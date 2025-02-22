@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const subjectsList = ["Mathematics", "Physics", "Physics-L", "Chemistry", "Chemistry-L", 
@@ -18,7 +19,7 @@ const Signup = () => {
     semesters: [], // ✅ Store multiple selected semesters
     branches: [],  // ✅ Store multiple selected branches
   });
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -37,8 +38,9 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      const res = await axios.post("http://192.168.29.220:5000/api/auth/signup", formData);
       alert(res.data.message);
+      navigate("/dashboard");
     } catch (err) {
       alert("Error: " + err.response.data.error);
     }
@@ -93,6 +95,11 @@ const Signup = () => {
       ))}
 
       <button type="submit">Signup</button>
+      <br />
+      <p>Already have an account?</p>
+      <button type="button" onClick={() => navigate("/login")}>
+        Login
+      </button>
     </form>
   );
 };

@@ -52,7 +52,8 @@ router.post("/signup", async (req, res) => {
                     }
                     console.log("Subjects/branches inserted successfully");
                     res.status(201).json({ message: "User registered successfully" });
-                    res.navigate("/dashboard");
+                    // res.status(201).json({ message: "User registered successfully", token  });
+
                 });
             }
         );

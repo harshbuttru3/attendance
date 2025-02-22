@@ -24,7 +24,7 @@ const Dashboard = () => {
   const fetchSubjects = () => {
     if (semester && branch) {
       axios
-        .get(`http://localhost:5000/api/subjects/${user.id}/${semester}/${branch}`)
+        .get(`http://192.168.29.220:5000/api/subjects/${user.id}/${semester}/${branch}`)
         .then((res) => {
           if (res.data.length > 0) {
             setSubjects(res.data);
@@ -44,7 +44,7 @@ const Dashboard = () => {
   // 🔹 Fetch students & attendance when semester, branch, and subject are selected
   const fetchStudents = () => {
     if (semester && branch && selectedSubject) {
-      axios.get(`http://localhost:5000/api/attendance/${semester}/${branch}/${selectedSubject}`)
+      axios.get(`http://192.168.29.220:5000/api/attendance/${semester}/${branch}/${selectedSubject}`)
         .then(res => {
           setStudents(res.data);
           setAttendance(
@@ -69,18 +69,26 @@ const Dashboard = () => {
   const handleInputChange = (index, field, value) => {
     setAttendance((prevAttendance) => {
       const updatedAttendance = [...prevAttendance];
-      updatedAttendance[index] = {
-        ...updatedAttendance[index],
-        [field]: value,
-      };
+  
+      if (field === "total_classes") {
+        // ✅ Update "total_classes" for all students
+        updatedAttendance.forEach((entry) => {
+          entry.total_classes = value;
+        });
+      } else {
+        // ✅ Update only the specific student's field
+        updatedAttendance[index][field] = value;
+      }
+  
       return updatedAttendance;
     });
   };
+  
 
   // 🔹 Submit attendance
   const handleSubmit = () => {
     axios
-      .post("http://localhost:5000/api/attendance/update", attendance)
+      .post("http://192.168.29.220:5000/api/attendance/update", attendance)
       .then(() => alert("Attendance updated successfully!"))
       .catch((err) => console.error("Error updating attendance:", err));
   };

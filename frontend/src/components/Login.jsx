@@ -15,7 +15,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const res = await axios.post("http://192.168.29.220:5000/api/auth/login", formData);
       login(res.data.user);
       console.log("User after login:", res.data.user); // ✅ Debug log
       setTimeout(() => navigate("/dashboard"), 500); // ✅ Delay navigation slightly
@@ -29,6 +29,9 @@ const Login = () => {
       <input type="email" name="email" placeholder="Email" onChange={handleChange} />
       <input type="password" name="password" placeholder="Password" onChange={handleChange} />
       <button type="submit">Login</button>
+      <br />
+      <p>Don't have an account?</p>
+      <button type="button" onClick={() => navigate("/signup")}>Signup</button>
     </form>
   );
 };

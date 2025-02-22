@@ -1,73 +1,87 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 const StudentAttendance = () => {
-    const [semesters, setSemesters] = useState([]);
-    const [selectedSemester, setSelectedSemester] = useState("");
-    const [attendanceData, setAttendanceData] = useState([]);
+  const [semester, setSemester] = useState("");
+  const [branch, setBranch] = useState("");
+  const [attendanceData, setAttendanceData] = useState({});
+  const [showTables, setShowTables] = useState(false);
 
-    // Fetch semesters from backend
-    useEffect(() => {
-        axios.get("http://localhost:5000/api/semesters")
-            .then((response) => setSemesters(response.data))
-            .catch((error) => console.error("Error fetching semesters:", error));
-    }, []);
+  const fetchAttendance = () => {
+    if (semester && branch) {
+      axios
+        .get(`http://192.168.29.220:5000/api/student-attendance/${semester}/${branch}`)
+        .then((res) => {
+          setAttendanceData(res.data);
+          setShowTables(true);
+        })
+        .catch((err) => {
+          console.error("Error fetching attendance:", err);
+          alert("No attendance records found.");
+        });
+    }
+  };
 
-    // Fetch attendance when semester changes
-    useEffect(() => {
-        if (selectedSemester) {
-            axios.get(`http://localhost:5000/api/attendance?semester=${selectedSemester}`)
-                .then((response) => setAttendanceData(response.data))
-                .catch((error) => console.error("Error fetching attendance:", error));
-        }
-    }, [selectedSemester]);
+  return (
+    <div>
+      <h1>Dce attendance system</h1>
+      <h2>Check Attendance</h2>
 
-    return (
-        <div className="container mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-4">View Attendance</h2>
+      <label>Select Semester:</label>
+      <select onChange={(e) => setSemester(e.target.value)}>
+        <option value="">-- Select Semester --</option>
+        {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+          <option key={sem} value={sem}>{sem} Semester</option>
+        ))}
+      </select>
 
-            {/* Semester Dropdown */}
-            <select 
-                className="border p-2 rounded mb-4" 
-                value={selectedSemester} 
-                onChange={(e) => setSelectedSemester(e.target.value)}
-            >
-                <option value="">Select Semester</option>
-                {semesters.map((sem) => (
-                    <option key={sem.semester_id} value={sem.semester_id}>
-                        {sem.semester_name}
-                    </option>
+      <label>Select Branch:</label>
+      <select onChange={(e) => setBranch(e.target.value)}>
+        <option value="">-- Select Branch --</option>
+        {["CSE", "ECE", "EEE", "Cybersecurity"].map((br) => (
+          <option key={br} value={br}>{br}</option>
+        ))}
+      </select>
+
+      <button onClick={fetchAttendance} disabled={!semester || !branch}>View Attendance</button>
+
+      {showTables && Object.keys(attendanceData).length > 0 ? (
+        Object.keys(attendanceData).map((subject, index) => (
+          <div key={index}>
+            <h3>Subject: {subject}</h3>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Reg ID</th>
+                  <th>Name</th>
+                  <th>Total Classes</th>
+                  <th>Attended Classes</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceData[subject].map((student, idx) => (
+                  <tr key={`${student.registration_no}-${subject}`}>
+                    <td>{student.registration_no}</td>
+                    <td>{student.name}</td>
+                    <td>{student.total_classes}</td>
+                    <td>{student.attended_classes}</td>
+                    <td>{((student.attended_classes / student.total_classes) * 100).toFixed(2)}%</td>
+                  </tr>
                 ))}
-            </select>
+              </tbody>
+            </table>
+          </div>
+        ))
+      ) : (
+        showTables && <p>No attendance records found.</p>
+      )}
+      <footer>
+        <p>© 2021 DCE Attendance System</p>
+      </footer>
+    </div>
 
-            {/* Attendance Table */}
-            {attendanceData.length > 0 ? (
-                <table className="w-full border-collapse border mt-4">
-                    <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border p-2">Subject</th>
-                            <th className="border p-2">Total Classes</th>
-                            <th className="border p-2">Attended</th>
-                            <th className="border p-2">Attendance (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {attendanceData.map((record) => (
-                            <tr key={record.subject_id} className="text-center">
-                                <td className="border p-2">{record.subject_name}</td>
-                                <td className="border p-2">{record.total_classes_held}</td>
-                                <td className="border p-2">{record.total_classes_attended}</td>
-                                <td className="border p-2">{record.attendance_percentage.toFixed(2)}%</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) : (
-                selectedSemester && <p className="mt-4 text-red-500">No attendance data found.</p>
-            )}
-        </div>
-    );
+  );
 };
 
 export default StudentAttendance;
-

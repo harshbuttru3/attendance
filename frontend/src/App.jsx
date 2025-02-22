@@ -5,7 +5,9 @@ import Home from "./pages/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
+import StudentAttendance from "./components/StudentAttendance";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./components/AdminDashboard";
 
 // ✅ Protect Dashboard Route
 const PrivateRoute = ({ element }) => {
@@ -18,11 +20,13 @@ function App() {
     <Router>
       <AuthProvider> {/* ✅ Moved AuthProvider inside Router */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<StudentAttendance/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           {/* ✅ Only allow logged-in users to access Dashboard */}
+          <Route path="/attendance" element={<StudentAttendance />} /> 
           <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
+          <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
