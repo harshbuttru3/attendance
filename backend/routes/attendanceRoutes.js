@@ -70,23 +70,32 @@ router.get("/student-attendance/:semester/:branch", (req, res) => {
     );
 });
 
+
 // Update Attendance for Students
+// Update Attendance for Students (Prevent Duplicates)
 router.post("/attendance/update", (req, res) => {
     const attendanceData = req.body;
+
+    if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
+        return res.status(400).json({ error: "Invalid attendance data" });
+    }
 
     attendanceData.forEach(({ student_id, subject, semester, branch, total_classes, attended_classes }) => {
         pool.query(
             `INSERT INTO attendance (student_id, subject, semester, branch, total_classes, attended_classes)
              VALUES (?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE total_classes = ?, attended_classes = ?`,
-            [student_id, subject, semester, branch, total_classes, attended_classes, total_classes, attended_classes],
+             ON DUPLICATE KEY UPDATE 
+             total_classes = VALUES(total_classes), 
+             attended_classes = VALUES(attended_classes)`,
+            [student_id, subject, semester, branch, total_classes, attended_classes],
             (error) => {
-                if (error) console.error("Error updating attendance:", error);
+                if (error) console.error("❌ Error updating attendance:", error);
             }
         );
     });
 
-    res.json({ message: "Attendance updated successfully!" });
+    res.json({ message: "✅ Attendance updated successfully!" });
 });
+
 
 module.exports = router;

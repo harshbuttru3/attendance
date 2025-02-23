@@ -1,0 +1,133 @@
+/* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #0877c7, #323b42);
+    color: #ede7e7;
+    padding: 5vh 35vw 5vh 35vw;
+    display: flex;
+  }
+  
+  /* Container */
+  div {
+    max-width: 80vw;
+    margin: 40px auto;
+    padding: 20px;
+    background: rgb(43, 42, 42);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Header */
+  h1 {
+    font-size: 28px;
+    color: #0d47a1;
+    margin-bottom: 10px;
+  }
+  
+  h2 {
+    font-size: 22px;
+    color: #1565c0;
+  }
+  
+  /* Labels */
+  label {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+    margin: 15px 0 5px;
+  }
+  
+  /* Select dropdowns */
+  select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #90caf9;
+    border-radius: 5px;
+    background-color: #353637;
+    font-size: 16px;
+  }
+  
+  /* Button */
+  button {
+    background-color: #1565c0;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #0d47a1;
+  }
+  
+  button:disabled {
+    background-color: #b0bec5;
+    cursor: not-allowed;
+  }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background: #344a20;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #bbdefb;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #1565c0;
+    color: white;
+  }
+  
+  /* Subject title */
+  h3 {
+    color: #0d47a1;
+    margin-top: 30px;
+  }
+  
+  /* Footer */
+  footer {
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 14px;
+    color: #0d47a1;
+    background-color: #e3f2fd;
+    border-radius: 5px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    div {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    table {
+      font-size: 14px;
+    }
+  
+    th, td {
+      padding: 8px;
+    }
+  
+    button {
+      width: 100%;
+      font-size: 14px;
+    }
+  }
+  

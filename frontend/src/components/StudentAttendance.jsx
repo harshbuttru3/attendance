@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import "../css/studentAttendance.css";
 
 const StudentAttendance = () => {
   const [semester, setSemester] = useState("");
@@ -10,7 +11,7 @@ const StudentAttendance = () => {
   const fetchAttendance = () => {
     if (semester && branch) {
       axios
-        .get(`http://192.168.29.220:5000/api/student-attendance/${semester}/${branch}`)
+        .get(`http://localhost:5000/api/student-attendance/${semester}/${branch}`)
         .then((res) => {
           setAttendanceData(res.data);
           setShowTables(true);

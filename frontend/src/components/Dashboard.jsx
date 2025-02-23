@@ -24,7 +24,7 @@ const Dashboard = () => {
   const fetchSubjects = () => {
     if (semester && branch) {
       axios
-        .get(`http://192.168.29.220:5000/api/subjects/${user.id}/${semester}/${branch}`)
+        .get(`http://localhost:5000/api/subjects/${user.id}/${semester}/${branch}`)
         .then((res) => {
           if (res.data.length > 0) {
             setSubjects(res.data);
@@ -44,7 +44,7 @@ const Dashboard = () => {
   // 🔹 Fetch students & attendance when semester, branch, and subject are selected
   const fetchStudents = () => {
     if (semester && branch && selectedSubject) {
-      axios.get(`http://192.168.29.220:5000/api/attendance/${semester}/${branch}/${selectedSubject}`)
+      axios.get(`http://localhost:5000/api/attendance/${semester}/${branch}/${selectedSubject}`)
         .then(res => {
           setStudents(res.data);
           setAttendance(
@@ -88,7 +88,7 @@ const Dashboard = () => {
   // 🔹 Submit attendance
   const handleSubmit = () => {
     axios
-      .post("http://192.168.29.220:5000/api/attendance/update", attendance)
+      .post("http://localhost:5000/api/attendance/update", attendance)
       .then(() => alert("Attendance updated successfully!"))
       .catch((err) => console.error("Error updating attendance:", err));
   };
@@ -102,7 +102,8 @@ const Dashboard = () => {
       <label>Select Semester:</label>
       <select value={semester} onChange={(e) => setSemester(e.target.value)}>
         <option value="">-- Select Semester --</option>
-        {["1st", "2nd", "3rd"].map((sem) => (
+        {["1st", "2nd", "3rd","4th", "5th", "6th", "7th", "8th"]
+        .map((sem) => (
           <option key={sem} value={sem}>{sem} Semester</option>
         ))}
       </select>
@@ -111,7 +112,7 @@ const Dashboard = () => {
       <label>Select Branch:</label>
       <select value={branch} onChange={(e) => setBranch(e.target.value)}>
         <option value="">-- Select Branch --</option>
-        {["CSE", "ECE", "EEE", "Cybersecurity"].map((br) => (
+        {["CSE", "Civil", "EEE", "Cybersecurity","Mechanical", "FTS"].map((br) => (
           <option key={br} value={br}>{br}</option>
         ))}
       </select>

@@ -23,7 +23,7 @@ const AdminDashboard = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post("http://192.168.29.220:5000/api/admin/register-student", formData, {
+      const res = await axios.post("http://localhost:5000/api/admin/register-student", formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(res.data.message);
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
 
   const handlePromote = async () => {
     try {
-      const res = await axios.put("http://192.168.29.220:5000/api/admin/promote-semester", { currentSemester: promotionSemester }, {
+      const res = await axios.put("http://localhost:5000/api/admin/promote-semester", { currentSemester: promotionSemester }, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(res.data.message);
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
 
   const handleUpdateSemester = async () => {
     try {
-      const res = await axios.put("http://192.168.29.220:5000/api/admin/update-student-semester", updateData, {
+      const res = await axios.put("http://localhost:5000/api/admin/update-student-semester", updateData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(res.data.message);
