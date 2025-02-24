@@ -4,7 +4,8 @@
   "description": "attendence system for dce",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"No test specified\" && exit 1"
+    "test": "echo \"No test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "shivam",
   "license": "ISC",

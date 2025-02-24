@@ -1,0 +1,43 @@
+.title{
+    display: block;
+    font-size: 3.2em;
+    line-height: 1.1;
+    text-align: center;
+    text-decoration: underline;
+}
+#attendanceTablesContainer{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2em;
+}
+.attendanceTable{
+    background-color: rgb(32, 33, 77);
+    border-collapse: collapse;
+    width: 48vw;
+    max-width: 800px;
+    margin: 1em;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.summaryTable{
+    background-color: rgb(52, 29, 73);
+    border-collapse: collapse;
+    width: 48vw;
+    max-width: 800px;
+    margin: 1em;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.attendanceTable, .summaryTable h3{
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .attendanceTable {
+        width: 90vw;
+        overflow: auto;
+    }
+}

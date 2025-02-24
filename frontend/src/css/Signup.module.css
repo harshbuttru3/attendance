@@ -1,0 +1,67 @@
+
+#signupForm {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #3b3a3a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#signupForm input {
+    height: 40px;
+    width: 100%;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+.passwordInput{
+    display: flex;
+    width: 100%;
+}
+.passwordInput button{
+    height: fit-content;
+    margin-top: 0;
+}
+
+
+label {
+    display: inline-block;
+    font-size: 1em;
+    margin-bottom: 5px;
+    margin-right: 10px;
+    color: #e3dada;
+}
+/* for subject selection */
+.label{
+    text-align: center;
+    display: block;
+    margin: 30px;
+}
+.label2{
+    margin: 30px;
+}
+#subjects {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2em;
+}
+
+#subjects label {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #555;
+}
+#signupButton{
+    margin: 30px;
+    background-color: red;
+}

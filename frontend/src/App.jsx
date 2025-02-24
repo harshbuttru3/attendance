@@ -20,6 +20,7 @@ function App() {
     <Router>
       <AuthProvider> {/* ✅ Moved AuthProvider inside Router */}
         <Routes>
+          <Route path="/home" element={<Home />} />
           <Route path="/" element={<StudentAttendance/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

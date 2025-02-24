@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import styles from "../css/Signup.module.css";
 
 const subjectsList = ["Mathematics", "Physics", "Physics-L", "Chemistry", "Chemistry-L", 
                       "Biology", "PPS", "PPS-L", "English", "DSA", "DSA-L", 
                       "OOPS", "OOPS-L", "AE"];
 
-const branchesList = ["CSE", "EEE", "Mechanical", "Civil", "Electrical", "Cybersecurity", "FTS"];
+const branchesList = ["CSE", "EEE", "Mechanical", "Civil", "Cybersecurity", "FTS"];
 
 const semestersList = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 
@@ -46,28 +47,77 @@ const Signup = () => {
     }
   };
 
+  const [passwordMatch, setPasswordMatch] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "confirmPassword") {
+      setPasswordMatch(value === formData.password);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" name="name" placeholder="Name" onChange={handleChange} required />
-      <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-      <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-
-      {/* Subject Selection */}
-      <label>Select Subjects:</label>
-      {subjectsList.map((subject, index) => (
-        <div key={index}>
+      <h2>Signup</h2>
+      <div id={styles.signupForm}>
+        <input type="text" name="name" placeholder="Name" onChange={handleChange} required />
+        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
+        <div className={styles.passwordInput}>
           <input
-            type="checkbox"
-            name="subjects"
-            value={subject}
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
             onChange={handleChange}
+            required
           />
-          <label>{subject}</label>
+          <button type="button" onClick={togglePasswordVisibility}>
+            {showPassword ? "Hide" : "Show"}
+          </button>
         </div>
-      ))}
-
+        <div className={styles.passwordInput}>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            onChange={handlePasswordChange}
+            required
+          />
+          <button type="button" onClick={toggleConfirmPasswordVisibility}>
+            {showConfirmPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        {passwordMatch === false && <p style={{ color: "red" }}>Passwords do not match</p>}
+        {passwordMatch === true && <p style={{ color: "green" }}>Passwords match</p>}
+      </div>
+      {/* Subject Selection */}
+      <label className={styles.label}>Select Subjects:</label>
+      <div id={styles.subjects}>
+        {subjectsList.map((subject, index) => (
+          <div key={index}>
+            <input
+              type="checkbox"
+              name="subjects"
+              value={subject}
+              onChange={handleChange}
+            />
+            <label>{subject}</label>
+          </div>
+        ))}
+      </div>
       {/* Semester Selection */}
-      <label>Select Semester:</label>
+      <label className={styles.label2}>Select Semester: </label>
       {semestersList.map((semester, index) => (
         <div key={index}>
           <input
@@ -81,9 +131,9 @@ const Signup = () => {
       ))}
 
       {/* Branch Selection */}
-      <label>Select Branch:</label>
+      <label className={styles.label2}>Select Branch:</label>
       {branchesList.map((branch, index) => (
-        <div key={index}>
+        <div key={index} >
           <input
             type="checkbox"
             name="branches"
@@ -94,7 +144,7 @@ const Signup = () => {
         </div>
       ))}
 
-      <button type="submit">Signup</button>
+      <button type="submit" id={styles.singupButton}>Signup</button>
       <br />
       <p>Already have an account?</p>
       <button type="button" onClick={() => navigate("/login")}>
