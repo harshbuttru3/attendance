@@ -36,7 +36,7 @@
 }
 
 @media (max-width: 768px) {
-    .attendanceTable {
+    .attendanceTable, .summaryTable {
         width: 90vw;
         overflow: auto;
     }

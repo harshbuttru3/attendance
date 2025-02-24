@@ -15,7 +15,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const res = await axios.post("https://dce-attendance.onrender.com/api/auth/login", formData);
       login(res.data.user);
       console.log("User after login:", res.data.user); // ✅ Debug log
       setTimeout(() => navigate("/dashboard"), 500); // ✅ Delay navigation slightly

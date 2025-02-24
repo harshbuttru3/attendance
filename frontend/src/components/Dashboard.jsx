@@ -24,7 +24,7 @@ const Dashboard = () => {
   const fetchSubjects = () => {
     if (semester && branch) {
       axios
-        .get(`http://localhost:5000/api/subjects/${user.id}/${semester}/${branch}`)
+        .get(`https://dce-attendance.onrender.com/api/subjects/${user.id}/${semester}/${branch}`)
         .then((res) => {
           if (res.data.length > 0) {
             setSubjects(res.data);
@@ -44,7 +44,7 @@ const Dashboard = () => {
   // 🔹 Fetch students & attendance when semester, branch, and subject are selected
   const fetchStudents = () => {
     if (semester && branch && selectedSubject) {
-      axios.get(`http://localhost:5000/api/attendance/${semester}/${branch}/${selectedSubject}`)
+      axios.get(`https://dce-attendance.onrender.com/api/attendance/${semester}/${branch}/${selectedSubject}`)
         .then(res => {
           setStudents(res.data);
           setAttendance(
@@ -88,7 +88,7 @@ const Dashboard = () => {
   // 🔹 Submit attendance
   const handleSubmit = () => {
     axios
-      .post("http://localhost:5000/api/attendance/update", attendance)
+      .post("https://dce-attendance.onrender.com/api/attendance/update", attendance)
       .then(() => alert("Attendance updated successfully!"))
       .catch((err) => console.error("Error updating attendance:", err));
   };
