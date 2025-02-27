@@ -20,7 +20,6 @@ const Dashboard = () => {
     }
   }, [user, navigate]);
 
-  // 🔹 Fetch subjects after selecting semester & branch
   const fetchSubjects = () => {
     if (semester && branch) {
       axios
@@ -28,7 +27,7 @@ const Dashboard = () => {
         .then((res) => {
           if (res.data.length > 0) {
             setSubjects(res.data);
-            setShowSubjectDropdown(true); // ✅ Show subject dropdown
+            setShowSubjectDropdown(true);
           } else {
             alert("No subjects assigned for this selection.");
             setShowSubjectDropdown(false);
@@ -41,7 +40,6 @@ const Dashboard = () => {
     }
   };
 
-  // 🔹 Fetch students & attendance when semester, branch, and subject are selected
   const fetchStudents = () => {
     if (semester && branch && selectedSubject) {
       axios.get(`https://dce-attendance.onrender.com/api/attendance/${semester}/${branch}/${selectedSubject}`)
@@ -65,27 +63,27 @@ const Dashboard = () => {
     }
   };
 
-  // 🔹 Update attendance input fields correctly
   const handleInputChange = (index, field, value) => {
     setAttendance((prevAttendance) => {
       const updatedAttendance = [...prevAttendance];
   
+      // Remove leading zeros by converting to a number, but allow empty input
+      let numericValue = value === "" ? "" : Math.max(0, Number(value));
+  
       if (field === "total_classes") {
-        // ✅ Update "total_classes" for all students
         updatedAttendance.forEach((entry) => {
-          entry.total_classes = value;
+          entry.total_classes = numericValue;
         });
       } else {
-        // ✅ Update only the specific student's field
-        updatedAttendance[index][field] = value;
+        updatedAttendance[index][field] = numericValue;
       }
   
       return updatedAttendance;
     });
   };
   
+  
 
-  // 🔹 Submit attendance
   const handleSubmit = () => {
     axios
       .post("https://dce-attendance.onrender.com/api/attendance/update", attendance)
@@ -98,7 +96,6 @@ const Dashboard = () => {
       <h2>Welcome, {user?.name}</h2>
       <button onClick={logout}>Logout</button>
 
-      {/* 🔹 Semester Selection */}
       <label>Select Semester:</label>
       <select value={semester} onChange={(e) => setSemester(e.target.value)}>
         <option value="">-- Select Semester --</option>
@@ -108,7 +105,6 @@ const Dashboard = () => {
         ))}
       </select>
 
-      {/* 🔹 Branch Selection */}
       <label>Select Branch:</label>
       <select value={branch} onChange={(e) => setBranch(e.target.value)}>
         <option value="">-- Select Branch --</option>
@@ -117,10 +113,8 @@ const Dashboard = () => {
         ))}
       </select>
 
-      {/* 🔹 Load Subjects Button */}
       <button onClick={fetchSubjects} disabled={!semester || !branch}>Load Subjects</button>
 
-      {/* 🔹 Subject Selection - Disabled by Default */}
       {showSubjectDropdown && (
         <>
           <label>Select Subject:</label>
@@ -135,7 +129,6 @@ const Dashboard = () => {
         </>
       )}
 
-      {/* 🔹 Student Attendance Table */}
       {students.length > 0 && (
         <div>
           <h3>Subject: {selectedSubject}</h3>
@@ -156,14 +149,14 @@ const Dashboard = () => {
                   <td>
                     <input
                       type="number"
-                      value={attendance[index]?.total_classes || ""}
+                      value={attendance[index]?.total_classes || 0}
                       onChange={(e) => handleInputChange(index, "total_classes", e.target.value)}
                     />
                   </td>
                   <td>
                     <input
                       type="number"
-                      value={attendance[index]?.attended_classes || ""}
+                      value={attendance[index]?.attended_classes || 0}
                       onChange={(e) => handleInputChange(index, "attended_classes", e.target.value)}
                     />
                   </td>

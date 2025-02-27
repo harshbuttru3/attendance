@@ -5,7 +5,8 @@ import styles from "../css/Signup.module.css";
 
 const subjectsList = ["Mathematics", "Physics", "Physics-L", "Chemistry", "Chemistry-L", 
                       "Biology", "PPS", "PPS-L", "English", "DSA", "DSA-L", 
-                      "OOPS", "OOPS-L", "AE"];
+                      "OOPS", "OOPS-L", "AE", "AE-L", "DBMS", "DBMS-L",
+                      "OS", "OS-L", "CN", "CN-L", "SE", "SE-L", "TOC", "TOC-L","Extras-Classes", "Extras-Acitivities"];
 
 const branchesList = ["CSE", "EEE", "Mechanical", "Civil", "Cybersecurity", "FTS"];
 
