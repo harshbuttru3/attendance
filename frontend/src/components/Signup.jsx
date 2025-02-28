@@ -40,7 +40,7 @@
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
 //     try {
-//       const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
+//       const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", formData);
 //       alert(res.data.message);
 //       navigate("/dashboard");
 //     } catch (err) {
@@ -248,7 +248,7 @@ const Signup = () => {
     };
 
     try {
-        const res = await axios.post("http://localhost:5000/api/auth/signup", payload, {
+        const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", payload, {
             headers: { "Content-Type": "application/json" },
         });
         alert(res.data.message);

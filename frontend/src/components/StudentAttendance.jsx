@@ -12,7 +12,7 @@ const StudentAttendance = () => {
   const fetchAttendance = () => {
     if (semester && branch) {
       axios
-        .get(`http://localhost:5000/api/student-attendance/${semester}/${branch}`)
+        .get(`https://dce-attendance.onrender.com/api/student-attendance/${semester}/${branch}`)
         .then((res) => {
           setAttendanceData(res.data);
           setShowTables(true);
