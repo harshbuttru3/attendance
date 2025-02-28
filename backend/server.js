@@ -5,10 +5,22 @@ require("dotenv").config();
 const app = express();
 
 // ✅ Configure CORS properly
+const allowedOrigins = [
+    "https://attendance-pi-woad.vercel.app", // Frontend on Vercel
+    "http://localhost:5173" // Local development
+];
+
 app.use(cors({
-    origin: ["https://attendance-pi-woad.vercel.app"], // Replace with your frontend URL
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     methods: "GET,POST,PUT,DELETE",
-    credentials: true // If you need to send cookies/auth headers
+    credentials: true, // Allow cookies/auth headers
+    allowedHeaders: "Content-Type,Authorization"
 }));
 
 app.use(express.json());
