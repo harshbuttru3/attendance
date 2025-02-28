@@ -8,7 +8,7 @@ const AttendanceForm = () => {
   const updateAttendance = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://dce-attendance.onrender.com/api/attendance", { subject, daysPresent });
+      await axios.post("http://localhost:5000/api/attendance", { subject, daysPresent });
       alert("Attendance updated successfully!");
     } catch (error) {
       alert("Error updating attendance");

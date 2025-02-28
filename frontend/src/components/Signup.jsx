@@ -40,7 +40,7 @@
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
 //     try {
-//       const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", formData);
+//       const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
 //       alert(res.data.message);
 //       navigate("/dashboard");
 //     } catch (err) {
@@ -232,30 +232,32 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.name || !formData.email || !formData.password || formData.subjects.length === 0) {
-      alert("Please fill all required fields.");
-      return;
+        alert("Please fill all required fields.");
+        return;
     }
 
-    // Prepare the payload
+    // ✅ Convert subjects, semesters, and branches to JSON strings
     const payload = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      subjects: formData.subjects,
-      semesters: formData.semesters,
-      branches: formData.branches,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        subjects: JSON.stringify(formData.subjects),
+        semesters: JSON.stringify(formData.semesters),
+        branches: JSON.stringify(formData.branches),
     };
 
     try {
-      const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", payload);
-      alert(res.data.message);
-      navigate("/dashboard");
+        const res = await axios.post("http://localhost:5000/api/auth/signup", payload, {
+            headers: { "Content-Type": "application/json" },
+        });
+        alert(res.data.message);
+        navigate("/dashboard");
     } catch (err) {
-      alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+        alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
-  };
+};
+
 
   const handleAddSubjectClick = () => {
     setShowModal(true);
