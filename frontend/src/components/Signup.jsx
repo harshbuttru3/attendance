@@ -157,6 +157,7 @@
 
 // export default Signup;
 
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -191,7 +192,9 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
-    subjects: [], // Store selected subjects as objects: { subject, semester, branch }
+    subjects: [], // Array of objects: { subject, semester, branch }
+    semesters: [], // Array of selected semesters
+    branches: [], // Array of selected branches
   });
   const [showModal, setShowModal] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState("");
@@ -228,12 +231,29 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.password || formData.subjects.length === 0) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    // Prepare the payload
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      subjects: formData.subjects,
+      semesters: formData.semesters,
+      branches: formData.branches,
+    };
+
     try {
-      const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", formData);
+      const res = await axios.post("https://dce-attendance.onrender.com/api/auth/signup", payload);
       alert(res.data.message);
       navigate("/dashboard");
     } catch (err) {
-      alert("Error: " + err.response.data.error);
+      alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
   };
 
@@ -270,10 +290,14 @@ const Signup = () => {
       semester: selectedSemester,
       branch: selectedBranch,
     }));
-    setFormData({
-      ...formData,
-      subjects: [...formData.subjects, ...newSubjects],
-    });
+
+    setFormData((prevData) => ({
+      ...prevData,
+      subjects: [...prevData.subjects, ...newSubjects],
+      semesters: [...new Set([...prevData.semesters, selectedSemester])], // Add unique semesters
+      branches: [...new Set([...prevData.branches, selectedBranch])], // Add unique branches
+    }));
+
     setShowModal(false);
     setTempSelectedSubjects([]);
   };
