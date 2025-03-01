@@ -166,7 +166,7 @@ import styles from "../css/Signup.module.css";
 // Define subjects for each semester and branch
 const subjectsList = {
   "1st": {
-    CSE: ["Mathematics", "Physics", "Chemistry", "English", "PPS"],
+    CSE: ["Physics","Mathematics","PPS","IT-Workshop","BEE"],
     EEE: ["Mathematics", "Physics", "Chemistry", "English", "Basic Electrical Engineering"],
     Mechanical: ["Mathematics", "Physics", "Chemistry", "English", "Mechanical Basics"],
     Civil: ["Mathematics", "Physics", "Chemistry", "English", "Civil Basics"],
@@ -174,14 +174,24 @@ const subjectsList = {
     FTS: ["Mathematics", "Physics", "Chemistry", "English", "FTS Basics"],
   },
   "2nd": {
-    CSE: ["Mathematics", "Physics-L", "Chemistry-L", "English", "PPS-L"],
+    CSE: ["Chemistry", "Mathematics", "English","Python","Web-Design"],
     EEE: ["Mathematics", "Physics-L", "Chemistry-L", "English", "Basic Electrical Engineering-L"],
     Mechanical: ["Mathematics", "Physics-L", "Chemistry-L", "English", "Mechanical Basics-L"],
     Civil: ["Mathematics", "Physics-L", "Chemistry-L", "English", "Civil Basics-L"],
     Cybersecurity: ["Mathematics", "Physics-L", "Chemistry-L", "English", "Cybersecurity Basics-L"],
     FTS: ["Mathematics", "Physics-L", "Chemistry-L", "English", "FTS Basics-L"],
   },
-  // Add more semesters and branches as needed
+  "3rd":{
+    CSE: ["AE","DSA","OOPS","Technical-Writing","Mathematics"],
+    Cybersecurity: ["AE","DSA","OOPS","Technical-Writing","Mathematics"]
+  },
+  "4th":{
+    CSE:["Discrete-Mathematics","Computer-Organisation-And-Structure","Operating-System","Design-And-Analysis-Of-Algorithm","Digital-Electronics","Human-Resources-Development-And-Orgainisational-Behavior","Environmental-Science"]
+  },
+  "5th":{
+    CSE:[ ]
+  }
+ 
 };
 
 const branchesList = ["CSE", "EEE", "Mechanical", "Civil", "Cybersecurity", "FTS"];
