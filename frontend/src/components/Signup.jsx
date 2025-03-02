@@ -57,7 +57,7 @@ const Signup = () => {
     try {
       const { confirmPassword, ...userData } = formData;
       const res = await axios.post(
-        "https://dce-attendance.onrender.com/api/auth/signup",
+        "http://localhost:5000/api/auth/signup",
         userData,
         { headers: { "Content-Type": "application/json" } }
       );

@@ -5,39 +5,17 @@ const pool = require("../db");
 
 const router = express.Router();
 
-// Signup Route
+// 🔹 Signup Route (No Subject Selection)
 router.post("/signup", async (req, res) => {
-    console.log("🔹 Signup route hit!");
-    console.log("Received data:", req.body); // 🔹 Debugging
-    let { name, email, password, subjects, semesters, branches } = req.body;
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
 
     try {
-        console.log("Received data:", req.body); // 🔹 Debugging
-        if (!name || !email || !password || !subjects || !semesters || !branches) {
-            return res.status(400).json({ error: "All fields are required" });
-        }
-
-        // ✅ Convert subjects to an array if it's a string (fixing [object Object] issue)
-        if (typeof subjects === "string") {
-            subjects = JSON.parse(subjects);
-        }
-        if (typeof semesters === "string") {
-            semesters = JSON.parse(semesters);
-        }
-        if (typeof branches === "string") {
-            branches = JSON.parse(branches);
-        }
-
-        if (!Array.isArray(subjects) || subjects.length === 0 ||
-            !Array.isArray(semesters) || semesters.length === 0 ||
-            !Array.isArray(branches) || branches.length === 0) {
-            return res.status(400).json({ error: "Invalid subjects/semesters/branches" });
-        }
-
-        // ✅ Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // ✅ Insert teacher into database
         pool.query(
             "INSERT INTO teachers (name, email, password) VALUES (?, ?, ?)",
             [name, email, hashedPassword],
@@ -47,23 +25,8 @@ router.post("/signup", async (req, res) => {
                     return res.status(500).json({ error: "Database error while inserting teacher" });
                 }
 
-                const teacherId = result.insertId;
-                console.log(`Teacher created with ID: ${teacherId}`);
-
-                // ✅ Insert subjects, semesters, and branches into `teacher_subjects`
-                const values = subjects.map(({ subject, semester, branch }) => [
-                    teacherId, subject, semester, branch
-                ]);
-
-                const insertQuery = "INSERT INTO teacher_subjects (teacher_id, subject, semester, branch) VALUES ?";
-                pool.query(insertQuery, [values], (err) => {
-                    if (err) {
-                        console.error("Error inserting subjects/branches:", err);
-                        return res.status(500).json({ error: "Error inserting subjects/branches" });
-                    }
-                    console.log("Subjects/branches inserted successfully");
-                    res.status(201).json({ message: "User registered successfully" });
-                });
+                console.log(`Teacher created with ID: ${result.insertId}`);
+                res.status(201).json({ message: "User registered successfully" });
             }
         );
     } catch (err) {
@@ -72,10 +35,7 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-
-
-
-// Login Route
+// 🔹 Login Route
 router.post("/login", (req, res) => {
     const { email, password } = req.body;
 
@@ -88,33 +48,37 @@ router.post("/login", (req, res) => {
         bcrypt.compare(password, teacher.password, (err, match) => {
             if (!match) return res.status(401).json({ error: "Invalid email or password" });
 
-            // ✅ Fetch subjects from `teacher_subjects` table
-            pool.query(
-                "SELECT subject FROM teacher_subjects WHERE teacher_id = ?",
-                [teacher.id],
-                (subError, subResults) => {
-                    if (subError) return res.status(500).json({ error: "Database error while fetching subjects" });
+            // Prepare user object (excluding password)
+            const user = {
+                id: teacher.id,
+                name: teacher.name,
+                email: teacher.email,
+                semester: teacher.semester,
+                branch: teacher.branch
+            };
 
-                    const subjects = subResults.map(sub => sub.subject);
+            // Generate a JWT Token
+            const token = jwt.sign(user, "secretkey", { expiresIn: "1h" });
 
-                    // ✅ Debug: Log output
-                    console.log("Fetched subjects:", subjects);
-
-                    const user = {
-                        id: teacher.id,
-                        name: teacher.name,
-                        email: teacher.email,
-                        subjects: subjects
-                    };
-
-                    const token = jwt.sign(user, "secretkey", { expiresIn: "1h" });
-                    res.json({ message: "Login successful", token, user });
-                }
-            );
+            res.json({ message: "Login successful", token, user });
         });
     });
 });
 
+// 🔹 Get Teacher Info (Authenticated Route)
+router.get("/profile", (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token from "Bearer <token>"
+    
+    if (!token) {
+        return res.status(401).json({ error: "Unauthorized. No token provided." });
+    }
 
+    try {
+        const decoded = jwt.verify(token, "secretkey");
+        res.json({ user: decoded });
+    } catch (err) {
+        res.status(401).json({ error: "Invalid token. Please log in again." });
+    }
+});
 
 module.exports = router;

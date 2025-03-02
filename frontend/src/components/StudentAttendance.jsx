@@ -13,7 +13,7 @@ const StudentAttendance = () => {
     if (semester && branch) {
       axios
         .get(
-          `https://dce-attendance.onrender.com/api/student-attendance/${semester}/${branch}`
+          `http://localhost:5000/api/student-attendance/${semester}/${branch}`
         )
         .then((res) => {
           setAttendanceData(res.data);
@@ -48,7 +48,7 @@ const StudentAttendance = () => {
 
   return (
     <div>
-      <h1 className={styles.title}>DCE Attendance System</h1>
+      <h1>DCE Attendance System</h1>
       <h2>Check Attendance</h2>
 
       <label>Select Semester:</label>
@@ -77,10 +77,10 @@ const StudentAttendance = () => {
         View Attendance
       </button>
 
-      <div id={styles.attendanceTablesContainer}>
+      <div>
         {showTables && Object.keys(attendanceData).length > 0
           ? Object.keys(attendanceData).map((subject, index) => (
-              <div key={index} className={styles.attendanceTable}>
+              <div key={index}>
                 <h3>Subject: {subject}</h3>
                 <table border="1">
                   <thead>
@@ -124,7 +124,7 @@ const StudentAttendance = () => {
           : showTables && <p>No attendance records found.</p>}
 
         {showTables && Object.keys(summaryData).length > 0 && (
-          <div className={styles.summaryTable}>
+          <div >
             <h2>Overall Attendance Summary</h2>
             <table border="1">
               <thead>
