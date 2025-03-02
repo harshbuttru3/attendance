@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useContext } from "react";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
 import Home from "./pages/Home";
@@ -8,6 +13,9 @@ import Dashboard from "./components/Dashboard";
 import StudentAttendance from "./components/StudentAttendance";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./components/AdminDashboard";
+import Navbar from "./components/Navbar";
+import { ThemeProvider } from "./context/ThemeContext";
+import Footer from "./components/Footer";
 
 // ✅ Protect Dashboard Route
 const PrivateRoute = ({ element }) => {
@@ -17,21 +25,58 @@ const PrivateRoute = ({ element }) => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider> {/* ✅ Moved AuthProvider inside Router */}
+    <AuthProvider>
+      {" "}
+      {/* ✅ AuthContext is available everywhere */}
+      <Router>
         <Routes>
           <Route path="/home" element={<Home />} />
-          <Route path="/" element={<StudentAttendance/>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          {/* ✅ Only allow logged-in users to access Dashboard */}
-          <Route path="/attendance" element={<StudentAttendance />} /> 
-          <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
-          <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} />} />
+          <Route path="/" element={<StudentAttendance />} />
+          <Route
+            path="/login"
+            element={
+              <>
+                <ThemeProvider>
+                  <div className="flex flex-col min-h-screen">
+                    <Navbar />
+                    <main className="flex-grow">
+                      <Login />
+                    </main>
+                    <Footer />
+                  </div>
+                </ThemeProvider>
+              </>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <>
+                <ThemeProvider>
+                  <div className="flex flex-col min-h-screen">
+                    <Navbar />
+                    <main className="flex-grow">
+                      <Signup />
+                    </main>
+                    <Footer />
+                  </div>
+                </ThemeProvider>
+              </>
+            }
+          />
+          <Route path="/attendance" element={<StudentAttendance />} />
+          <Route
+            path="/dashboard"
+            element={<PrivateRoute element={<Dashboard />} />}
+          />
+          <Route
+            path="/admin"
+            element={<PrivateRoute element={<AdminDashboard />} />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
