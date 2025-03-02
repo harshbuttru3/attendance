@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react"; // Added useEffect
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
@@ -26,16 +26,16 @@ const Signup = () => {
       ...prev,
       [name]: value,
     }));
-
-    // Only check password match if both fields have values
-    if (name === "confirmPassword" || name === "password") {
-      if (formData.password && formData.confirmPassword) {
-        setPasswordMatch(formData.password === formData.confirmPassword);
-      } else {
-        setPasswordMatch(null); // Reset if either field is empty
-      }
-    }
   };
+
+  // Use useEffect to check password match after formData is updated
+  useEffect(() => {
+    if (formData.password && formData.confirmPassword) {
+      setPasswordMatch(formData.password === formData.confirmPassword);
+    } else {
+      setPasswordMatch(null); // Reset if either field is empty
+    }
+  }, [formData.password, formData.confirmPassword]);
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () =>
@@ -74,7 +74,7 @@ const Signup = () => {
     <div
       className={`min-h-screen flex items-center justify-center ${
         darkMode ? "bg-gray-900" : "bg-gray-100"
-      } transition duration-300 p-4`} // Added padding for mobile
+      } transition duration-300 p-4`}
     >
       <form
         onSubmit={handleSubmit}
