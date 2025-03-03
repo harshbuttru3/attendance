@@ -26,56 +26,34 @@ const PrivateRoute = ({ element }) => {
 function App() {
   return (
     <AuthProvider>
-      {" "}
-      {/* ✅ AuthContext is available everywhere */}
-      <Router>
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/" element={<StudentAttendance />} />
-          <Route
-            path="/login"
-            element={
-              <>
-                <ThemeProvider>
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-grow">
-                      <Login />
-                    </main>
-                    <Footer />
-                  </div>
-                </ThemeProvider>
-              </>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <>
-                <ThemeProvider>
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-grow">
-                      <Signup />
-                    </main>
-                    <Footer />
-                  </div>
-                </ThemeProvider>
-              </>
-            }
-          />
-          <Route path="/attendance" element={<StudentAttendance />} />
-          <Route
-            path="/dashboard"
-            element={<PrivateRoute element={<Dashboard />} />}
-          />
-          <Route
-            path="/admin"
-            element={<PrivateRoute element={<AdminDashboard />} />}
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <ThemeProvider>
+        {" "}
+        {/* Wrap the entire app with ThemeProvider */}
+        <Router>
+          <div className="flex flex-col min-h-screen">
+            <Navbar /> {/* Navbar is outside Routes to appear on all pages */}
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<StudentAttendance />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/attendance" element={<StudentAttendance />} />
+                <Route
+                  path="/dashboard"
+                  element={<PrivateRoute element={<Dashboard />} />}
+                />
+                <Route
+                  path="/admin"
+                  element={<PrivateRoute element={<AdminDashboard />} />}
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer /> {/* Footer is outside Routes to appear on all pages */}
+          </div>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

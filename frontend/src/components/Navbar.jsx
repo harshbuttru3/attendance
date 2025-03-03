@@ -2,9 +2,11 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import { FaSun, FaMoon, FaBars, FaTimes } from "react-icons/fa";
+import { AuthContext } from "../context/AuthContext"; // Import AuthContext
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { user, logout } = useContext(AuthContext); // Get user and logout function
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -46,18 +48,29 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
-          <button
-            onClick={() => navigate("/login")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => navigate("/signup")}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 focus:outline-none shadow-md"
-          >
-            Signup
-          </button>
+          {user ? (
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/login")}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/signup")}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 focus:outline-none shadow-md"
+              >
+                Signup
+              </button>
+            </>
+          )}
           <button
             onClick={toggleDarkMode}
             className={`p-2 rounded-full transition duration-300 focus:outline-none shadow-md 
@@ -84,18 +97,29 @@ const Navbar = () => {
           } border-t border-gray-200 dark:border-gray-700 shadow-md`}
         >
           <div className="flex flex-col items-center space-y-4 py-4">
-            <button
-              onClick={() => navigate("/login")}
-              className="w-4/5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/signup")}
-              className="w-4/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 focus:outline-none shadow-md"
-            >
-              Signup
-            </button>
+            {user ? (
+              <button
+                onClick={logout}
+                className="w-4/5 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="w-4/5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="w-4/5 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 focus:outline-none shadow-md"
+                >
+                  Signup
+                </button>
+              </>
+            )}
             <button
               onClick={toggleDarkMode}
               className={`w-4/5 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md 
