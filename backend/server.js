@@ -30,12 +30,14 @@ const authRoutes = require("./routes/authRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // 🔹 Define routes
 app.use("/api/auth", authRoutes);
 app.use("/api", attendanceRoutes);
 app.use("/api", subjectRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // const PORT = process.env.PORT || 5000;
 const PORT = 5000;

@@ -54,7 +54,7 @@ const StudentAttendance = () => {
       <label>Select Semester:</label>
       <select onChange={(e) => setSemester(e.target.value)}>
         <option value="">-- Select Semester --</option>
-        {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+        {[1,2,3,4,5,6,7,8].map((sem) => (
           <option key={sem} value={sem}>
             {sem} Semester
           </option>
@@ -167,10 +167,6 @@ const StudentAttendance = () => {
           </div>
         )}
       </div>
-
-      <footer>
-        <p>© 2024 DCE Attendance System</p>
-      </footer>
     </div>
   );
 };
