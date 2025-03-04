@@ -156,7 +156,7 @@ const subjectsData = [
         branch: "Cybersecurity",
         subjects: [
           { id: 311, name: "Mathematics - III" },
-          { id: 312, name: "Cryptography" },
+          { id: 312, name: "OOPS" },
           { id: 313, name: "Ethical Hacking" },
           { id: 314, name: "Web Application Security" },
           { id: 315, name: "Software Engineering" },

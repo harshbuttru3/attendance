@@ -141,15 +141,28 @@ const Navbar = () => {
           <div
             className={`fixed top-0 right-0 h-full w-64 ${
               darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-            } shadow-lg transform transition-transform duration-300 ${
-              isMenuOpen ? "translate-x-0" : "translate-x-full"
+            } shadow-lg transform transition-all duration-500 ease-in-out ${
+              isMenuOpen
+                ? "translate-x-0 opacity-100"
+                : "translate-x-full opacity-0"
             }`}
+            style={{
+              animation: isMenuOpen
+                ? "slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)"
+                : "none",
+            }}
           >
             <div className="flex flex-col space-y-6 p-6">
               {/* Dashboard Link */}
               <a
                 href="/dashboard"
                 className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                style={{
+                  animation: isMenuOpen
+                    ? "fadeIn 0.5s ease-in-out 0.2s forwards"
+                    : "none",
+                  opacity: 0,
+                }}
               >
                 <FaHome className="text-xl" />
                 <span>Dashboard</span>
@@ -159,6 +172,12 @@ const Navbar = () => {
               <a
                 href="/attendance"
                 className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                style={{
+                  animation: isMenuOpen
+                    ? "fadeIn 0.5s ease-in-out 0.3s forwards"
+                    : "none",
+                  opacity: 0,
+                }}
               >
                 <FaClipboardList className="text-xl" />
                 <span>All Attendance</span>
@@ -169,6 +188,12 @@ const Navbar = () => {
                 <a
                   onClick={logout}
                   className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
+                  style={{
+                    animation: isMenuOpen
+                      ? "fadeIn 0.5s ease-in-out 0.4s forwards"
+                      : "none",
+                    opacity: 0,
+                  }}
                 >
                   <FaSignOutAlt className="text-xl" />
                   <span>Logout</span>
@@ -178,6 +203,12 @@ const Navbar = () => {
                   <a
                     onClick={() => navigate("/login")}
                     className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
+                    style={{
+                      animation: isMenuOpen
+                        ? "fadeIn 0.5s ease-in-out 0.4s forwards"
+                        : "none",
+                      opacity: 0,
+                    }}
                   >
                     <FaSignInAlt className="text-xl" />
                     <span>Login</span>
@@ -185,6 +216,12 @@ const Navbar = () => {
                   <a
                     onClick={() => navigate("/signup")}
                     className="flex items-center space-x-2 text-lg font-medium hover:text-green-600 transition duration-300 cursor-pointer"
+                    style={{
+                      animation: isMenuOpen
+                        ? "fadeIn 0.5s ease-in-out 0.5s forwards"
+                        : "none",
+                      opacity: 0,
+                    }}
                   >
                     <FaUserPlus className="text-xl" />
                     <span>Signup</span>
@@ -195,6 +232,37 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Add CSS Animations */}
+      <style>
+        {`
+          @keyframes slideInRight {
+            0% {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            60% {
+              transform: translateX(-10%);
+              opacity: 1;
+            }
+            100% {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+
+          @keyframes fadeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </nav>
   );
 };
