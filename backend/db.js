@@ -21,7 +21,6 @@ pool.getConnection((err, connection) => {
 
 module.exports = pool;
 
-
 // const mysql = require("mysql2");
 
 // const pool = mysql.createPool({

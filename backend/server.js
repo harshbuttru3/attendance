@@ -6,22 +6,25 @@ const app = express();
 
 // ✅ Configure CORS properly
 const allowedOrigins = [
-    "https://attendance-pi-woad.vercel.app", // Frontend on Vercel
-    "http://localhost:5173" // Local development
+  "https://attendance-pi-woad.vercel.app", // Frontend on Vercel
+  "http://localhost:5173", // Local development
+  "http://192.168.1.70:5173", // local Network
 ];
 
-app.use(cors({
+app.use(
+  cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     methods: "GET,POST,PUT,DELETE",
     credentials: true, // Allow cookies/auth headers
-    allowedHeaders: "Content-Type,Authorization"
-}));
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 
 app.use(express.json());
 
@@ -30,12 +33,14 @@ const authRoutes = require("./routes/authRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // 🔹 Define routes
 app.use("/api/auth", authRoutes);
 app.use("/api", attendanceRoutes);
 app.use("/api", subjectRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // const PORT = process.env.PORT || 5000;
 const PORT = 5000;
@@ -44,7 +49,7 @@ app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 // ✅ Debugging: List all available routes
 console.log("Available routes:");
 app._router.stack.forEach((r) => {
-    if (r.route && r.route.path) {
-        console.log(r.route.path);
-    }
+  if (r.route && r.route.path) {
+    console.log(r.route.path);
+  }
 });

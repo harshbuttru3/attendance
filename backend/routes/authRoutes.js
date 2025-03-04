@@ -48,22 +48,31 @@ router.post("/login", (req, res) => {
         bcrypt.compare(password, teacher.password, (err, match) => {
             if (!match) return res.status(401).json({ error: "Invalid email or password" });
 
-            // Prepare user object (excluding password)
-            const user = {
-                id: teacher.id,
-                name: teacher.name,
-                email: teacher.email,
-                semester: teacher.semester,
-                branch: teacher.branch
-            };
+            // ✅ Fetch subjects from `teacher_subjects` table
+            pool.query(
+                "SELECT subject FROM teacher_subjects WHERE teacher_id = ?",
+                [teacher.id],
+                (subError, subResults) => {
+                    if (subError) return res.status(500).json({ error: "Database error while fetching subjects" });
 
-            // Generate a JWT Token
-            const token = jwt.sign(user, "secretkey", { expiresIn: "1h" });
+                    const subjects = subResults.map(sub => sub.subject);
 
-            res.json({ message: "Login successful", token, user });
+                    // ✅ Send `id` in response
+                    const user = {
+                        id: teacher.id,  // ✅ Ensure `id` is included
+                        name: teacher.name,
+                        email: teacher.email,
+                        subjects: subjects
+                    };
+
+                    const token = jwt.sign(user, "secretkey", { expiresIn: "1h" });
+                    res.json({ message: "Login successful", token, user });
+                }
+            );
         });
     });
 });
+
 
 // 🔹 Get Teacher Info (Authenticated Route)
 router.get("/profile", (req, res) => {
