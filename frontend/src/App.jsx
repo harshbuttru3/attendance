@@ -34,7 +34,7 @@ function App() {
             <Navbar /> {/* Navbar is outside Routes to appear on all pages */}
             <main className="flex-grow">
               <Routes>
-                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<Home />} />
                 {/* <Route path="/" element={<StudentAttendance />} /> */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
