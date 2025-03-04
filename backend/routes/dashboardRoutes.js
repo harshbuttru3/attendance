@@ -163,5 +163,33 @@ router.post("/attendance/update", (req, res) => {
     res.json({ message: "Attendance updated successfully!" });
 });
 
+//remove subject
+router.delete("/remove-subject", (req, res) => {
+    const { teacher_id, subject, semester, branch } = req.body;
+
+    if (!teacher_id || !subject || !semester || !branch) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const query = `
+        DELETE FROM teacher_subjects
+        WHERE teacher_id = ? AND subject = ? AND semester = ? AND branch = ?
+    `;
+
+    pool.query(query, [teacher_id, subject, semester, branch], (err, result) => {
+        if (err) {
+            console.error("Error deleting subject:", err);
+            return res.status(500).json({ error: "Database error while removing subject" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Subject not found" });
+        }
+
+        res.json({ message: "Subject removed successfully!" });
+    });
+});
+
+
 
 module.exports = router;

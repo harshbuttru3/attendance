@@ -211,6 +211,32 @@ const Dashboard = () => {
       .catch((err) => console.error("Error updating attendance:", err));
   };
 
+  const handleRemoveSubject = (subject, semester, branch) => {
+    if (!window.confirm(`Are you sure you want to remove ${subject} (${semester} - ${branch})?`)) {
+        return;
+    }
+
+    const payload = {
+        teacher_id: user.id,
+        subject,
+        semester,
+        branch
+    };
+
+    axios
+        .delete("http://localhost:5000/api/dashboard/remove-subject", { data: payload })
+        .then(() => {
+            alert("Subject removed successfully!");
+            window.location.reload();
+            fetchUserSubjects(); // Refresh subject list
+        })
+        .catch((err) => {
+            console.error("Error removing subject:", err.response?.data || err.message);
+            alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+        });
+};
+
+
   return (
     <div
       className={`min-h-screen flex flex-col items-center justify-start ${
@@ -294,31 +320,33 @@ const Dashboard = () => {
         </div>
 
         <div className="mb-8">
-          <h3 className="text-2xl font-bold mb-4">Your Subjects</h3>
-          {userSubjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {userSubjects.map((sub, index) => (
-                <button
-                  key={index}
-                  onClick={() =>
-                    fetchStudents(sub.subject, sub.semester, sub.branch)
-                  }
-                  className={`p-4 rounded-lg w-full text-left transition duration-300 ${
-                    darkMode
-                      ? "bg-gray-700 hover:bg-gray-600 text-white"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                  }`}
-                >
-                  <p className="font-medium">
-                    {sub.subject} ({sub.semester} Semester - {sub.branch})
-                  </p>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p>No subjects added yet.</p>
-          )}
+    <h3 className="text-2xl font-bold mb-4">Your Subjects</h3>
+    {userSubjects.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userSubjects.map((sub, index) => (
+                <div key={index} className={`p-4 rounded-lg w-full flex justify-between items-center transition duration-300 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}>
+                    <button 
+                        onClick={() => fetchStudents(sub.subject, sub.semester, sub.branch)} 
+                        className="text-left flex-grow"
+                    >
+                        <p className="font-medium">
+                            {sub.subject} ({sub.semester} Semester - {sub.branch})
+                        </p>
+                    </button>
+                    <button 
+                        onClick={() => handleRemoveSubject(sub.subject, sub.semester, sub.branch)} 
+                        className="ml-4 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-700"
+                    >
+                        ✖
+                    </button>
+                </div>
+            ))}
         </div>
+    ) : (
+        <p>No subjects added yet.</p>
+    )}
+</div>
+
 
         {students.length > 0 && (
           <div className="mt-6 w-full">
