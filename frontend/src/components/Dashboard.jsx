@@ -45,14 +45,21 @@ const Dashboard = () => {
         setUserSubjects(res.data);
       })
       .catch((err) =>
-        console.error("Error fetching subjects:", err.response?.data || err.message)
+        console.error(
+          "Error fetching subjects:",
+          err.response?.data || err.message
+        )
       );
   };
 
   useEffect(() => {
     if (semester) {
-      const selectedSemester = subjectsData.find((sem) => sem.semester === parseInt(semester));
-      setBranches(selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []);
+      const selectedSemester = subjectsData.find(
+        (sem) => sem.semester === parseInt(semester)
+      );
+      setBranches(
+        selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []
+      );
       setBranch("");
       setSubjects([]);
     }
@@ -60,9 +67,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (semester && branch) {
-      const selectedSemester = subjectsData.find((sem) => sem.semester === parseInt(semester));
-      const selectedBranch = selectedSemester?.branches.find((b) => b.branch === branch);
-      setSubjects(selectedBranch ? selectedBranch.subjects.map((sub) => sub.name) : []);
+      const selectedSemester = subjectsData.find(
+        (sem) => sem.semester === parseInt(semester)
+      );
+      const selectedBranch = selectedSemester?.branches.find(
+        (b) => b.branch === branch
+      );
+      setSubjects(
+        selectedBranch ? selectedBranch.subjects.map((sub) => sub.name) : []
+      );
       setSubject("");
     }
   }, [branch, semester]);
@@ -92,7 +105,9 @@ const Dashboard = () => {
       })
       .catch((err) => {
         console.error("Error:", err.response?.data || err.message);
-        alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+        alert(
+          "Error: " + (err.response?.data?.error || "Something went wrong")
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -102,44 +117,56 @@ const Dashboard = () => {
       alert("Invalid subject selection.");
       return;
     }
-  
-    console.log("Fetching students for:", { selectedSubject, selectedSemester, selectedBranch });
-  
+
+    console.log("Fetching students for:", {
+      selectedSubject,
+      selectedSemester,
+      selectedBranch,
+    });
+
     // Fetch students for the selected semester & branch
     axios
-      .get(`http://localhost:5000/api/dashboard/students/${selectedSemester}/${selectedBranch}`)
+      .get(
+        `http://localhost:5000/api/dashboard/students/${selectedSemester}/${selectedBranch}`
+      )
       .then((res) => {
         const studentList = res.data;
         setStudents(studentList);
-  
+
         // Fetch past attendance records for the selected subject
         axios
-          .get(`http://localhost:5000/api/dashboard/attendance/${selectedSemester}/${selectedBranch}/${selectedSubject}`)
+          .get(
+            `http://localhost:5000/api/dashboard/attendance/${selectedSemester}/${selectedBranch}/${selectedSubject}`
+          )
           .then((attendanceRes) => {
             const pastAttendance = attendanceRes.data;
-  
+
             // Map past attendance to students, if records exist
             const updatedAttendance = studentList.map((student) => {
               const existingRecord = pastAttendance.find(
                 (record) => record.student_id === student.id
               );
-  
+
               return {
                 student_id: student.id,
                 subject: selectedSubject,
                 semester: selectedSemester,
                 branch: selectedBranch,
-                total_classes: existingRecord ? existingRecord.total_classes : 0,
-                attended_classes: existingRecord ? existingRecord.attended_classes : 0,
+                total_classes: existingRecord
+                  ? existingRecord.total_classes
+                  : 0,
+                attended_classes: existingRecord
+                  ? existingRecord.attended_classes
+                  : 0,
               };
             });
-  
+
             setAttendance(updatedAttendance);
           })
           .catch((err) => {
             console.error("Error fetching past attendance:", err);
             alert("Could not fetch past attendance.");
-            
+
             // If no past attendance, initialize fresh records
             setAttendance(
               studentList.map((student) => ({
@@ -158,9 +185,6 @@ const Dashboard = () => {
         alert("No students found for this selection.");
       });
   };
-  
-  
-  
 
   const handleTotalClassesChange = (value) => {
     setAttendance((prevAttendance) =>
@@ -170,7 +194,6 @@ const Dashboard = () => {
       }))
     );
   };
-  
 
   const handleInputChange = (index, field, value) => {
     setAttendance((prevAttendance) => {
@@ -189,12 +212,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-start ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} transition duration-300 p-4`}>
-      <div className={`w-full max-w-6xl bg-white ${darkMode ? "dark:bg-gray-800" : ""} p-8 rounded-xl shadow-2xl border ${darkMode ? "border-gray-700" : "border-gray-200"} transition duration-300`}>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-start ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      } transition duration-300 p-4`}
+    >
+      <div
+        className={`w-full max-w-6xl p-8 rounded-xl shadow-2xl border ${
+          darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        } transition duration-300`}
+      >
         <h2 className="text-3xl font-bold mb-8">Welcome, {user?.name}</h2>
 
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
-          <select value={semester} onChange={(e) => setSemester(e.target.value)} className="w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none">
+          <select
+            value={semester}
+            onChange={(e) => setSemester(e.target.value)}
+            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+              darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+            }`}
+          >
             <option value="">-- Select Semester --</option>
             {subjectsData.map((sem) => (
               <option key={sem.semester} value={sem.semester}>
@@ -203,90 +242,162 @@ const Dashboard = () => {
             ))}
           </select>
 
-          <select value={branch} onChange={(e) => setBranch(e.target.value)} className="w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none" disabled={!semester}>
+          <select
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+              darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+            }`}
+            disabled={!semester}
+          >
             <option value="">-- Select Branch --</option>
             {branches.map((br) => (
-              <option key={br} value={br}>{br}</option>
+              <option key={br} value={br}>
+                {br}
+              </option>
             ))}
           </select>
 
-          <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none" disabled={!branch}>
+          <select
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+              darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+            }`}
+            disabled={!branch}
+          >
             <option value="">-- Select Subject --</option>
             {subjects.map((sub) => (
-              <option key={sub} value={sub}>{sub}</option>
+              <option key={sub} value={sub}>
+                {sub}
+              </option>
             ))}
           </select>
 
-          <button onClick={handleAddSubject} disabled={!semester || !branch || !subject || loading} className="w-full md:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 focus:outline-none shadow-md">
+          <button
+            onClick={handleAddSubject}
+            disabled={!semester || !branch || !subject || loading}
+            className={`w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
+              semester && branch && subject
+                ? darkMode
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-gray-400 cursor-not-allowed text-gray-700"
+            }`}
+          >
             {loading ? "Adding..." : "Add Subject"}
           </button>
         </div>
 
         <div className="mb-8">
-  <h3 className="text-2xl font-bold mb-4">Your Subjects</h3>
-  {userSubjects.length > 0 ? (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {userSubjects.map((sub, index) => (
-        <button
-          key={index}
-          onClick={() => fetchStudents(sub.subject, sub.semester, sub.branch)}
-          className="p-4 rounded-lg w-full text-left bg-gray-100 transition duration-300"
-        >
-          <p className="font-medium">
-            {sub.subject} ({sub.semester} Semester - {sub.branch})
-          </p>
-        </button>
-      ))}
-    </div>
-  ) : (
-    <p>No subjects added yet.</p>
-  )}
-</div>
+          <h3 className="text-2xl font-bold mb-4">Your Subjects</h3>
+          {userSubjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userSubjects.map((sub, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    fetchStudents(sub.subject, sub.semester, sub.branch)
+                  }
+                  className={`p-4 rounded-lg w-full text-left transition duration-300 ${
+                    darkMode
+                      ? "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                  }`}
+                >
+                  <p className="font-medium">
+                    {sub.subject} ({sub.semester} Semester - {sub.branch})
+                  </p>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p>No subjects added yet.</p>
+          )}
+        </div>
 
-{/* ✅ Show Attendance Table when Students are Fetched */}
-{students.length > 0 && (
-  <div className="mt-6 w-full">
-    <h3 className="text-2xl font-bold mb-4">{attendance[0]?.subject}</h3>
-    <table className="border-collapse w-full">
-      <thead>
-        <tr className="bg-gray-200">
-          <th className="border px-4 py-2">Reg ID</th>
-          <th className="border px-4 py-2">Name</th>
-          <th className="border px-4 py-2">Total Classes</th>
-          <th className="border px-4 py-2">Attended Classes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {attendance.map((entry, index) => (
-          <tr key={entry.student_id} className="bg-white">
-            <td className="border px-4 py-2">{students[index]?.registration_no}</td>
-            <td className="border px-4 py-2">{students[index]?.name}</td>
-            <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={entry.total_classes}
-                onChange={(e) => handleTotalClassesChange(e.target.value)}
-                className="w-full text-center"
-              />
-            </td>
-            <td className="border px-4 py-2">
-              <input
-                type="number"
-                value={entry.attended_classes}
-                onChange={(e) => handleInputChange(index, "attended_classes", e.target.value)}
-                className="w-full text-center"
-              />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <button onClick={handleSubmit} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-      Submit Attendance
-    </button>
-  </div>
-)}
-
+        {students.length > 0 && (
+          <div className="mt-6 w-full">
+            <h3 className="text-2xl font-bold mb-4">
+              {attendance[0]?.subject}
+            </h3>
+            <table
+              className={`border-collapse w-full ${
+                darkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              <thead>
+                <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
+                  <th className="border px-4 py-2">Reg ID</th>
+                  <th className="border px-4 py-2">Name</th>
+                  <th className="border px-4 py-2">Total Classes</th>
+                  <th className="border px-4 py-2">Attended Classes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendance.map((entry, index) => (
+                  <tr
+                    key={entry.student_id}
+                    className={darkMode ? "bg-gray-800" : "bg-white"}
+                  >
+                    <td className="border px-4 py-2">
+                      {students[index]?.registration_no}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {students[index]?.name}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <input
+                        type="number"
+                        value={entry.total_classes}
+                        onChange={(e) =>
+                          handleTotalClassesChange(e.target.value)
+                        }
+                        className={`w-full text-center ${
+                          darkMode
+                            ? "bg-gray-700 text-white border-gray-600"
+                            : "bg-white text-gray-900 border-gray-300"
+                        }`}
+                      />
+                    </td>
+                    <td className="border px-4 py-2">
+                      <input
+                        type="number"
+                        value={entry.attended_classes}
+                        onChange={(e) =>
+                          handleInputChange(
+                            index,
+                            "attended_classes",
+                            e.target.value
+                          )
+                        }
+                        className={`w-full text-center ${
+                          darkMode
+                            ? "bg-gray-700 text-white border-gray-600"
+                            : "bg-white text-gray-900 border-gray-300"
+                        }`}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button
+              onClick={handleSubmit}
+              className={`mt-4 px-4 py-2 rounded ${
+                darkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
+            >
+              Submit Attendance
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
