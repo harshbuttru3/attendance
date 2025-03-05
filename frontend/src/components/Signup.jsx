@@ -14,7 +14,7 @@ const Signup = () => {
   useEffect(() => {
     if (user) {
       navigate("/attendance");
-      toast.error("Already Logged In!!");
+      // toast.error("Already Logged In!!");
     }
   }, [user, navigate]);
 

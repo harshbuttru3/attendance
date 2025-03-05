@@ -55,7 +55,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === parseInt(semester)
+        (sem) => sem.semester === semester
       );
       setBranches(
         selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []
@@ -68,7 +68,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester && branch) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === parseInt(semester)
+        (sem) => sem.semester === semester
       );
       const selectedBranch = selectedSemester?.branches.find(
         (b) => b.branch === branch
@@ -81,6 +81,12 @@ const Dashboard = () => {
   }, [branch, semester]);
 
   const handleAddSubject = () => {
+    if (!user || !user.id) {
+      alert("User not authenticated. Please log in.");
+      navigate("/login");
+      return;
+    }
+
     if (!semester || !branch || !subject) {
       alert("Please select semester, branch, and subject.");
       return;
@@ -89,9 +95,9 @@ const Dashboard = () => {
     setLoading(true);
 
     const payload = {
-      teacher_id: user.id,
+      teacher_id: user.id, // Ensure this is correctly set
       subject,
-      semester,
+      semester, // Send semester as "1st", "2nd", etc.
       branch,
     };
 
@@ -150,7 +156,7 @@ const Dashboard = () => {
               return {
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester,
+                semester: selectedSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: existingRecord
                   ? existingRecord.total_classes
@@ -172,7 +178,7 @@ const Dashboard = () => {
               studentList.map((student) => ({
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester,
+                semester: selectedSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: 0,
                 attended_classes: 0,
@@ -223,7 +229,7 @@ const Dashboard = () => {
     const payload = {
       teacher_id: user.id,
       subject,
-      semester,
+      semester, // Use "1st", "2nd", etc.
       branch,
     };
 
@@ -271,11 +277,13 @@ const Dashboard = () => {
             }`}
           >
             <option value="">-- Select Semester --</option>
-            {subjectsData.map((sem) => (
-              <option key={sem.semester} value={sem.semester}>
-                Semester {sem.semester}
-              </option>
-            ))}
+            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
+              (sem) => (
+                <option key={sem} value={sem}>
+                  {sem} Semester
+                </option>
+              )
+            )}
           </select>
 
           <select
