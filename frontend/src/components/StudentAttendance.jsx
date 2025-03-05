@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 import { ThemeContext } from "../context/ThemeContext";
+import toast from "react-hot-toast";
 
 const StudentAttendance = () => {
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
@@ -17,12 +18,38 @@ const StudentAttendance = () => {
           `http://localhost:5000/api/student-attendance/${semester}/${branch}`
         )
         .then((res) => {
-          setAttendanceData(res.data);
-          setSummaryData(calculateSummary(res.data));
+          console.log("Raw API Response:", res.data); // Debugging Step
+
+          // Filter out null, undefined, or invalid subjects
+          const filteredData = Object.keys(res.data || {}).reduce(
+            (acc, subject) => {
+              if (
+                subject &&
+                subject !== "null" &&
+                res.data[subject] &&
+                Array.isArray(res.data[subject])
+              ) {
+                acc[subject] = res.data[subject];
+              }
+              return acc;
+            },
+            {}
+          );
+
+          if (Object.keys(filteredData).length > 0) {
+            setAttendanceData(filteredData);
+            setSummaryData(calculateSummary(filteredData));
+          } else {
+            setAttendanceData({});
+            setSummaryData({});
+            toast.error(
+              "No valid attendance records found for the selected semester and branch."
+            );
+          }
         })
         .catch((err) => {
           console.error("Error fetching attendance:", err);
-          alert("No attendance records found.");
+          toast.error("No attendance records found.");
         });
     }
   };
@@ -164,82 +191,94 @@ const StudentAttendance = () => {
       {/* Attendance Data */}
       <div>
         {Object.keys(attendanceData).length > 0 ? (
-          Object.keys(attendanceData).map((subject, index) => (
-            <div key={index} className="mb-4">
-              {/* Subject Title with Toggle Button */}
-              <div
-                className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
-                  darkMode
-                    ? "bg-gray-700 hover:bg-gray-600"
-                    : "bg-gray-200 hover:bg-gray-300"
-                }`}
-                onClick={() => toggleSubject(subject)}
-              >
-                <h3 className="text-xl font-bold">Subject: {subject}</h3>
-                <span className="text-lg">
-                  {expandedSubject === subject ? "▲" : "▼"}
-                </span>
-              </div>
-
-              {/* Expanded Table */}
-              {expandedSubject === subject && (
-                <table
-                  className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
-                    darkMode ? "text-white" : "text-gray-900"
+          Object.keys(attendanceData)
+            .filter((subject) => subject && subject !== "null") // Remove null values
+            .map((subject, index) => (
+              <div key={index} className="mb-4">
+                {/* Subject Title with Toggle Button */}
+                <div
+                  className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
+                    darkMode
+                      ? "bg-gray-700 hover:bg-gray-600"
+                      : "bg-gray-200 hover:bg-gray-300"
                   }`}
+                  onClick={() => toggleSubject(subject)}
                 >
-                  <thead>
-                    <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
-                      <th className="border px-4 py-2">Reg ID</th>
-                      <th className="border px-4 py-2">Name</th>
-                      <th className="border px-4 py-2">Total Classes</th>
-                      <th className="border px-4 py-2">Attended Classes</th>
-                      <th className="border px-4 py-2">Attendance %</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceData[subject].map((student, idx) => {
-                      const attendancePercentage =
-                        student.total_classes > 0
-                          ? (student.attended_classes / student.total_classes) *
-                            100
-                          : 0;
-                      return (
-                        <tr
-                          key={idx}
-                          className={darkMode ? "bg-gray-800" : "bg-white"}
-                          style={{
-                            backgroundColor:
-                              attendancePercentage < 75
-                                ? darkMode
-                                  ? "rgba(239, 68, 68, 0.2)" // Dark mode red
-                                  : "rgba(239, 68, 68, 0.1)" // Light mode red
-                                : "transparent",
-                          }}
-                        >
-                          <td className="border px-4 py-2">
-                            {student.registration_no}
-                          </td>
-                          <td className="border px-4 py-2">{student.name}</td>
-                          <td className="border px-4 py-2">
-                            {student.total_classes}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {student.attended_classes}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {attendancePercentage.toFixed(2)}%
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          ))
+                  <h3 className="text-xl font-bold">Subject: {subject}</h3>
+                  <span className="text-lg">
+                    {expandedSubject === subject ? "▲" : "▼"}
+                  </span>
+                </div>
+
+                {/* Expanded Table */}
+                {expandedSubject === subject && (
+                  <table
+                    className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    <thead>
+                      <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
+                        <th className="border px-4 py-2">Reg ID</th>
+                        <th className="border px-4 py-2">Name</th>
+                        <th className="border px-4 py-2">Total Classes</th>
+                        <th className="border px-4 py-2">Attended Classes</th>
+                        <th className="border px-4 py-2">Attendance %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceData[subject].map((student, idx) => {
+                        const attendancePercentage =
+                          student.total_classes > 0
+                            ? (student.attended_classes /
+                                student.total_classes) *
+                              100
+                            : 0;
+                        return (
+                          <tr
+                            key={idx}
+                            className={darkMode ? "bg-gray-800" : "bg-white"}
+                            style={{
+                              backgroundColor:
+                                attendancePercentage < 75
+                                  ? darkMode
+                                    ? "rgba(239, 68, 68, 0.2)" // Dark mode red
+                                    : "rgba(239, 68, 68, 0.1)" // Light mode red
+                                  : "transparent",
+                            }}
+                          >
+                            <td className="border px-4 py-2">
+                              {student.registration_no}
+                            </td>
+                            <td className="border px-4 py-2">{student.name}</td>
+                            <td className="border px-4 py-2">
+                              {student.total_classes}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {student.attended_classes}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {attendancePercentage.toFixed(2)}%
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            ))
         ) : (
-          <p>No attendance records found.</p>
+          <div
+            className={`p-6 rounded-lg text-center ${
+              darkMode ? "bg-gray-700" : "bg-gray-100"
+            }`}
+          >
+            <p className="text-lg">
+              No attendance records found. Select a semester and branch to view
+              attendance.
+            </p>
+          </div>
         )}
       </div>
     </div>
