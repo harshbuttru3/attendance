@@ -17,8 +17,16 @@ const StudentAttendance = () => {
           `http://localhost:5000/api/student-attendance/${semester}/${branch}`
         )
         .then((res) => {
-          setAttendanceData(res.data);
-          setSummaryData(calculateSummary(res.data));
+          if (Object.keys(res.data).length > 0) {
+            setAttendanceData(res.data);
+            setSummaryData(calculateSummary(res.data));
+          } else {
+            setAttendanceData({}); // Clear attendance data
+            setSummaryData({}); // Clear summary data
+            alert(
+              "No attendance records found for the selected semester and branch."
+            );
+          }
         })
         .catch((err) => {
           console.error("Error fetching attendance:", err);
@@ -188,7 +196,16 @@ const StudentAttendance = () => {
             </div>
           ))
         ) : (
-          <p>No attendance records found.</p>
+          <div
+            className={`p-6 rounded-lg text-center ${
+              darkMode ? "bg-gray-700" : "bg-gray-100"
+            }`}
+          >
+            <p className="text-lg">
+              No attendance records found. Select a semester and branch to view
+              attendance.
+            </p>
+          </div>
         )}
       </div>
     </div>
