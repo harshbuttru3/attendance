@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 import { ThemeContext } from "../context/ThemeContext";
+import toast from "react-hot-toast";
 
 const StudentAttendance = () => {
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
@@ -41,14 +42,14 @@ const StudentAttendance = () => {
           } else {
             setAttendanceData({});
             setSummaryData({});
-            alert(
+            toast.error(
               "No valid attendance records found for the selected semester and branch."
             );
           }
         })
         .catch((err) => {
           console.error("Error fetching attendance:", err);
-          alert("No attendance records found.");
+          toast.error("No attendance records found.");
         });
     }
   };

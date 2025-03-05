@@ -3,11 +3,20 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
+import toast from "react-hot-toast";
 
 const Signup = () => {
-  const { login } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/attendance");
+      toast.error("Already Logged In!!");
+    }
+  }, [user, navigate]);
 
   const [formData, setFormData] = useState({
     name: "",
