@@ -21,6 +21,15 @@ const Dashboard = () => {
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Helper function to convert numeric values to ordinal strings (e.g., 8 -> "8th")
+  const getOrdinalSuffix = (number) => {
+    const suffixes = ["th", "st", "nd", "rd"];
+    const remainder = number % 100;
+    return (
+      suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]
+    );
+  };
+
   useEffect(() => {
     if (!user) {
       console.log("User ID is missing, redirecting to login page.");
@@ -55,7 +64,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === semester
+        (sem) => sem.semester === parseInt(semester)
       );
       setBranches(
         selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []
@@ -68,7 +77,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester && branch) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === semester
+        (sem) => sem.semester === parseInt(semester)
       );
       const selectedBranch = selectedSemester?.branches.find(
         (b) => b.branch === branch
@@ -94,10 +103,13 @@ const Dashboard = () => {
 
     setLoading(true);
 
+    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
+    const ordinalSemester = `${semester}${getOrdinalSuffix(semester)}`;
+
     const payload = {
       teacher_id: user.id, // Ensure this is correctly set
       subject,
-      semester, // Send semester as "1st", "2nd", etc.
+      semester: ordinalSemester, // Send semester as "1st", "2nd", etc.
       branch,
     };
 
@@ -124,16 +136,21 @@ const Dashboard = () => {
       return;
     }
 
+    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
+    const ordinalSemester = `${selectedSemester}${getOrdinalSuffix(
+      selectedSemester
+    )}`;
+
     console.log("Fetching students for:", {
       selectedSubject,
-      selectedSemester,
+      ordinalSemester,
       selectedBranch,
     });
 
     // Fetch students for the selected semester & branch
     axios
       .get(
-        `http://localhost:5000/api/dashboard/students/${selectedSemester}/${selectedBranch}`
+        `http://localhost:5000/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
       )
       .then((res) => {
         const studentList = res.data;
@@ -142,7 +159,7 @@ const Dashboard = () => {
         // Fetch past attendance records for the selected subject
         axios
           .get(
-            `http://localhost:5000/api/dashboard/attendance/${selectedSemester}/${selectedBranch}/${selectedSubject}`
+            `http://localhost:5000/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
           )
           .then((attendanceRes) => {
             const pastAttendance = attendanceRes.data;
@@ -156,7 +173,7 @@ const Dashboard = () => {
               return {
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester, // Use "1st", "2nd", etc.
+                semester: ordinalSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: existingRecord
                   ? existingRecord.total_classes
@@ -178,7 +195,7 @@ const Dashboard = () => {
               studentList.map((student) => ({
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester, // Use "1st", "2nd", etc.
+                semester: ordinalSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: 0,
                 attended_classes: 0,
@@ -226,10 +243,13 @@ const Dashboard = () => {
       return;
     }
 
+    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
+    const ordinalSemester = `${semester}${getOrdinalSuffix(semester)}`;
+
     const payload = {
       teacher_id: user.id,
       subject,
-      semester, // Use "1st", "2nd", etc.
+      semester: ordinalSemester, // Use "1st", "2nd", etc.
       branch,
     };
 
@@ -277,13 +297,11 @@ const Dashboard = () => {
             }`}
           >
             <option value="">-- Select Semester --</option>
-            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
-              (sem) => (
-                <option key={sem} value={sem}>
-                  {sem} Semester
-                </option>
-              )
-            )}
+            {subjectsData.map((sem) => (
+              <option key={sem.semester} value={sem.semester}>
+                {`${sem.semester}${getOrdinalSuffix(sem.semester)} Semester`}
+              </option>
+            ))}
           </select>
 
           <select
