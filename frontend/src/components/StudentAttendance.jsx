@@ -50,6 +50,43 @@ const StudentAttendance = () => {
     setExpandedSubject(expandedSubject === subject ? null : subject);
   };
 
+  //csv download button 
+  const exportToCSV = () => {
+    if (Object.keys(attendanceData).length === 0) {
+      alert("No attendance data to export.");
+      return;
+    }
+  
+    let csvContent = "data:text/csv;charset=utf-8,";
+  
+    // Headers
+    csvContent += "Subject,Registration No,Name,Total Classes,Attended Classes,Attendance %\n";
+  
+    // Data rows
+    Object.keys(attendanceData).forEach((subject) => {
+      attendanceData[subject].forEach((student) => {
+        const attendancePercentage =
+          student.total_classes > 0
+            ? (student.attended_classes / student.total_classes) * 100
+            : 0;
+  
+        csvContent += `${subject},${student.registration_no},${student.name},${student.total_classes},${student.attended_classes},${attendancePercentage.toFixed(2)}%\n`;
+      });
+    });
+  
+    // Create a link and trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Attendance_Sem${semester}_Branch_${branch}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+
+
+
   return (
     <div
       className={`min-h-screen p-4 ${
@@ -108,6 +145,20 @@ const StudentAttendance = () => {
         >
           View Attendance
         </button>
+        <button
+  onClick={exportToCSV}
+  disabled={Object.keys(attendanceData).length === 0}
+  className={`w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
+    semester && branch
+      ? darkMode
+        ? "bg-blue-600 hover:bg-blue-700 text-white"
+        : "bg-blue-500 hover:bg-blue-600 text-white"
+      : "bg-gray-400 cursor-not-allowed text-gray-700"
+  }`}
+>
+  Export CSV
+</button>
+
       </div>
 
       {/* Attendance Data */}
