@@ -11,6 +11,7 @@ import {
   FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
+  FaUserCog, // Icon for Admin Dashboard
 } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext"; // Import AuthContext
 
@@ -33,7 +34,13 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         {/* Left Side: Heading + Dashboard Link */}
         <div className="flex items-center space-x-6">
-          <h1 className="text-2xl font-bold">DCE Attendance</h1>
+          {/* Clickable Heading */}
+          <h1
+            onClick={() => navigate("/")} // Navigate to home route
+            className="text-2xl font-bold cursor-pointer hover:text-purple-600 transition duration-300"
+          >
+            DCE Attendance
+          </h1>
           <div className="hidden md:flex items-center space-x-6">
             <a
               href="/dashboard"
@@ -48,6 +55,14 @@ const Navbar = () => {
             >
               <FaClipboardList className="text-xl" />
               <span>All Attendance</span>
+            </a>
+            {/* Admin Dashboard Link (Visible to All) */}
+            <a
+              href="/admin"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+            >
+              <FaUserCog className="text-xl" />
+              <span>Admin Dashboard</span>
             </a>
           </div>
         </div>
@@ -183,6 +198,21 @@ const Navbar = () => {
                 <span>All Attendance</span>
               </a>
 
+              {/* Admin Dashboard Link (Visible to All) */}
+              <a
+                href="/admin"
+                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                style={{
+                  animation: isMenuOpen
+                    ? "fadeIn 0.5s ease-in-out 0.4s forwards"
+                    : "none",
+                  opacity: 0,
+                }}
+              >
+                <FaUserCog className="text-xl" />
+                <span>Admin Dashboard</span>
+              </a>
+
               {/* Login/Logout Links */}
               {user ? (
                 <a
@@ -190,7 +220,7 @@ const Navbar = () => {
                   className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
                   style={{
                     animation: isMenuOpen
-                      ? "fadeIn 0.5s ease-in-out 0.4s forwards"
+                      ? "fadeIn 0.5s ease-in-out 0.5s forwards"
                       : "none",
                     opacity: 0,
                   }}
@@ -205,7 +235,7 @@ const Navbar = () => {
                     className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
                     style={{
                       animation: isMenuOpen
-                        ? "fadeIn 0.5s ease-in-out 0.4s forwards"
+                        ? "fadeIn 0.5s ease-in-out 0.6s forwards"
                         : "none",
                       opacity: 0,
                     }}
@@ -218,7 +248,7 @@ const Navbar = () => {
                     className="flex items-center space-x-2 text-lg font-medium hover:text-green-600 transition duration-300 cursor-pointer"
                     style={{
                       animation: isMenuOpen
-                        ? "fadeIn 0.5s ease-in-out 0.5s forwards"
+                        ? "fadeIn 0.5s ease-in-out 0.7s forwards"
                         : "none",
                       opacity: 0,
                     }}

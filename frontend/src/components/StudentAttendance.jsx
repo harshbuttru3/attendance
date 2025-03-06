@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react"; // Import React
 import axios from "axios";
 import { ThemeContext } from "../context/ThemeContext";
 import toast from "react-hot-toast";
@@ -64,11 +64,16 @@ const StudentAttendance = () => {
             name: student.name,
             total_classes: 0,
             attended_classes: 0,
+            subjects: {}, // Store subject-wise data
           };
         }
         summary[student.registration_no].total_classes += student.total_classes;
         summary[student.registration_no].attended_classes +=
           student.attended_classes;
+        summary[student.registration_no].subjects[subject] = {
+          total_classes: student.total_classes,
+          attended_classes: student.attended_classes,
+        };
       });
     });
     return summary;
@@ -96,7 +101,7 @@ const StudentAttendance = () => {
 
       // Headers
       csvContent +=
-        "Subject,Registration No,Name,Total Classes,Attended Classes,Attendance %\n";
+        "Subject,Registration No,Name,Total Classes,Attended Classes,Attendance %,Low Attendance\n";
 
       // Data rows
       subjectData.forEach((student) => {
@@ -104,10 +109,13 @@ const StudentAttendance = () => {
           student.total_classes > 0
             ? (student.attended_classes / student.total_classes) * 100
             : 0;
+        const isLowAttendance = attendancePercentage < 75 ? "Yes" : "No";
 
         csvContent += `${subject},${student.registration_no},${student.name},${
           student.total_classes
-        },${student.attended_classes},${attendancePercentage.toFixed(2)}%\n`;
+        },${student.attended_classes},${attendancePercentage.toFixed(
+          2
+        )}%,${isLowAttendance}\n`;
       });
     } else if (dataType === "summary") {
       // Export summary data
@@ -117,20 +125,32 @@ const StudentAttendance = () => {
       }
 
       // Headers
+      csvContent += "Registration No,Name,";
+      Object.keys(attendanceData).forEach((subject) => {
+        csvContent += `${subject} Total Classes,${subject} Attended Classes,`;
+      });
       csvContent +=
-        "Registration No,Name,Total Classes,Attended Classes,Attendance %\n";
+        "Total Classes,Attended Classes,Attendance %,Low Attendance\n";
 
       // Data rows
       Object.keys(summaryData).forEach((regId) => {
         const student = summaryData[regId];
+        csvContent += `${regId},${student.name},`;
+        Object.keys(attendanceData).forEach((subject) => {
+          const subjectData = student.subjects[subject] || {
+            total_classes: 0,
+            attended_classes: 0,
+          };
+          csvContent += `${subjectData.total_classes},${subjectData.attended_classes},`;
+        });
         const attendancePercentage =
           student.total_classes > 0
             ? (student.attended_classes / student.total_classes) * 100
             : 0;
-
-        csvContent += `${regId},${student.name},${student.total_classes},${
+        const isLowAttendance = attendancePercentage < 75 ? "Yes" : "No";
+        csvContent += `${student.total_classes},${
           student.attended_classes
-        },${attendancePercentage.toFixed(2)}%\n`;
+        },${attendancePercentage.toFixed(2)}%,${isLowAttendance}\n`;
       });
     } else {
       alert("Invalid export request.");
@@ -239,7 +259,7 @@ const StudentAttendance = () => {
 
                   {/* Expanded Table */}
                   {expandedSubject === subject && (
-                    <div>
+                    <div className="overflow-x-auto">
                       <table
                         className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
                           darkMode ? "text-white" : "text-gray-900"
@@ -334,7 +354,7 @@ const StudentAttendance = () => {
 
               {/* Expanded Summary Table */}
               {showSummary && (
-                <div>
+                <div className="overflow-x-auto">
                   <table
                     className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
                       darkMode ? "text-white" : "text-gray-900"
@@ -344,6 +364,16 @@ const StudentAttendance = () => {
                       <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
                         <th className="border px-4 py-2">Reg ID</th>
                         <th className="border px-4 py-2">Name</th>
+                        {Object.keys(attendanceData).map((subject) => (
+                          <React.Fragment key={subject}>
+                            <th className="border px-4 py-2">
+                              {subject} Total Classes
+                            </th>
+                            <th className="border px-4 py-2">
+                              {subject} Attended Classes
+                            </th>
+                          </React.Fragment>
+                        ))}
                         <th className="border px-4 py-2">Total Classes</th>
                         <th className="border px-4 py-2">Attended Classes</th>
                         <th className="border px-4 py-2">Attendance %</th>
@@ -362,9 +392,33 @@ const StudentAttendance = () => {
                           <tr
                             key={regId}
                             className={darkMode ? "bg-gray-800" : "bg-white"}
+                            style={{
+                              backgroundColor:
+                                attendancePercentage < 75
+                                  ? darkMode
+                                    ? "rgba(239, 68, 68, 0.2)" // Dark mode red
+                                    : "rgba(239, 68, 68, 0.1)" // Light mode red
+                                  : "transparent",
+                            }}
                           >
                             <td className="border px-4 py-2">{regId}</td>
                             <td className="border px-4 py-2">{student.name}</td>
+                            {Object.keys(attendanceData).map((subject) => {
+                              const subjectData = student.subjects[subject] || {
+                                total_classes: 0,
+                                attended_classes: 0,
+                              };
+                              return (
+                                <React.Fragment key={subject}>
+                                  <td className="border px-4 py-2">
+                                    {subjectData.total_classes}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {subjectData.attended_classes}
+                                  </td>
+                                </React.Fragment>
+                              );
+                            })}
                             <td className="border px-4 py-2">
                               {student.total_classes}
                             </td>

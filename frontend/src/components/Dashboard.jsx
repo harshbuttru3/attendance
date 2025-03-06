@@ -22,12 +22,19 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
 
   // Helper function to convert numeric values to ordinal strings (e.g., 8 -> "8th")
-  const getOrdinalSuffix = (number) => {
+  const getOrdinalSuffix = (value) => {
+    // If the value is already an ordinal string (e.g., "3rd"), return it as-is
+    if (typeof value === "string" && /^\d+(st|nd|rd|th)$/.test(value)) {
+      return value;
+    }
+
+    // If the value is numeric, convert it to an ordinal string
+    const number = parseInt(value);
     const suffixes = ["th", "st", "nd", "rd"];
     const remainder = number % 100;
-    return (
+    return `${number}${
       suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]
-    );
+    }`;
   };
 
   useEffect(() => {
@@ -103,8 +110,8 @@ const Dashboard = () => {
 
     setLoading(true);
 
-    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
-    const ordinalSemester = `${semester}${getOrdinalSuffix(semester)}`;
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(semester);
 
     const payload = {
       teacher_id: user.id, // Ensure this is correctly set
@@ -136,10 +143,8 @@ const Dashboard = () => {
       return;
     }
 
-    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
-    const ordinalSemester = `${selectedSemester}${getOrdinalSuffix(
-      selectedSemester
-    )}`;
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(selectedSemester);
 
     console.log("Fetching students for:", {
       selectedSubject,
@@ -243,8 +248,8 @@ const Dashboard = () => {
       return;
     }
 
-    // Convert numeric semester to ordinal string (e.g., 8 -> "8th")
-    const ordinalSemester = `${semester}${getOrdinalSuffix(semester)}`;
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(semester);
 
     const payload = {
       teacher_id: user.id,
@@ -297,11 +302,13 @@ const Dashboard = () => {
             }`}
           >
             <option value="">-- Select Semester --</option>
-            {subjectsData.map((sem) => (
-              <option key={sem.semester} value={sem.semester}>
-                {`${sem.semester}${getOrdinalSuffix(sem.semester)} Semester`}
-              </option>
-            ))}
+            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
+              (sem) => (
+                <option key={sem} value={sem}>
+                  {sem} Semester
+                </option>
+              )
+            )}
           </select>
 
           <select
