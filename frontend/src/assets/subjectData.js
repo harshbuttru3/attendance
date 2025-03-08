@@ -1,6 +1,6 @@
 const subjectsData = [
   {
-    semester: 1,
+    semester: "1st",
     branches: [
       {
         branch: "CSE",
@@ -65,7 +65,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 2,
+    semester: "2nd",
     branches: [
       {
         branch: "CSE",
@@ -130,7 +130,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 3,
+    semester: "3rd",
     branches: [
       {
         branch: "CSE",
@@ -195,7 +195,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 4,
+    semester: "4th",
     branches: [
       {
         branch: "CSE",
@@ -260,7 +260,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 5,
+    semester: "5th",
     branches: [
       {
         branch: "CSE",
@@ -325,7 +325,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 6,
+    semester: "6th",
     branches: [
       {
         branch: "CSE",
@@ -390,7 +390,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 7,
+    semester: "7th",
     branches: [
       {
         branch: "CSE",
@@ -455,7 +455,7 @@ const subjectsData = [
     ],
   },
   {
-    semester: 8,
+    semester: "8th",
     branches: [
       {
         branch: "CSE",

@@ -11,11 +11,23 @@ const StudentAttendance = () => {
   const [summaryData, setSummaryData] = useState({});
   const [expandedSubject, setExpandedSubject] = useState(null); // Track expanded subject
 
+  //format semester
+  const formatSemester = (sem) => {
+    if (sem === "1") return "1st";
+    if (sem === "2") return "2nd";
+    if (sem === "3") return "3rd";
+    return `${sem}th`; // Default for 4, 5, 6, 7, 8
+  };
+  
+
   const fetchAttendance = () => {
     if (semester && branch) {
+
+      const formattedSemester = formatSemester(semester);
+
       axios
         .get(
-          `http://localhost:5000/api/student-attendance/${semester}/${branch}`
+          `http://localhost:5000/api/student-attendance/${formattedSemester}/${branch}`
         )
         .then((res) => {
           console.log("Raw API Response:", res.data); // Debugging Step

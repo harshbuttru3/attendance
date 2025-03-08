@@ -55,7 +55,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === parseInt(semester)
+        (sem) => sem.semester === semester
       );
       setBranches(
         selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []
@@ -68,7 +68,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (semester && branch) {
       const selectedSemester = subjectsData.find(
-        (sem) => sem.semester === parseInt(semester)
+        (sem) => sem.semester === semester
       );
       const selectedBranch = selectedSemester?.branches.find(
         (b) => b.branch === branch
