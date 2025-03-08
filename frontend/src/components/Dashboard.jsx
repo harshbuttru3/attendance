@@ -21,6 +21,22 @@ const Dashboard = () => {
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Helper function to convert numeric values to ordinal strings (e.g., 8 -> "8th")
+  const getOrdinalSuffix = (value) => {
+    // If the value is already an ordinal string (e.g., "3rd"), return it as-is
+    if (typeof value === "string" && /^\d+(st|nd|rd|th)$/.test(value)) {
+      return value;
+    }
+
+    // If the value is numeric, convert it to an ordinal string
+    const number = parseInt(value);
+    const suffixes = ["th", "st", "nd", "rd"];
+    const remainder = number % 100;
+    return `${number}${
+      suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]
+    }`;
+  };
+
   useEffect(() => {
     if (!user) {
       console.log("User ID is missing, redirecting to login page.");
@@ -81,6 +97,12 @@ const Dashboard = () => {
   }, [branch, semester]);
 
   const handleAddSubject = () => {
+    if (!user || !user.id) {
+      alert("User not authenticated. Please log in.");
+      navigate("/login");
+      return;
+    }
+
     if (!semester || !branch || !subject) {
       alert("Please select semester, branch, and subject.");
       return;
@@ -88,10 +110,13 @@ const Dashboard = () => {
 
     setLoading(true);
 
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(semester);
+
     const payload = {
-      teacher_id: user.id,
+      teacher_id: user.id, // Ensure this is correctly set
       subject,
-      semester,
+      semester: ordinalSemester, // Send semester as "1st", "2nd", etc.
       branch,
     };
 
@@ -118,16 +143,19 @@ const Dashboard = () => {
       return;
     }
 
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(selectedSemester);
+
     console.log("Fetching students for:", {
       selectedSubject,
-      selectedSemester,
+      ordinalSemester,
       selectedBranch,
     });
 
     // Fetch students for the selected semester & branch
     axios
       .get(
-        `http://localhost:5000/api/dashboard/students/${selectedSemester}/${selectedBranch}`
+        `http://localhost:5000/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
       )
       .then((res) => {
         const studentList = res.data;
@@ -136,7 +164,7 @@ const Dashboard = () => {
         // Fetch past attendance records for the selected subject
         axios
           .get(
-            `http://localhost:5000/api/dashboard/attendance/${selectedSemester}/${selectedBranch}/${selectedSubject}`
+            `http://localhost:5000/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
           )
           .then((attendanceRes) => {
             const pastAttendance = attendanceRes.data;
@@ -150,7 +178,7 @@ const Dashboard = () => {
               return {
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester,
+                semester: ordinalSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: existingRecord
                   ? existingRecord.total_classes
@@ -172,7 +200,7 @@ const Dashboard = () => {
               studentList.map((student) => ({
                 student_id: student.id,
                 subject: selectedSubject,
-                semester: selectedSemester,
+                semester: ordinalSemester, // Use "1st", "2nd", etc.
                 branch: selectedBranch,
                 total_classes: 0,
                 attended_classes: 0,
@@ -220,10 +248,13 @@ const Dashboard = () => {
       return;
     }
 
+    // Convert semester to ordinal string if necessary
+    const ordinalSemester = getOrdinalSuffix(semester);
+
     const payload = {
       teacher_id: user.id,
       subject,
-      semester,
+      semester: ordinalSemester, // Use "1st", "2nd", etc.
       branch,
     };
 
@@ -271,11 +302,13 @@ const Dashboard = () => {
             }`}
           >
             <option value="">-- Select Semester --</option>
-            {subjectsData.map((sem) => (
-              <option key={sem.semester} value={sem.semester}>
-                Semester {sem.semester}
-              </option>
-            ))}
+            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
+              (sem) => (
+                <option key={sem} value={sem}>
+                  {sem} Semester
+                </option>
+              )
+            )}
           </select>
 
           <select
