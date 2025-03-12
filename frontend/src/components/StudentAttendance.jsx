@@ -17,7 +17,13 @@ const StudentAttendance = () => {
     if (sem === "1") return "1st";
     if (sem === "2") return "2nd";
     if (sem === "3") return "3rd";
-    return `${sem}th`; // Default for 4, 5, 6, 7, 8
+    if (sem === "4") return "4th";
+    if (sem === "5") return "5th";
+    if (sem === "6") return "6th";
+    if (sem === "7") return "7th";
+    if (sem === "8") return "8th";
+    return sem;      
+    ; // 4th, 5th, 6th, 7th, 8th
   };
   
 

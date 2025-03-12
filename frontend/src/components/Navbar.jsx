@@ -58,7 +58,7 @@ const Navbar = () => {
             </a>
             {/* Admin Dashboard Link (Visible to All) */}
             <a
-              href="/admin"
+              href="/admin/dashboard"
               className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
             >
               <FaUserCog className="text-xl" />

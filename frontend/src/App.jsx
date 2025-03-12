@@ -16,12 +16,14 @@ import AdminDashboard from "./components/AdminDashboard";
 import Navbar from "./components/Navbar";
 import { ThemeProvider } from "./context/ThemeContext";
 import Footer from "./components/Footer";
+import AdminLogin from "./components/AdminLogin";
 
 // ✅ Protect Dashboard Route
 const PrivateRoute = ({ element }) => {
   const { user } = useContext(AuthContext);
   return user ? element : <Navigate to="/login" />;
 };
+const isAdmin = localStorage.getItem("adminToken");
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
                   path="/admin"
                   element={<PrivateRoute element={<AdminDashboard />} />}
                 />
+                <Route path="/admin/dashboard" element={isAdmin ? <AdminDashboard /> : <Navigate to="/admin/login" />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

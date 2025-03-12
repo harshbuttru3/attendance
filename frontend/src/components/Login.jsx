@@ -7,11 +7,12 @@ import toast from "react-hot-toast";
 
 const Login = () => {
   const { user, login } = useContext(AuthContext);
-  const { darkMode } = useContext(ThemeContext); // Get darkMode state
+  const { darkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  // Redirect to dashboard if user is already logged in
+  const [formData, setFormData] = useState({ employee_id: "", password: "" });
+
+  // ✅ Redirect to dashboard if user is already logged in
   useEffect(() => {
     if (user) {
       navigate("/attendance");
@@ -19,22 +20,24 @@ const Login = () => {
     }
   }, [user, navigate]);
 
+  // ✅ Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ✅ Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "http://localhost:5000/api/auth/login", // ✅ Correct Endpoint
         formData
       );
-      login(res.data.user);
-      console.log("User after login:", res.data.user); // Debug log
-      setTimeout(() => navigate("/dashboard"), 500); // Delay navigation slightly
+      login(res.data.user); // ✅ Save user info in context
+      console.log("User after login:", res.data.user);
+      setTimeout(() => navigate("/dashboard"), 500);
     } catch (err) {
-      alert("Error: " + err.response?.data?.error);
+      toast.error(err.response?.data?.error || "Something went wrong");
     }
   };
 
@@ -59,6 +62,8 @@ const Login = () => {
         >
           Login
         </h2>
+
+        {/* ✅ Employee ID Field */}
         <div className="space-y-6">
           <div>
             <label
@@ -66,13 +71,13 @@ const Login = () => {
                 darkMode ? "text-gray-300" : "text-gray-700"
               } mb-2 transition duration-300`}
             >
-              Email
+              Employee ID
             </label>
             <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
+              type="text"
+              name="employee_id"
+              placeholder="Enter your Employee ID"
+              value={formData.employee_id}
               onChange={handleChange}
               required
               className={`w-full px-4 py-2 rounded-lg border ${
@@ -83,6 +88,7 @@ const Login = () => {
             />
           </div>
 
+          {/* ✅ Password Field */}
           <div>
             <label
               className={`block text-sm font-medium ${
@@ -106,6 +112,7 @@ const Login = () => {
             />
           </div>
 
+          {/* ✅ Login Button */}
           <button
             type="submit"
             className={`w-full mt-6 ${
@@ -116,21 +123,6 @@ const Login = () => {
           >
             Login
           </button>
-
-          <p
-            className={`mt-4 text-center ${
-              darkMode ? "text-gray-300" : "text-gray-700"
-            } transition duration-300`}
-          >
-            Don't have an account?{" "}
-            <button
-              type="button"
-              onClick={() => navigate("/signup")}
-              className="text-blue-600 hover:underline focus:outline-none"
-            >
-              Signup
-            </button>
-          </p>
         </div>
       </form>
     </div>

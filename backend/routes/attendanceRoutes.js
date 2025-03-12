@@ -34,9 +34,11 @@ router.get("/attendance/:semester/:branch/:subject", (req, res) => {
         }
     );
 });
+
+// Fetch student attendance for a selected semester and branch
 router.get("/student-attendance/:semester/:branch", (req, res) => {
     const { semester, branch } = req.params;
-
+    console.log(semester, branch);
     pool.query(
         `SELECT s.registration_no, s.name, a.subject, 
                 COALESCE(a.total_classes, 0) AS total_classes, 

@@ -10,6 +10,51 @@ const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
 
+  //for teachers
+
+  const [teacherData, setTeacherData] = useState({
+    employee_id: "",
+    name: "",
+    password: "",
+  });
+
+  const handleTeacherChange = (e) => {
+    const { name, value } = e.target;
+    setTeacherData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ Handle adding teacher
+  const handleAddTeacher = async () => {
+    if (!teacherData.name || !teacherData.employee_id || !teacherData.password) {
+      alert("Please fill all fields to add a teacher.");
+      return;
+    }
+  
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      const res = await axios.post(
+        "http://localhost:5000/api/admin/add-teacher",
+        teacherData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 🔥 Send token in Authorization header
+          },
+        }
+      );
+  
+      alert(res.data.message);
+      setTeacherData({ name: "", employee_id: "", password: "" });
+      fetchTeachers(); // ✅ Refresh teacher list after adding
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+    }
+  };
+  
+
+
+
+  //for studdents 
   const [formData, setFormData] = useState({
     registration_no: "",
     name: "",
@@ -28,18 +73,34 @@ const AdminDashboard = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Convert semester number to ordinal (1st, 2nd, 3rd, etc.)
+  /**
+   * 🔹 Convert semester number (1, 2, 3) to ordinal ("1st", "2nd", "3rd")
+   */
   const toOrdinalSemester = (semester) => {
-    if (semester === 1) return "1st";
-    if (semester === 2) return "2nd";
-    if (semester === 3) return "3rd";
-    return `${semester}th`;
+    const ordinalMap = {
+      "1": "1st", "2": "2nd", "3": "3rd",
+      "4": "4th", "5": "5th", "6": "6th",
+      "7": "7th", "8": "8th"
+    };
+    return ordinalMap[semester] || semester;
   };
 
+  /**
+   * 🔹 Handle input changes and convert semester to ordinal format
+   */
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+
+    if (name === "semester") {
+      value = toOrdinalSemester(value); // Convert semester to ordinal
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  /**
+   * 🔹 Handle student registration with ordinal semester
+   */
   const handleRegister = async () => {
     if (
       !formData.registration_no ||
@@ -51,16 +112,11 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Convert semester to ordinal format
-    const ordinalSemester = toOrdinalSemester(formData.semester);
-
     try {
       const res = await axios.post(
         "http://localhost:5000/api/admin/register-student",
-        { ...formData, semester: ordinalSemester },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        formData,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       alert(res.data.message);
       setFormData({ registration_no: "", name: "", branch: "", semester: "" }); // Clear form
@@ -69,65 +125,54 @@ const AdminDashboard = () => {
     }
   };
 
+  /**
+   * 🔹 Handle student promotion to next semester (with confirmation)
+   */
   const handlePromote = async () => {
     if (!promotionSemester) {
       alert("Please select a semester to promote students.");
       return;
     }
 
-    // Convert semester to ordinal format
-    const ordinalSemester = toOrdinalSemester(promotionSemester);
+    const confirmPromotion = window.confirm(
+      `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester?`
+    );
+
+    if (!confirmPromotion) return;
 
     try {
       const res = await axios.put(
         "http://localhost:5000/api/admin/promote-semester",
-        { currentSemester: ordinalSemester },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        { currentSemester: promotionSemester },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       alert(res.data.message);
-      setPromotionSemester(""); // Clear selection
+      setPromotionSemester("");
     } catch (err) {
       alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
   };
 
+  /**
+   * 🔹 Handle updating a single student's semester
+   */
   const handleUpdateSemester = async () => {
     if (!updateData.registration_no || !updateData.newSemester) {
       alert("Please fill all fields to update a student's semester.");
       return;
     }
 
-    // Convert semester to ordinal format
-    const ordinalSemester = toOrdinalSemester(updateData.newSemester);
-
     try {
       const res = await axios.put(
         "http://localhost:5000/api/admin/update-student-semester",
-        { ...updateData, newSemester: ordinalSemester },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        updateData,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       alert(res.data.message);
-      setUpdateData({ registration_no: "", newSemester: "" }); // Clear form
+      setUpdateData({ registration_no: "", newSemester: "" });
     } catch (err) {
       alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
-  };
-
-  // Get subjects based on selected branch and semester
-  const selectedSubjects = () => {
-    if (!formData.branch || !formData.semester) return [];
-    const semesterData = subjectData.find(
-      (sem) => sem.semester === parseInt(formData.semester)
-    );
-    if (!semesterData) return [];
-    const branchData = semesterData.branches.find(
-      (b) => b.branch === formData.branch
-    );
-    return branchData ? branchData.subjects : [];
   };
 
   return (
@@ -137,17 +182,10 @@ const AdminDashboard = () => {
       }`}
     >
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6">
-            Admin Dashboard
-          </h2>
-        </div>
+        <h2 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h2>
 
-        {/* Student Section Heading */}
-        <h3 className="text-2xl font-bold mb-4">Student Section</h3>
-
-        {/* Register Student Section */}
-        <div
+       {/* Register Student Section */}
+       <div
           className={`mb-8 p-6 rounded-lg shadow-lg ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
@@ -159,6 +197,7 @@ const AdminDashboard = () => {
             <h3 className="text-xl font-bold">Register New Student</h3>
             <span>{isRegisterOpen ? "▲" : "▼"}</span>
           </div>
+
           {isRegisterOpen && (
             <div className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,6 +244,8 @@ const AdminDashboard = () => {
                     </option>
                   ))}
                 </select>
+
+                {/* 🔹 Dropdown now uses ordinal format in state */}
                 <select
                   name="semester"
                   value={formData.semester}
@@ -216,25 +257,15 @@ const AdminDashboard = () => {
                   }`}
                 >
                   <option value="">Select Semester</option>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                    <option key={sem} value={sem}>
-                      {toOrdinalSemester(sem)} Semester
-                    </option>
-                  ))}
+                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
+                    (sem) => (
+                      <option key={sem} value={sem}>
+                        {sem} Semester
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
-
-              {/* Display Subjects */}
-              {formData.branch && formData.semester && (
-                <div className="mt-4">
-                  <h4 className="text-xl font-bold">Subjects:</h4>
-                  <ul className="list-disc pl-6">
-                    {selectedSubjects().map((subject) => (
-                      <li key={subject.id}>{subject.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               <button
                 onClick={handleRegister}
@@ -250,83 +281,9 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Update Semester Section */}
-        <div
-          className={`mb-8 p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
-        >
-          <div
-            className="flex justify-between items-center cursor-pointer"
-            onClick={() => setIsUpdateOpen(!isUpdateOpen)}
-          >
-            <h3 className="text-xl font-bold">Update Student Semester</h3>
-            <span>{isUpdateOpen ? "▲" : "▼"}</span>
-          </div>
-          {isUpdateOpen && (
-            <div className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="registration_no"
-                  placeholder="Registration No"
-                  value={updateData.registration_no}
-                  onChange={(e) =>
-                    setUpdateData({
-                      ...updateData,
-                      registration_no: e.target.value,
-                    })
-                  }
-                  className={`p-2 rounded-lg border focus:outline-none ${
-                    darkMode
-                      ? "bg-gray-700 text-white border-gray-600"
-                      : "bg-white text-gray-900 border-gray-300"
-                  }`}
-                  required
-                />
-                <select
-                  name="newSemester"
-                  value={updateData.newSemester}
-                  onChange={(e) =>
-                    setUpdateData({
-                      ...updateData,
-                      newSemester: e.target.value,
-                    })
-                  }
-                  className={`p-2 rounded-lg border focus:outline-none ${
-                    darkMode
-                      ? "bg-gray-700 text-white border-gray-600"
-                      : "bg-white text-gray-900 border-gray-300"
-                  }`}
-                >
-                  <option value="">Select New Semester</option>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                    <option key={sem} value={sem}>
-                      {toOrdinalSemester(sem)} Semester
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                onClick={handleUpdateSemester}
-                className={`mt-4 px-4 py-2 rounded-lg ${
-                  darkMode
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : "bg-yellow-500 hover:bg-yellow-600"
-                } text-white w-full md:w-auto`}
-              >
-                Update Semester
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Promote Students Section */}
-        <div
-          className={`mb-8 p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
-        >
+        <div className={`mb-8 p-6 rounded-lg shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
           <div
             className="flex justify-between items-center cursor-pointer"
             onClick={() => setIsPromoteOpen(!isPromoteOpen)}
@@ -334,32 +291,25 @@ const AdminDashboard = () => {
             <h3 className="text-xl font-bold">Promote Students</h3>
             <span>{isPromoteOpen ? "▲" : "▼"}</span>
           </div>
+
           {isPromoteOpen && (
             <div className="mt-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <select
                   value={promotionSemester}
                   onChange={(e) => setPromotionSemester(e.target.value)}
-                  className={`p-2 rounded-lg border focus:outline-none ${
-                    darkMode
-                      ? "bg-gray-700 text-white border-gray-600"
-                      : "bg-white text-gray-900 border-gray-300"
-                  }`}
+                  className="p-2 rounded-lg border"
                 >
                   <option value="">Select Semester to Promote</option>
-                  {[1, 2, 3, 4, 5, 6, 7].map((sem) => (
+                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map((sem) => (
                     <option key={sem} value={sem}>
-                      {toOrdinalSemester(sem)} Semester
+                      {sem} Semester
                     </option>
                   ))}
                 </select>
                 <button
                   onClick={handlePromote}
-                  className={`px-4 py-2 rounded-lg ${
-                    darkMode
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-green-500 hover:bg-green-600"
-                  } text-white w-full md:w-auto`}
+                  className="px-4 py-2 rounded-lg bg-green-500 text-white"
                 >
                   Promote Students
                 </button>
@@ -367,6 +317,58 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
+
+        {/* Update Student Semester */}
+        <div className={`mb-8 p-6 rounded-lg shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+          <h3 className="text-xl font-bold">Update Student Semester</h3>
+          <input type="text" name="registration_no" placeholder="Registration No" value={updateData.registration_no} onChange={(e) => setUpdateData({ ...updateData, registration_no: e.target.value })} className="p-2 rounded-lg border" />
+          <select name="newSemester" value={updateData.newSemester} onChange={(e) => setUpdateData({ ...updateData, newSemester: e.target.value })} className="p-2 rounded-lg border">
+            <option value="">Select New Semester</option>
+            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+              <option key={sem} value={sem}>{sem} Semester</option>
+            ))}
+          </select>
+          <button onClick={handleUpdateSemester} className="mt-4 px-4 py-2 rounded-lg bg-yellow-500 text-white">Update Semester</button>
+        </div>
+                    {/* 🔹 Add Teacher Section */}
+        <div className="mb-8 p-6 rounded-lg shadow-lg bg-white">
+          <h3 className="text-xl font-bold mb-4">Add New Teacher</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="employee_id"
+              placeholder="Employee ID"
+              value={teacherData.employee_id}
+              onChange={handleTeacherChange}
+              className="p-2 rounded-lg border"
+            />
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={teacherData.name}
+              onChange={handleTeacherChange}
+              className="p-2 rounded-lg border"
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={teacherData.password}
+              onChange={handleTeacherChange}
+              className="p-2 rounded-lg border"
+            />
+          </div>
+          <button
+            onClick={handleAddTeacher}
+            className="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white"
+          >
+            Add Teacher
+          </button>
+        </div>
+
+
+
       </div>
     </div>
   );
