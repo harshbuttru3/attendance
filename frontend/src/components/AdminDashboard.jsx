@@ -28,7 +28,7 @@ const AdminDashboard = () => {
   const fetchTeachers = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get("http://localhost:5000/api/admin/teachers", {
+      const res = await axios.get("https://dce-attendance.onrender.com/api/admin/teachers", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,7 +64,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("adminToken");
 
       const res = await axios.post(
-        "http://localhost:5000/api/admin/add-teacher",
+        "https://dce-attendance.onrender.com/api/admin/add-teacher",
         teacherData,
         {
           headers: {
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.delete(
-        `http://localhost:5000/api/admin/delete-teacher/${teacherData.employee_id}`,
+        `https://dce-attendance.onrender.com/api/admin/delete-teacher/${teacherData.employee_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/admin/register-student",
+        "https://dce-attendance.onrender.com/api/admin/register-student",
         formData,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -202,7 +202,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/admin/promote-semester",
+        "https://dce-attendance.onrender.com/api/admin/promote-semester",
         { currentSemester: promotionSemester },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/admin/update-student-semester",
+        "https://dce-attendance.onrender.com/api/admin/update-student-semester",
         updateData,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
