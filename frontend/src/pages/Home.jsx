@@ -53,14 +53,14 @@ const Home = () => {
                 Login
               </button>
               <button
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/admin/login")}
                 className={`px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
                   darkMode
                     ? "bg-green-600 hover:bg-green-700 text-white"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
-                Signup
+                Admin Login
               </button>
             </>
           )}

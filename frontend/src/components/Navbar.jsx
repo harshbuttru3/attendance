@@ -116,15 +116,9 @@ const Navbar = () => {
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
               >
                 <FaSignInAlt className="text-xl" />
-                <span>Login</span>
+                <span>Teacher Login</span>
               </button>
-              <button
-                onClick={() => navigate("/signup")}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 focus:outline-none shadow-md"
-              >
-                <FaUserPlus className="text-xl" />
-                <span>Signup</span>
-              </button>
+              
             </>
           )}
           <button

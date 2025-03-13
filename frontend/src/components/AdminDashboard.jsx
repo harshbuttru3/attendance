@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -22,17 +22,47 @@ const AdminDashboard = () => {
     const { name, value } = e.target;
     setTeacherData((prev) => ({ ...prev, [name]: value }));
   };
+  const [teacherList, setTeacherList] = useState([]); // ✅ State to store teachers list
+
+  // ✅ Fetch teachers list
+  const fetchTeachers = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.get("https://dce-attendance.onrender.com/api/admin/teachers", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      console.log("Fetched Teachers:", res.data);
+      
+      // ✅ Set teacher list directly from the response
+      setTeacherList(res.data.map(({ id, name, employee_id }) => ({
+        id,
+        name,
+        employee_id
+      })));
+    } catch (err) {
+      console.log(err || "Something went wrong");
+      setTeacherList([]); // ✅ Clear teacher list on error
+    }
+  };
+  
 
   // ✅ Handle adding teacher
   const handleAddTeacher = async () => {
-    if (!teacherData.name || !teacherData.employee_id || !teacherData.password) {
+    if (
+      !teacherData.name ||
+      !teacherData.employee_id ||
+      !teacherData.password
+    ) {
       alert("Please fill all fields to add a teacher.");
       return;
     }
-  
+
     try {
       const token = localStorage.getItem("adminToken");
-  
+
       const res = await axios.post(
         "https://dce-attendance.onrender.com/api/admin/add-teacher",
         teacherData,
@@ -42,19 +72,42 @@ const AdminDashboard = () => {
           },
         }
       );
-  
+
       alert(res.data.message);
       setTeacherData({ name: "", employee_id: "", password: "" });
       fetchTeachers(); // ✅ Refresh teacher list after adding
     } catch (err) {
-      alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+      // alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+      console.log(err || "Something went wrong");
     }
   };
-  
 
+  // ✅ Handle deleting teacher
+  const handleDelteTeacher = async () => {
+    if (!teacherData.employee_id) {
+      alert("Please enter the Employee ID to delete a teacher.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.delete(
+        `https://dce-attendance.onrender.com/api/admin/delete-teacher/${teacherData.employee_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert(res.data.message);
+      setTeacherData({ employee_id: "", name: "", password: "" });
+      fetchTeachers(); // ✅ Refresh teacher list after deleting
+    } catch (err) {
+      // alert("Error: " + (err.response?.data?.error || "Something went wrong"));
+      console.log(err || "Something went wrong");
+    }
+  };
 
-
-  //for studdents 
+  //for studdents
   const [formData, setFormData] = useState({
     registration_no: "",
     name: "",
@@ -78,9 +131,14 @@ const AdminDashboard = () => {
    */
   const toOrdinalSemester = (semester) => {
     const ordinalMap = {
-      "1": "1st", "2": "2nd", "3": "3rd",
-      "4": "4th", "5": "5th", "6": "6th",
-      "7": "7th", "8": "8th"
+      1: "1st",
+      2: "2nd",
+      3: "3rd",
+      4: "4th",
+      5: "5th",
+      6: "6th",
+      7: "7th",
+      8: "8th",
     };
     return ordinalMap[semester] || semester;
   };
@@ -116,7 +174,9 @@ const AdminDashboard = () => {
       const res = await axios.post(
         "https://dce-attendance.onrender.com/api/admin/register-student",
         formData,
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
       alert(res.data.message);
       setFormData({ registration_no: "", name: "", branch: "", semester: "" }); // Clear form
@@ -144,7 +204,9 @@ const AdminDashboard = () => {
       const res = await axios.put(
         "https://dce-attendance.onrender.com/api/admin/promote-semester",
         { currentSemester: promotionSemester },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
       alert(res.data.message);
       setPromotionSemester("");
@@ -166,7 +228,9 @@ const AdminDashboard = () => {
       const res = await axios.put(
         "https://dce-attendance.onrender.com/api/admin/update-student-semester",
         updateData,
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
       alert(res.data.message);
       setUpdateData({ registration_no: "", newSemester: "" });
@@ -174,6 +238,10 @@ const AdminDashboard = () => {
       alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
   };
+
+    useEffect(() => {
+      fetchTeachers(); // ✅ Fetch teachers list on component mount
+    }, []);
 
   return (
     <div
@@ -184,8 +252,8 @@ const AdminDashboard = () => {
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h2>
 
-       {/* Register Student Section */}
-       <div
+        {/* Register Student Section */}
+        <div
           className={`mb-8 p-6 rounded-lg shadow-lg ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
@@ -281,9 +349,12 @@ const AdminDashboard = () => {
           )}
         </div>
 
-
         {/* Promote Students Section */}
-        <div className={`mb-8 p-6 rounded-lg shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+        <div
+          className={`mb-8 p-6 rounded-lg shadow-lg ${
+            darkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
           <div
             className="flex justify-between items-center cursor-pointer"
             onClick={() => setIsPromoteOpen(!isPromoteOpen)}
@@ -301,11 +372,13 @@ const AdminDashboard = () => {
                   className="p-2 rounded-lg border"
                 >
                   <option value="">Select Semester to Promote</option>
-                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map((sem) => (
-                    <option key={sem} value={sem}>
-                      {sem} Semester
-                    </option>
-                  ))}
+                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
+                    (sem) => (
+                      <option key={sem} value={sem}>
+                        {sem} Semester
+                      </option>
+                    )
+                  )}
                 </select>
                 <button
                   onClick={handlePromote}
@@ -319,18 +392,47 @@ const AdminDashboard = () => {
         </div>
 
         {/* Update Student Semester */}
-        <div className={`mb-8 p-6 rounded-lg shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+        <div
+          className={`mb-8 p-6 rounded-lg shadow-lg ${
+            darkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
           <h3 className="text-xl font-bold">Update Student Semester</h3>
-          <input type="text" name="registration_no" placeholder="Registration No" value={updateData.registration_no} onChange={(e) => setUpdateData({ ...updateData, registration_no: e.target.value })} className="p-2 rounded-lg border" />
-          <select name="newSemester" value={updateData.newSemester} onChange={(e) => setUpdateData({ ...updateData, newSemester: e.target.value })} className="p-2 rounded-lg border">
+          <input
+            type="text"
+            name="registration_no"
+            placeholder="Registration No"
+            value={updateData.registration_no}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, registration_no: e.target.value })
+            }
+            className="p-2 rounded-lg border"
+          />
+          <select
+            name="newSemester"
+            value={updateData.newSemester}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, newSemester: e.target.value })
+            }
+            className="p-2 rounded-lg border"
+          >
             <option value="">Select New Semester</option>
-            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
-              <option key={sem} value={sem}>{sem} Semester</option>
-            ))}
+            {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
+              (sem) => (
+                <option key={sem} value={sem}>
+                  {sem} Semester
+                </option>
+              )
+            )}
           </select>
-          <button onClick={handleUpdateSemester} className="mt-4 px-4 py-2 rounded-lg bg-yellow-500 text-white">Update Semester</button>
+          <button
+            onClick={handleUpdateSemester}
+            className="mt-4 px-4 py-2 rounded-lg bg-yellow-500 text-white"
+          >
+            Update Semester
+          </button>
         </div>
-                    {/* 🔹 Add Teacher Section */}
+        {/* 🔹 Add Teacher Section */}
         <div className="mb-8 p-6 rounded-lg shadow-lg bg-white">
           <h3 className="text-xl font-bold mb-4">Add New Teacher</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,8 +469,68 @@ const AdminDashboard = () => {
           </button>
         </div>
 
+        {/* Delete teachers */}
+        <div className="mb-8 p-6 rounded-lg shadow-lg bg-white">
+          <h3 className="text-xl font-bold mb-4">Delete Teacher</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="employee_id"
+              placeholder="Employee ID"
+              value={teacherData.employee_id}
+              onChange={handleTeacherChange}
+              className="p-2 rounded-lg border"
+            />
+          </div>
+          <button
+            onClick={handleDelteTeacher}
+            className="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white"
+          >
+            Delete Teacher
+          </button>
+        </div>
+
+    {/* list of teachers */}
+<div className="mb-8 p-6 rounded-lg shadow-lg bg-white">
+  <h3 className="text-xl font-bold mb-4">List of Teachers</h3>
+  
+  <table className="w-full mt-4">
+    <thead>
+      <tr>
+        <th className="py-2">Name</th>
+        <th className="py-2">Employee ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {teacherList.length > 0 ? (
+        teacherList.map((teacher) => (
+          <tr key={teacher.id}>
+            <td className="py-2">{teacher.name}</td>
+            <td className="py-2">{teacher.employee_id}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="2" className="py-2 text-center">
+            No teachers found.
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
 
 
+        {/* Logout Button */}
+        <button
+          onClick={() => {
+            localStorage.removeItem("adminToken");
+            navigate("/");
+          }}
+          className="px-4 py-2 rounded-lg bg-red-500 text-white" // 🔴 Changed color to red
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

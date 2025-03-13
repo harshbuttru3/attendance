@@ -15,14 +15,14 @@ const Footer = () => {
           © {new Date().getFullYear()} DCE Attendance. All rights reserved.
         </p>
         <p className="text-sm mt-2">
-          Made with ❤️ by{" "}
+          Made with ❤️ by a{" "}
           <a
             href="https://yourwebsite.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
           >
-            Your Team
+             student of DCE.
           </a>
         </p>
       </div>
