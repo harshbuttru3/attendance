@@ -30,7 +30,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://https://dce-attendance.onrender.com/api/auth/login", // ✅ Correct Endpoint
+        "https://dce-attendance.onrender.com/api/auth/login", // ✅ Correct Endpoint
         formData
       );
       login(res.data.user); // ✅ Save user info in context

@@ -34,7 +34,7 @@ const StudentAttendance = () => {
 
       axios
         .get(
-          `http://https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`
+          `https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`
         )
         .then((res) => {
           console.log("Raw API Response:", res.data); // Debugging Step

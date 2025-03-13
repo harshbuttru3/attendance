@@ -34,7 +34,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("adminToken");
   
       const res = await axios.post(
-        "http://https://dce-attendance.onrender.com/api/admin/add-teacher",
+        "https://dce-attendance.onrender.com/api/admin/add-teacher",
         teacherData,
         {
           headers: {
@@ -114,7 +114,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.post(
-        "http://https://dce-attendance.onrender.com/api/admin/register-student",
+        "https://dce-attendance.onrender.com/api/admin/register-student",
         formData,
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.put(
-        "http://https://dce-attendance.onrender.com/api/admin/promote-semester",
+        "https://dce-attendance.onrender.com/api/admin/promote-semester",
         { currentSemester: promotionSemester },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.put(
-        "http://https://dce-attendance.onrender.com/api/admin/update-student-semester",
+        "https://dce-attendance.onrender.com/api/admin/update-student-semester",
         updateData,
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
