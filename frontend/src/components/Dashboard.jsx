@@ -55,7 +55,7 @@ const Dashboard = () => {
     console.log(`Fetching subjects for user ID: ${user.id}`);
 
     axios
-      .get(`http://localhost:5000/api/dashboard/subjects/${user.id}`)
+      .get(`http://https://dce-attendance.onrender.com/api/dashboard/subjects/${user.id}`)
       .then((res) => {
         console.log("Fetched subjects:", res.data);
         setUserSubjects(res.data);
@@ -123,7 +123,7 @@ const Dashboard = () => {
     console.log("Sending Data:", payload);
 
     axios
-      .post("http://localhost:5000/api/dashboard/add-subjects", payload)
+      .post("http://https://dce-attendance.onrender.com/api/dashboard/add-subjects", payload)
       .then(() => {
         fetchUserSubjects();
         alert("Subject added successfully!");
@@ -155,7 +155,7 @@ const Dashboard = () => {
     // Fetch students for the selected semester & branch
     axios
       .get(
-        `http://localhost:5000/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
+        `http://https://dce-attendance.onrender.com/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
       )
       .then((res) => {
         const studentList = res.data;
@@ -164,7 +164,7 @@ const Dashboard = () => {
         // Fetch past attendance records for the selected subject
         axios
           .get(
-            `http://localhost:5000/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
+            `http://https://dce-attendance.onrender.com/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
           )
           .then((attendanceRes) => {
             const pastAttendance = attendanceRes.data;
@@ -234,7 +234,7 @@ const Dashboard = () => {
 
   const handleSubmit = () => {
     axios
-      .post("http://localhost:5000/api/dashboard/attendance/update", attendance)
+      .post("http://https://dce-attendance.onrender.com/api/dashboard/attendance/update", attendance)
       .then(() => alert("Attendance updated successfully!"))
       .catch((err) => console.error("Error updating attendance:", err));
   };
@@ -259,7 +259,7 @@ const Dashboard = () => {
     };
 
     axios
-      .delete("http://localhost:5000/api/dashboard/remove-subject", {
+      .delete("http://https://dce-attendance.onrender.com/api/dashboard/remove-subject", {
         data: payload,
       })
       .then(() => {
