@@ -14,7 +14,7 @@ const Signup = () => {
   useEffect(() => {
     if (user) {
       navigate("/attendance");
-      toast.error("Already Logged In!!");
+      // toast.error("Already Logged In!!");
     }
   }, [user, navigate]);
 
@@ -66,7 +66,7 @@ const Signup = () => {
     try {
       const { confirmPassword, ...userData } = formData;
       const res = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        "https://dce-attendance.onrender.com/api/auth/signup",
         userData,
         { headers: { "Content-Type": "application/json" } }
       );

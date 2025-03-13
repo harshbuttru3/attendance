@@ -1,43 +1,32 @@
-import { useState, useContext, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
-import toast from "react-hot-toast";
+import { useContext } from "react";
 
-const Login = () => {
-  const { user, login } = useContext(AuthContext);
-  const { darkMode } = useContext(ThemeContext);
+const AdminLogin = () => {
+  const [formData, setFormData] = useState({ employee_id: "", password: "" });
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({ employee_id: "", password: "" });
+  // const { user, login } = useContext(AuthContext);
+    const { darkMode } = useContext(ThemeContext);
 
-  // ✅ Redirect to dashboard if user is already logged in
-  useEffect(() => {
-    if (user) {
-      navigate("/attendance");
-      // toast.error("Already Logged In!!");
-    }
-  }, [user, navigate]);
 
-  // ✅ Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(
-        "https://dce-attendance.onrender.com/api/auth/login", // ✅ Correct Endpoint
-        formData
-      );
-      login(res.data.user); // ✅ Save user info in context
-      console.log("User after login:", res.data.user);
-      setTimeout(() => navigate("/dashboard"), 500);
+      const res = await axios.post("https://dce-attendance.onrender.com/api/admin/auth/login", formData);
+      localStorage.setItem("adminToken", res.data.token);
+      console.log(res.data);
+      alert(res.data.message);
+      setTimeout(() => navigate("/admin/dashboard"), 100);
     } catch (err) {
-      toast.error(err.response?.data?.error || "Something went wrong");
+      alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
   };
 
@@ -60,7 +49,7 @@ const Login = () => {
             darkMode ? "text-white" : "text-gray-900"
           } text-center transition duration-300`}
         >
-          Login
+         Admin Login
         </h2>
 
         {/* ✅ Employee ID Field */}
@@ -71,12 +60,12 @@ const Login = () => {
                 darkMode ? "text-gray-300" : "text-gray-700"
               } mb-2 transition duration-300`}
             >
-              Employee ID
+              Admin ID
             </label>
             <input
               type="text"
               name="employee_id"
-              placeholder="Enter your Employee ID"
+              placeholder="Enter your Admin ID"
               value={formData.employee_id}
               onChange={handleChange}
               required
@@ -127,6 +116,7 @@ const Login = () => {
       </form>
     </div>
   );
+
 };
 
-export default Login;
+export default AdminLogin;
