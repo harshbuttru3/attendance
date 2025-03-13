@@ -112,6 +112,42 @@ router.post("/add-teacher", verifyAdminToken, async (req, res) => {
     }
   });
 
+
+// ✅ Delete teacher using employee_id in the URL
+router.delete("/delete-teacher/:employee_id", verifyAdminToken, (req, res) => {
+    const { employee_id } = req.params;
+
+    if (!employee_id) {
+        return res.status(400).json({ error: "Employee ID is required" });
+    }
+
+    pool.query(
+        "DELETE FROM teachers WHERE employee_id = ?",
+        [employee_id],
+        (error, result) => {
+            if (error) {
+                console.error("Error deleting teacher:", error);
+                return res.status(500).json({ error: "Database error while deleting teacher" });
+            }
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Teacher not found" });
+            }
+            res.json({ message: "Teacher deleted successfully" });
+        }
+    );
+});
+ 
+// for fetching teachers 
+router.get("/teachers", verifyAdminToken, (req, res) => {
+    pool.query("SELECT * FROM teachers", (error, results) => {
+        if (error) {
+            console.error("Error fetching teachers:", error);
+            return res.status(500).json({ error: "Database error while fetching teachers" });
+        }
+        res.json(results);
+    });
+});
+
 /**
  * ✅ Register a new student (Store semester as "1st", "2nd", ...)
  */
