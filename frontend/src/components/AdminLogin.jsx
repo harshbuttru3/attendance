@@ -14,7 +14,7 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/auth/login", formData);
+      const res = await axios.post("https://dce-attendance.onrender.com/api/admin/auth/login", formData);
       localStorage.setItem("adminToken", res.data.token);
       console.log(res.data);
       alert(res.data.message);
