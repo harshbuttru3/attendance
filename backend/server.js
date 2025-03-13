@@ -7,7 +7,7 @@ const app = express();
 // ✅ Configure CORS properly
 const allowedOrigins = [
   "https://attendance-pi-woad.vercel.app", // Frontend on Vercel
-  "http://localhost:5173", // Local development
+  "localhost:5173", // Local development
   "http://192.168.1.70:5173", // local Network
 ];
 
