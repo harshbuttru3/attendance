@@ -14,8 +14,11 @@ import {
   FaUserCog, // Icon for Admin Dashboard
 } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext"; // Import AuthContext
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const { user, logout } = useContext(AuthContext); // Get user and logout function
   const navigate = useNavigate();
@@ -101,24 +104,25 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
-          {user ? (
-            <button
-              onClick={logout}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md"
-            >
-              <FaSignOutAlt className="text-xl" />
-              <span>Logout</span>
-            </button>
-          ) : (
+          {!isAdminRoute && (
             <>
-              <button
-                onClick={() => navigate("/login")}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
-              >
-                <FaSignInAlt className="text-xl" />
-                <span>Teacher Login</span>
-              </button>
-              
+              {user ? (
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md"
+                >
+                  <FaSignOutAlt className="text-xl" />
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
+                >
+                  <FaSignInAlt className="text-xl" />
+                  <span>Teacher Login</span>
+                </button>
+              )}
             </>
           )}
           <button
@@ -194,7 +198,7 @@ const Navbar = () => {
 
               {/* Admin Dashboard Link (Visible to All) */}
               <a
-                href="/admin"
+                href="/admin/dashboard"
                 className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
                 style={{
                   animation: isMenuOpen
@@ -208,48 +212,52 @@ const Navbar = () => {
               </a>
 
               {/* Login/Logout Links */}
-              {user ? (
-                <a
-                  onClick={logout}
-                  className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
-                  style={{
-                    animation: isMenuOpen
-                      ? "fadeIn 0.5s ease-in-out 0.5s forwards"
-                      : "none",
-                    opacity: 0,
-                  }}
-                >
-                  <FaSignOutAlt className="text-xl" />
-                  <span>Logout</span>
-                </a>
-              ) : (
+              {!isAdminRoute && (
                 <>
-                  <a
-                    onClick={() => navigate("/login")}
-                    className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
-                    style={{
-                      animation: isMenuOpen
-                        ? "fadeIn 0.5s ease-in-out 0.6s forwards"
-                        : "none",
-                      opacity: 0,
-                    }}
-                  >
-                    <FaSignInAlt className="text-xl" />
-                    <span>Login</span>
-                  </a>
-                  <a
-                    onClick={() => navigate("/signup")}
-                    className="flex items-center space-x-2 text-lg font-medium hover:text-green-600 transition duration-300 cursor-pointer"
-                    style={{
-                      animation: isMenuOpen
-                        ? "fadeIn 0.5s ease-in-out 0.7s forwards"
-                        : "none",
-                      opacity: 0,
-                    }}
-                  >
-                    <FaUserPlus className="text-xl" />
-                    <span>Signup</span>
-                  </a>
+                  {user ? (
+                    <a
+                      onClick={logout}
+                      className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
+                      style={{
+                        animation: isMenuOpen
+                          ? "fadeIn 0.5s ease-in-out 0.5s forwards"
+                          : "none",
+                        opacity: 0,
+                      }}
+                    >
+                      <FaSignOutAlt className="text-xl" />
+                      <span>Logout</span>
+                    </a>
+                  ) : (
+                    <>
+                      <a
+                        onClick={() => navigate("/login")}
+                        className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
+                        style={{
+                          animation: isMenuOpen
+                            ? "fadeIn 0.5s ease-in-out 0.6s forwards"
+                            : "none",
+                          opacity: 0,
+                        }}
+                      >
+                        <FaSignInAlt className="text-xl" />
+                        <span>Login</span>
+                      </a>
+                      <a
+                        onClick={() => navigate("/signup")}
+                        className="flex items-center space-x-2 text-lg font-medium hover:text-green-600 transition duration-300 cursor-pointer"
+                        style={{
+                          animation: isMenuOpen
+                            ? "fadeIn 0.5s ease-in-out 0.7s forwards"
+                            : "none",
+                          opacity: 0,
+                        }}
+                      >
+                        <FaUserPlus className="text-xl" />
+                        <span>Signup</span>
+                      </a>
+                    </>
+                  )}
                 </>
               )}
             </div>

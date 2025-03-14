@@ -9,8 +9,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   // const { user, login } = useContext(AuthContext);
-    const { darkMode } = useContext(ThemeContext);
-
+  const { darkMode } = useContext(ThemeContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,7 +19,10 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://dce-attendance.onrender.com/api/admin/auth/login", formData);
+      const res = await axios.post(
+        "https://dce-attendance.onrender.com/api/admin/auth/login",
+        formData
+      );
       localStorage.setItem("adminToken", res.data.token);
       console.log(res.data);
       alert(res.data.message);
@@ -49,7 +51,7 @@ const AdminLogin = () => {
             darkMode ? "text-white" : "text-gray-900"
           } text-center transition duration-300`}
         >
-         Admin Login
+          Admin Login
         </h2>
 
         {/* ✅ Employee ID Field */}
@@ -116,7 +118,6 @@ const AdminLogin = () => {
       </form>
     </div>
   );
-
 };
 
 export default AdminLogin;
