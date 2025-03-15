@@ -148,6 +148,38 @@ router.get("/teachers", verifyAdminToken, (req, res) => {
     });
 });
 
+// for resetting password of a teacher using employee_id
+router.put("/reset-password/:employee_id", verifyAdminToken, async (req, res) => {
+    const { employee_id } = req.params;
+    const { password } = req.body;
+
+    if (!employee_id || !password) {
+        return res.status(400).json({ error: "Employee ID and password are required" });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        pool.query(
+            "UPDATE teachers SET password = ? WHERE employee_id = ?",
+            [hashedPassword, employee_id],
+            (error, result) => {
+                if (error) {
+                    console.error("Error resetting password:", error);
+                    return res.status(500).json({ error: "Database error while resetting password" });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: "Teacher not found" });
+                }
+                res.json({ message: "Password reset successfully" });
+            }
+        );
+    } catch (err) {
+        console.error("Server error:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 /**
  * ✅ Register a new student (Store semester as "1st", "2nd", ...)
  */
@@ -227,6 +259,33 @@ router.put("/update-student-semester", (req, res) => {
         }
     );
 });
+
+// ✅ Delete student using registration number in the URL
+router.delete("/delete-student/:registration_no", verifyAdminToken, (req, res) => {
+    const { registration_no } = req.params;
+
+    if (!registration_no) {
+        return res.status(400).json({ error: "Registration number is required" });
+    }
+
+    pool.query(
+        "DELETE FROM students WHERE registration_no = ?",
+        [registration_no],
+        (error, result) => {
+            if (error) {
+                console.error("Error deleting student:", error);
+                return res.status(500).json({ error: "Database error while deleting student" });
+            }
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Student not found" });
+            }
+            res.json({ message: "Student deleted successfully" });
+        }
+    );
+});
+
+
+
 //admin login
 router.post("/auth/login", (req, res) => {
     const { employee_id, password } = req.body;
