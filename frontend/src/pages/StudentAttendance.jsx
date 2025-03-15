@@ -11,6 +11,7 @@ const StudentAttendance = () => {
   const [summaryData, setSummaryData] = useState({});
   const [expandedSubject, setExpandedSubject] = useState(null); // Track expanded subject
   const [showSummary, setShowSummary] = useState(false); // Track summary dropdown state
+  const [isLoading, setIsLoading] = useState(false); // Track loading state
 
   //format semester
   const formatSemester = (sem) => {
@@ -22,14 +23,15 @@ const StudentAttendance = () => {
     if (sem === "6") return "6th";
     if (sem === "7") return "7th";
     if (sem === "8") return "8th";
-    return sem;      
-    ; // 4th, 5th, 6th, 7th, 8th
+    return sem; // 4th, 5th, 6th, 7th, 8th
   };
-  
 
   const fetchAttendance = () => {
     if (semester && branch) {
-
+      setIsLoading(true); // Set loading to true
+      // Clear previous data before fetching
+      setAttendanceData({});
+      setSummaryData({});
       const formattedSemester = formatSemester(semester);
 
       axios
@@ -37,6 +39,7 @@ const StudentAttendance = () => {
           `https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`
         )
         .then((res) => {
+          setIsLoading(false); // Set loading to false
           console.log("Raw API Response:", res.data); // Debugging Step
 
           // Filter out null, undefined, or invalid subjects
@@ -59,17 +62,18 @@ const StudentAttendance = () => {
             setAttendanceData(filteredData);
             setSummaryData(calculateSummary(filteredData));
           } else {
-            setAttendanceData({});
-            setSummaryData({});
             toast.error(
               "No valid attendance records found for the selected semester and branch."
             );
           }
         })
         .catch((err) => {
+          setIsLoading(false); // Set loading to false
           console.error("Error fetching attendance:", err);
           toast.error("No attendance records found.");
         });
+    } else {
+      toast.error("Please select both semester and branch.");
     }
   };
 
@@ -113,7 +117,7 @@ const StudentAttendance = () => {
       // Export specific subject data
       const subjectData = attendanceData[subject];
       if (!subjectData || subjectData.length === 0) {
-        alert("No attendance data to export for this subject.");
+        toast.error("No attendance data to export for this subject.");
         return;
       }
 
@@ -138,7 +142,7 @@ const StudentAttendance = () => {
     } else if (dataType === "summary") {
       // Export summary data
       if (Object.keys(summaryData).length === 0) {
-        alert("No summary data to export.");
+        toast.error("No summary data to export.");
         return;
       }
 
@@ -171,7 +175,7 @@ const StudentAttendance = () => {
         },${attendancePercentage.toFixed(2)}%,${isLowAttendance}\n`;
       });
     } else {
-      alert("Invalid export request.");
+      toast.error("Invalid export request.");
       return;
     }
 
@@ -192,15 +196,20 @@ const StudentAttendance = () => {
 
   return (
     <div
-      className={`min-h-screen p-4 ${
+      className={`min-h-screen p-4 md:p-6 lg:p-8 ${
+        // Increased padding for larger screens
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
-      <h1 className="text-3xl font-bold mb-4">DCE Attendance System</h1>
-      <h2 className="text-2xl font-bold mb-4">Check Attendance</h2>
+      <h1 className="text-3xl font-bold mb-4 md:mb-6 lg:mb-8">
+        DCE Attendance System
+      </h1>
+      <h2 className="text-2xl font-bold mb-4 md:mb-6 lg:mb-8">
+        Check Attendance
+      </h2>
 
       {/* Dropdowns for Semester and Branch */}
-      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-6 md:mb-8 lg:mb-10">
         <select
           onChange={(e) => setSemester(e.target.value)}
           className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
@@ -239,27 +248,39 @@ const StudentAttendance = () => {
 
         <button
           onClick={fetchAttendance}
-          disabled={!semester || !branch}
-          className={`w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
-            semester && branch
+          disabled={!semester || !branch || isLoading}
+          className={`cursor-pointer w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md flex items-center justify-center ${
+            semester && branch && !isLoading
               ? darkMode
                 ? "bg-blue-600 hover:bg-blue-700 text-white"
                 : "bg-blue-500 hover:bg-blue-600 text-white"
               : "bg-gray-400 cursor-not-allowed text-gray-700"
           }`}
         >
-          View Attendance
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+          ) : (
+            "View Attendance"
+          )}
         </button>
       </div>
 
       {/* Attendance Data */}
       <div>
-        {Object.keys(attendanceData).length > 0 ? (
+        {isLoading ? (
+          <div
+            className={`p-6 rounded-lg text-center ${
+              darkMode ? "bg-gray-700" : "bg-gray-100"
+            }`}
+          >
+            <p className="text-lg">Loading attendance data...</p>
+          </div>
+        ) : Object.keys(attendanceData).length > 0 ? (
           <>
             {Object.keys(attendanceData)
               .filter((subject) => subject && subject !== "null") // Remove null values
               .map((subject, index) => (
-                <div key={index} className="mb-4">
+                <div key={index} className="mb-6 md:mb-8">
                   {/* Subject Title with Toggle Button */}
                   <div
                     className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
@@ -277,9 +298,9 @@ const StudentAttendance = () => {
 
                   {/* Expanded Table */}
                   {expandedSubject === subject && (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto mt-2">
                       <table
-                        className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
+                        className={`w-full border-collapse rounded-lg overflow-hidden ${
                           darkMode ? "text-white" : "text-gray-900"
                         }`}
                       >
@@ -287,13 +308,19 @@ const StudentAttendance = () => {
                           <tr
                             className={darkMode ? "bg-gray-700" : "bg-gray-200"}
                           >
-                            <th className="border px-4 py-2">Reg ID</th>
-                            <th className="border px-4 py-2">Name</th>
-                            <th className="border px-4 py-2">Total Classes</th>
-                            <th className="border px-4 py-2">
+                            <th className="border px-4 py-2 text-left">
+                              Reg ID
+                            </th>
+                            <th className="border px-4 py-2 text-left">Name</th>
+                            <th className="border px-4 py-2 text-left">
+                              Total Classes
+                            </th>
+                            <th className="border px-4 py-2 text-left">
                               Attended Classes
                             </th>
-                            <th className="border px-4 py-2">Attendance %</th>
+                            <th className="border px-4 py-2 text-left">
+                              Attendance %
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -343,7 +370,7 @@ const StudentAttendance = () => {
                       {/* Export Button for Subject */}
                       <button
                         onClick={() => exportToCSV("subject", subject)}
-                        className={`mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
+                        className={`cursor-pointer mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
                           darkMode
                             ? "bg-blue-600 hover:bg-blue-700 text-white"
                             : "bg-blue-500 hover:bg-blue-600 text-white"
@@ -357,7 +384,7 @@ const StudentAttendance = () => {
               ))}
 
             {/* Summary Dropdown */}
-            <div className="mb-4">
+            <div className="mb-6 md:mb-8">
               <div
                 className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
                   darkMode
@@ -372,29 +399,35 @@ const StudentAttendance = () => {
 
               {/* Expanded Summary Table */}
               {showSummary && (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto mt-2">
                   <table
-                    className={`w-full border-collapse mt-2 rounded-lg overflow-hidden ${
+                    className={`w-full border-collapse rounded-lg overflow-hidden ${
                       darkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
                     <thead>
                       <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
-                        <th className="border px-4 py-2">Reg ID</th>
-                        <th className="border px-4 py-2">Name</th>
+                        <th className="border px-4 py-2 text-left">Reg ID</th>
+                        <th className="border px-4 py-2 text-left">Name</th>
                         {Object.keys(attendanceData).map((subject) => (
                           <React.Fragment key={subject}>
-                            <th className="border px-4 py-2">
+                            <th className="border px-4 py-2 text-left">
                               {subject} Total Classes
                             </th>
-                            <th className="border px-4 py-2">
+                            <th className="border px-4 py-2 text-left">
                               {subject} Attended Classes
                             </th>
                           </React.Fragment>
                         ))}
-                        <th className="border px-4 py-2">Total Classes</th>
-                        <th className="border px-4 py-2">Attended Classes</th>
-                        <th className="border px-4 py-2">Attendance %</th>
+                        <th className="border px-4 py-2 text-left">
+                          Total Classes
+                        </th>
+                        <th className="border px-4 py-2 text-left">
+                          Attended Classes
+                        </th>
+                        <th className="border px-4 py-2 text-left">
+                          Attendance %
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -455,7 +488,7 @@ const StudentAttendance = () => {
                   {/* Export Button for Summary */}
                   <button
                     onClick={() => exportToCSV("summary")}
-                    className={`mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
+                    className={`cursor-pointer mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
                       darkMode
                         ? "bg-blue-600 hover:bg-blue-700 text-white"
                         : "bg-blue-500 hover:bg-blue-600 text-white"

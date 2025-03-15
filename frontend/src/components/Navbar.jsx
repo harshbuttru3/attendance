@@ -29,48 +29,48 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`${
+      className={`fixed top-0 w-full z-50 ${
         darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-      } shadow-lg transition duration-300`}
+      } shadow-md transition duration-300`}
     >
-      <div className="container mx-auto px-6 py-3 flex justify-between items-center">
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Left Side: Heading + Dashboard Link */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4">
           {/* Clickable Heading */}
           <h1
             onClick={() => navigate("/")} // Navigate to home route
-            className="text-2xl font-bold cursor-pointer hover:text-purple-600 transition duration-300"
+            className="text-xl md:text-2xl font-bold cursor-pointer hover:text-purple-600 transition duration-300"
           >
             DCE Attendance
           </h1>
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-4">
             <a
               href="/dashboard"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+              className="flex items-center space-x-2 text-base font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
-              <FaHome className="text-xl" />
+              <FaHome className="text-lg" />
               <span>Dashboard</span>
             </a>
             <a
               href="/attendance"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+              className="flex items-center space-x-2 text-base font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
-              <FaClipboardList className="text-xl" />
+              <FaClipboardList className="text-lg" />
               <span>All Attendance</span>
             </a>
             {/* Admin Dashboard Link (Visible to All) */}
             <a
               href="/admin/dashboard"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+              className="flex items-center space-x-2 text-base font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
-              <FaUserCog className="text-xl" />
+              <FaUserCog className="text-lg" />
               <span>Admin Dashboard</span>
             </a>
           </div>
         </div>
 
         {/* Right Side: Mobile Menu Toggle */}
-        <div className="md:hidden flex items-center space-x-4">
+        <div className="md:hidden flex items-center space-x-2">
           {/* Dark/Light Mode Toggler */}
           <button
             onClick={toggleDarkMode}
@@ -81,9 +81,9 @@ const Navbar = () => {
             }`}
           >
             {darkMode ? (
-              <FaSun className="text-white text-xl" />
+              <FaSun className="text-white text-lg" />
             ) : (
-              <FaMoon className="text-gray-800 text-xl" />
+              <FaMoon className="text-gray-800 text-lg" />
             )}
           </button>
 
@@ -93,9 +93,9 @@ const Navbar = () => {
             className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 focus:outline-none shadow-md cursor-pointer"
           >
             {isMenuOpen ? (
-              <FaTimes className="text-xl" />
+              <FaTimes className="text-lg" />
             ) : (
-              <FaBars className="text-xl" />
+              <FaBars className="text-lg" />
             )}
           </button>
         </div>
@@ -107,17 +107,17 @@ const Navbar = () => {
               {user ? (
                 <button
                   onClick={logout}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
                 >
-                  <FaSignOutAlt className="text-xl" />
+                  <FaSignOutAlt className="text-lg" />
                   <span>Logout</span>
                 </button>
               ) : (
                 <button
                   onClick={() => navigate("/login")}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
                 >
-                  <FaSignInAlt className="text-xl" />
+                  <FaSignInAlt className="text-lg" />
                   <span>Teacher's Login</span>
                 </button>
               )}
@@ -132,9 +132,9 @@ const Navbar = () => {
             }`}
           >
             {darkMode ? (
-              <FaSun className="text-white text-xl" />
+              <FaSun className="text-white text-lg" />
             ) : (
-              <FaMoon className="text-gray-800 text-xl" />
+              <FaMoon className="text-gray-800 text-lg" />
             )}
           </button>
         </div>
@@ -143,142 +143,73 @@ const Navbar = () => {
       {/* Mobile Menu (Full-Width Dropdown) */}
       {isMenuOpen && (
         <div
-          className={`fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ${
-            isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={toggleMenu}
+          className={`fixed top-0 right-0 h-full w-64 ${
+            darkMode ? "bg-gray-900/90 text-white" : "bg-white/90 text-gray-900"
+          } shadow-lg transform transition-all duration-300 ease-in-out backdrop-blur-md`}
+          style={{ transform: "translateX(0)" }} // Directly set transform for stickiness
         >
-          <div
-            className={`fixed top-0 right-0 h-full w-64 ${
-              darkMode
-                ? "bg-gray-900/90 text-white"
-                : "bg-white/90 text-gray-900"
-            } shadow-lg transform transition-all duration-500 ease-in-out backdrop-blur-md ${
-              isMenuOpen
-                ? "translate-x-0 opacity-100"
-                : "translate-x-full opacity-0"
-            }`}
-            style={{
-              animation: isMenuOpen
-                ? "slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)"
-                : "none",
-            }}
-          >
-            <div className="flex flex-col space-y-6 p-6">
-              {/* Dashboard Link */}
-              <a
-                href="/dashboard"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
-                style={{
-                  animation: isMenuOpen
-                    ? "fadeIn 0.5s ease-in-out 0.2s forwards"
-                    : "none",
-                  opacity: 0,
-                }}
+          <div className="flex flex-col space-y-4 p-6">
+            {/* Close Button for Mobile Menu */}
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={toggleMenu}
+                className="p-2 rounded-full focus:outline-none cursor-pointer"
               >
-                <FaHome className="text-xl" />
-                <span>Dashboard</span>
-              </a>
-
-              {/* All Attendance Link */}
-              <a
-                href="/attendance"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
-                style={{
-                  animation: isMenuOpen
-                    ? "fadeIn 0.5s ease-in-out 0.3s forwards"
-                    : "none",
-                  opacity: 0,
-                }}
-              >
-                <FaClipboardList className="text-xl" />
-                <span>All Attendance</span>
-              </a>
-
-              {/* Admin Dashboard Link (Visible to All) */}
-              <a
-                href="/admin/dashboard"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
-                style={{
-                  animation: isMenuOpen
-                    ? "fadeIn 0.5s ease-in-out 0.4s forwards"
-                    : "none",
-                  opacity: 0,
-                }}
-              >
-                <FaUserCog className="text-xl" />
-                <span>Admin Dashboard</span>
-              </a>
-
-              {/* Login/Logout Links */}
-              {!isAdminRoute && (
-                <>
-                  {user ? (
-                    <a
-                      onClick={logout}
-                      className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
-                      style={{
-                        animation: isMenuOpen
-                          ? "fadeIn 0.5s ease-in-out 0.5s forwards"
-                          : "none",
-                        opacity: 0,
-                      }}
-                    >
-                      <FaSignOutAlt className="text-xl" />
-                      <span>Logout</span>
-                    </a>
-                  ) : (
-                    <a
-                      onClick={() => navigate("/login")}
-                      className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
-                      style={{
-                        animation: isMenuOpen
-                          ? "fadeIn 0.5s ease-in-out 0.6s forwards"
-                          : "none",
-                        opacity: 0,
-                      }}
-                    >
-                      <FaSignInAlt className="text-xl" />
-                      <span>Teacher's Login</span>
-                    </a>
-                  )}
-                </>
-              )}
+                <FaTimes className="text-xl" />
+              </button>
             </div>
+            {/* Dashboard Link */}
+            <a
+              href="/dashboard"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+            >
+              <FaHome className="text-xl" />
+              <span>Dashboard</span>
+            </a>
+
+            {/* All Attendance Link */}
+            <a
+              href="/attendance"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+            >
+              <FaClipboardList className="text-xl" />
+              <span>All Attendance</span>
+            </a>
+
+            {/* Admin Dashboard Link (Visible to All) */}
+            <a
+              href="/admin/dashboard"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
+            >
+              <FaUserCog className="text-xl" />
+              <span>Admin Dashboard</span>
+            </a>
+
+            {/* Login/Logout Links */}
+            {!isAdminRoute && (
+              <>
+                {user ? (
+                  <button
+                    onClick={logout}
+                    className="flex items-center space-x-2 text-lg font-medium hover:text-red-600 transition duration-300 cursor-pointer"
+                  >
+                    <FaSignOutAlt className="text-xl" />
+                    <span>Logout</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
+                  >
+                    <FaSignInAlt className="text-xl" />
+                    <span>Teacher's Login</span>
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
-
-      {/* Add CSS Animations */}
-      <style>
-        {`
-          @keyframes slideInRight {
-            0% {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            60% {
-              transform: translateX(-10%);
-              opacity: 1;
-            }
-            100% {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-
-          @keyframes fadeIn {
-            0% {
-              opacity: 0;
-              transform: translateY(10px);
-            }
-            100% {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
     </nav>
   );
 };

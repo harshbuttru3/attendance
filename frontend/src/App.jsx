@@ -7,16 +7,16 @@ import {
 import { useContext } from "react";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
 import Home from "./pages/Home";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import Dashboard from "./components/Dashboard";
-import StudentAttendance from "./components/StudentAttendance";
-import NotFound from "./pages/NotFound";
-import AdminDashboard from "./components/AdminDashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import StudentAttendance from "./pages/StudentAttendance";
+import NotFound from "./components/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
 import { ThemeProvider } from "./context/ThemeContext";
 import Footer from "./components/Footer";
-import AdminLogin from "./components/AdminLogin";
+import AdminLogin from "./pages/AdminLogin";
 
 // ✅ Protect Dashboard Route (For Students/Teachers)
 const PrivateRoute = ({ element }) => {
