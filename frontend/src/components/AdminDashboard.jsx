@@ -3,36 +3,46 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
-import subjectData from "../assets/subjectData"; // Importing subject data
 import toast from "react-hot-toast";
 import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
 import { FiLogOut } from "react-icons/fi"; // Import logout icon
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import eye icons
+import subjectData from "../assets/subjectData"; // Import subject data
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
 
-  // For Teachers
+  // ✅ State to store teacher data
   const [teacherData, setTeacherData] = useState({
     employee_id: "",
     name: "",
     password: "",
-    confirmPassword: "", // New field for confirm password
+    confirmPassword: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [teacherList, setTeacherList] = useState([]);
+  const [teacherListUpdated, setTeacherListUpdated] = useState(false); // ✅ For triggering re-fetch
+  const [IsResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+  const [resetPasswordData, setResetPasswordData] = useState({
+    employee_id: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  
 
+  // ✅ Handle teacher form changes
   const handleTeacherChange = (e) => {
     const { name, value } = e.target;
     setTeacherData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const [teacherList, setTeacherList] = useState(); // State to store teachers list
-
-  // Fetch teachers list
+  // ✅ Fetch teachers list
   const fetchTeachers = async () => {
     try {
       const token = localStorage.getItem("adminToken");
@@ -54,11 +64,11 @@ const AdminDashboard = () => {
       );
     } catch (err) {
       console.log(err || "Something went wrong");
-      setTeacherList(); // Clear teacher list on error
+      setTeacherList([]); // ✅ Clear list on error
     }
   };
 
-  // Handle adding teacher
+  // ✅ Handle adding teacher
   const handleAddTeacher = async () => {
     if (
       !teacherData.name ||
@@ -93,21 +103,22 @@ const AdminDashboard = () => {
         password: "",
         confirmPassword: "",
       });
-      fetchTeachers(); // Refresh teacher list after adding
+
+      // ✅ Trigger re-fetch after adding teacher
+      setTeacherListUpdated((prev) => !prev);
     } catch (err) {
       console.log(err || "Something went wrong");
+      toast.error("Failed to add teacher.");
     }
   };
 
-  // Handle deleting teacher
+  // ✅ Handle deleting teacher
   const handleDeleteTeacher = async (employeeId, teacherName) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete teacher: ${teacherName} with Employee ID: ${employeeId}?`
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     try {
       const token = localStorage.getItem("adminToken");
@@ -120,15 +131,64 @@ const AdminDashboard = () => {
         }
       );
       toast.success(res.data.message);
-      fetchTeachers(); // Refresh teacher list after deleting
+
+      // ✅ Trigger re-fetch after deleting teacher
+      setTeacherListUpdated((prev) => !prev);
     } catch (err) {
-      toast.error(
-        "Error deleting teacher: " +
-          (err.response?.data?.error || "Something went wrong")
-      );
       console.log(err || "Something went wrong");
+      toast.error("Failed to delete teacher.");
     }
   };
+
+  // ✅ Fetch teachers on component mount or after adding/deleting
+  useEffect(() => {
+    fetchTeachers(); // ✅ Runs on mount and when teacherListUpdated changes
+  }, [teacherListUpdated]);
+
+
+  // Reset teacher's password using employee_id.
+  const handleResetPassword = async () => {
+    if (
+      !resetPasswordData.employee_id ||
+      !resetPasswordData.newPassword ||
+      !resetPasswordData.confirmNewPassword
+    ) {
+      toast.error("Please fill all fields to reset password.");
+      return;
+    }
+
+    if (resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword) {
+      toast.error("New Password and Confirm New Password do not match.");
+      return;
+    }
+
+    const confirmReset = window.confirm(
+      `Are you sure you want to reset password for teacher with Employee ID: ${resetPasswordData.employee_id}?`
+    );
+
+    if (!confirmReset) return;
+
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.put(
+        `https://dce-attendance.onrender.com/api/admin/reset-password/${resetPasswordData.employee_id}`,
+        { password: resetPasswordData.newPassword },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success(res.data.message);
+      setResetPasswordData({
+        employee_id: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+    } catch (err) {
+      console.log(err || "Something went wrong");
+      toast.error("Failed to reset password.");
+    }
+  };
+
 
   // For Students
   const [formData, setFormData] = useState({
@@ -148,6 +208,7 @@ const AdminDashboard = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
   const [isTeacherListOpen, setIsTeacherListOpen] = useState(false);
 
@@ -258,6 +319,34 @@ const AdminDashboard = () => {
     }
   };
 
+  //function to delete student using registration number in the URL
+  const handleDeleteStudent = async (registrationNo) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete student with Registration No: ${registrationNo}?`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.delete(
+        `https://dce-attendance.onrender.com/api/admin/delete-student/${registrationNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(res.data.message);
+
+      // Optionally, you can trigger a re-fetch or update the student list state here
+    } catch (err) {
+      console.log(err || "Something went wrong");
+      toast.error("Failed to delete student.");
+    }
+  };
+
+
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -268,10 +357,7 @@ const AdminDashboard = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Fetch teachers list on component mount
-  useEffect(() => {
-    fetchTeachers();
-  });
+
 
   const sectionTitleClass = `text-xl font-semibold mb-3 ${
     darkMode ? "text-gray-300" : "text-gray-700"
@@ -534,6 +620,42 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
+
+          {/* delete studnets based on registration number  */}
+          {/* Delete Student Section */}
+          <div className="mb-6">
+          <div
+            className={collapsibleTitleClass}
+            onClick={() => setIsDeleteOpen(!isDeleteOpen)}
+          >
+            <h4 className={sectionTitleClass}>Delete Student</h4>
+            <span>{isDeleteOpen ? "▲" : "▼"}</span>
+          </div>
+          {isDeleteOpen && (
+            <div className={collapsibleContentClass}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input
+              type="text"
+              name="delete_registration_no"
+              placeholder="Registration No"
+              value={formData.registration_no}
+              onChange={(e) =>
+                setFormData({ ...formData, registration_no: e.target.value })
+              }
+              className={inputClass}
+              required
+              />
+            </div>
+            <button
+              onClick={() => handleDeleteStudent(formData.registration_no)}
+              className={deleteButtonClass}
+            >
+              Delete Student
+            </button>
+            </div>
+          )}
+          </div>
+
         </div>
 
         {/* Teacher Management Section */}
@@ -622,6 +744,95 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
+
+        {/* component for reseting password of teacher */}
+        {/* Reset Teacher Password Section */}
+        <div className="mb-6">
+          <div
+            className={collapsibleTitleClass}
+            onClick={() => setIsResetPasswordOpen(!IsResetPasswordOpen)}
+          >
+            <h4 className={sectionTitleClass}>Reset Teacher Password</h4>
+            <span>{IsResetPasswordOpen ? "▲" : "▼"}</span>
+          </div>
+          {IsResetPasswordOpen && (
+            <div className={collapsibleContentClass}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input
+                  type="text"
+                  name="reset_employee_id"
+                  placeholder="Employee ID"
+                  value={resetPasswordData.employee_id}
+                  onChange={(e) =>
+                    setResetPasswordData({
+                      ...resetPasswordData,
+                      employee_id: e.target.value,
+                    })
+                  }
+                  className={inputClass}
+                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    placeholder="New Password"
+                    value={resetPasswordData.newPassword}
+                    onChange={(e) =>
+                      setResetPasswordData({
+                        ...resetPasswordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                  >
+                    {showNewPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showConfirmNewPassword ? "text" : "password"}
+                    name="confirmNewPassword"
+                    placeholder="Confirm New Password"
+                    value={resetPasswordData.confirmNewPassword}
+                    onChange={(e) =>
+                      setResetPasswordData({
+                        ...resetPasswordData,
+                        confirmNewPassword: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                  >
+                    {showConfirmNewPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={handleResetPassword}
+                className={primaryButtonClass}
+              >
+                Reset Password
+              </button>
+            </div>
+          )}
+        </div>
 
           {/* List of Teachers Section */}
           <div>
