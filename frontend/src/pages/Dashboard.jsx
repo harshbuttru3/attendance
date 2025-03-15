@@ -4,6 +4,9 @@ import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import subjectsData from "../assets/subjectData";
+import Loader from "../components/Loader";
+import toast from "react-hot-toast";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -14,21 +17,23 @@ const Dashboard = () => {
   const [branch, setBranch] = useState("");
   const [subject, setSubject] = useState("");
 
-  const [branches, setBranches] = useState([]);
-  const [subjects, setSubjects] = useState([]);
+  const [branches, setBranches] = useState([]); // Initialize as empty array
+  const [subjects, setSubjects] = useState([]); // Initialize as empty array
   const [userSubjects, setUserSubjects] = useState([]);
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [addSubjectLoading, setAddSubjectLoading] = useState(false);
+  const [fetchSubjectsLoading, setFetchSubjectsLoading] = useState(true);
+  const [fetchStudentsLoading, setFetchStudentsLoading] = useState(false);
+  const [removeSubjectLoading, setRemoveSubjectLoading] = useState(null);
+  const [submitAttendanceLoading, setSubmitAttendanceLoading] = useState(false);
+  const [selectedSubjectForAttendance, setSelectedSubjectForAttendance] =
+    useState(null);
 
-  // Helper function to convert numeric values to ordinal strings (e.g., 8 -> "8th")
   const getOrdinalSuffix = (value) => {
-    // If the value is already an ordinal string (e.g., "3rd"), return it as-is
     if (typeof value === "string" && /^\d+(st|nd|rd|th)$/.test(value)) {
       return value;
     }
-
-    // If the value is numeric, convert it to an ordinal string
     const number = parseInt(value);
     const suffixes = ["th", "st", "nd", "rd"];
     const remainder = number % 100;
@@ -49,23 +54,29 @@ const Dashboard = () => {
   const fetchUserSubjects = () => {
     if (!user?.id) {
       console.error("User ID is undefined, cannot fetch subjects.");
+      setFetchSubjectsLoading(false);
       return;
     }
 
-    console.log(`Fetching subjects for user ID: ${user.id}`);
+    console.log(`Workspaceing subjects for user ID: ${user.id}`);
+    setFetchSubjectsLoading(true);
 
     axios
-      .get(`https://dce-attendance.onrender.com/api/dashboard/subjects/${user.id}`)
+      .get(
+        `https://dce-attendance.onrender.com/api/dashboard/subjects/${user.id}`
+      )
       .then((res) => {
         console.log("Fetched subjects:", res.data);
         setUserSubjects(res.data);
       })
-      .catch((err) =>
+      .catch((err) => {
         console.error(
           "Error fetching subjects:",
           err.response?.data || err.message
-        )
-      );
+        );
+        toast.error("No Subject Found");
+      })
+      .finally(() => setFetchSubjectsLoading(false));
   };
 
   useEffect(() => {
@@ -75,9 +86,11 @@ const Dashboard = () => {
       );
       setBranches(
         selectedSemester ? selectedSemester.branches.map((b) => b.branch) : []
-      );
-      setBranch("");
-      setSubjects([]);
+      ); // Set to empty array if no semester is found
+      setBranch(""); // Reset branch
+      setSubjects([]); // Reset subjects
+    } else {
+      setBranches([]); // Reset branches if no semester is selected
     }
   }, [semester]);
 
@@ -91,59 +104,68 @@ const Dashboard = () => {
       );
       setSubjects(
         selectedBranch ? selectedBranch.subjects.map((sub) => sub.name) : []
-      );
-      setSubject("");
+      ); // Set to empty array if no branch is found
+      setSubject(""); // Reset subject
+    } else {
+      setSubjects([]); // Reset subjects if no branch is selected
     }
   }, [branch, semester]);
 
-  const handleAddSubject = () => {
+  const handleAddSubject = async () => {
     if (!user || !user.id) {
-      alert("User not authenticated. Please log in.");
+      toast.error("User not authenticated. Please log in.");
       navigate("/login");
       return;
     }
 
     if (!semester || !branch || !subject) {
-      alert("Please select semester, branch, and subject.");
+      toast.error("Please select semester, branch, and subject.");
       return;
     }
 
-    setLoading(true);
+    setAddSubjectLoading(true);
 
-    // Convert semester to ordinal string if necessary
     const ordinalSemester = getOrdinalSuffix(semester);
 
     const payload = {
-      teacher_id: user.id, // Ensure this is correctly set
+      teacher_id: user.id,
       subject,
-      semester: ordinalSemester, // Send semester as "1st", "2nd", etc.
+      semester: ordinalSemester,
       branch,
     };
 
     console.log("Sending Data:", payload);
 
-    axios
-      .post("https://dce-attendance.onrender.com/api/dashboard/add-subjects", payload)
-      .then(() => {
-        fetchUserSubjects();
-        alert("Subject added successfully!");
-      })
-      .catch((err) => {
-        console.error("Error:", err.response?.data || err.message);
-        alert(
-          "Error: " + (err.response?.data?.error || "Something went wrong")
-        );
-      })
-      .finally(() => setLoading(false));
+    try {
+      await axios.post(
+        "https://dce-attendance.onrender.com/api/dashboard/add-subjects",
+        payload
+      );
+      fetchUserSubjects();
+      toast.success("Subject added successfully!");
+      setSemester("");
+      setBranch("");
+      setSubject("");
+    } catch (err) {
+      console.error("Error:", err.response?.data || err.message);
+      toast.error(
+        "Error: " + (err.response?.data?.error || "Something went wrong")
+      );
+    } finally {
+      setAddSubjectLoading(false);
+    }
   };
 
-  const fetchStudents = (selectedSubject, selectedSemester, selectedBranch) => {
+  const fetchStudents = async (
+    selectedSubject,
+    selectedSemester,
+    selectedBranch
+  ) => {
     if (!selectedSubject || !selectedSemester || !selectedBranch) {
-      alert("Invalid subject selection.");
+      toast.error("Invalid subject selection.");
       return;
     }
 
-    // Convert semester to ordinal string if necessary
     const ordinalSemester = getOrdinalSuffix(selectedSemester);
 
     console.log("Fetching students for:", {
@@ -152,69 +174,65 @@ const Dashboard = () => {
       selectedBranch,
     });
 
-    // Fetch students for the selected semester & branch
-    axios
-      .get(
+    setFetchStudentsLoading(true);
+    setStudents([]); // Reset to empty array
+    setAttendance([]); // Reset to empty array
+    setSelectedSubjectForAttendance(selectedSubject);
+
+    try {
+      const studentsRes = await axios.get(
         `https://dce-attendance.onrender.com/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
-      )
-      .then((res) => {
-        const studentList = res.data;
-        setStudents(studentList);
+      );
+      const studentList = studentsRes.data;
+      setStudents(studentList);
 
-        // Fetch past attendance records for the selected subject
-        axios
-          .get(
-            `https://dce-attendance.onrender.com/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
-          )
-          .then((attendanceRes) => {
-            const pastAttendance = attendanceRes.data;
+      try {
+        const attendanceRes = await axios.get(
+          `https://dce-attendance.onrender.com/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
+        );
+        const pastAttendance = attendanceRes.data;
 
-            // Map past attendance to students, if records exist
-            const updatedAttendance = studentList.map((student) => {
-              const existingRecord = pastAttendance.find(
-                (record) => record.student_id === student.id
-              );
+        const updatedAttendance = studentList.map((student) => {
+          const existingRecord = pastAttendance.find(
+            (record) => record.student_id === student.id
+          );
 
-              return {
-                student_id: student.id,
-                subject: selectedSubject,
-                semester: ordinalSemester, // Use "1st", "2nd", etc.
-                branch: selectedBranch,
-                total_classes: existingRecord
-                  ? existingRecord.total_classes
-                  : 0,
-                attended_classes: existingRecord
-                  ? existingRecord.attended_classes
-                  : 0,
-              };
-            });
-
-            setAttendance(updatedAttendance);
-          })
-          .catch((err) => {
-            console.error("Error fetching past attendance:", err);
-            alert("Could not fetch past attendance.");
-
-            // If no past attendance, initialize fresh records
-            setAttendance(
-              studentList.map((student) => ({
-                student_id: student.id,
-                subject: selectedSubject,
-                semester: ordinalSemester, // Use "1st", "2nd", etc.
-                branch: selectedBranch,
-                total_classes: 0,
-                attended_classes: 0,
-              }))
-            );
-          });
-      })
-      .catch((err) => {
-        console.error("Error fetching students:", err);
-        alert("No students found for this selection.");
-      });
+          return {
+            student_id: student.id,
+            subject: selectedSubject,
+            semester: ordinalSemester,
+            branch: selectedBranch,
+            total_classes: existingRecord ? existingRecord.total_classes : 0,
+            attended_classes: existingRecord
+              ? existingRecord.attended_classes
+              : 0,
+          };
+        });
+        setAttendance(updatedAttendance);
+      } catch (err) {
+        console.error("Error fetching past attendance:", err);
+        toast.error("Could not fetch past attendance.");
+        setAttendance(
+          studentList.map((student) => ({
+            student_id: student.id,
+            subject: selectedSubject,
+            semester: ordinalSemester,
+            branch: selectedBranch,
+            total_classes: 0,
+            attended_classes: 0,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      toast.error("No students found for this selection.");
+    } finally {
+      setFetchStudentsLoading(false);
+    }
   };
 
   const handleTotalClassesChange = (value) => {
+    if (!attendance) return; // Add check for undefined
     setAttendance((prevAttendance) =>
       prevAttendance.map((entry) => ({
         ...entry,
@@ -224,6 +242,7 @@ const Dashboard = () => {
   };
 
   const handleInputChange = (index, field, value) => {
+    if (!attendance) return; // Add check for undefined
     setAttendance((prevAttendance) => {
       const updatedAttendance = [...prevAttendance];
       let numericValue = value === "" ? "" : Math.max(0, Number(value));
@@ -232,70 +251,97 @@ const Dashboard = () => {
     });
   };
 
-  const handleSubmit = () => {
-    axios
-      .post("https://dce-attendance.onrender.com/api/dashboard/attendance/update", attendance)
-      .then(() => alert("Attendance updated successfully!"))
-      .catch((err) => console.error("Error updating attendance:", err));
+  const handleSubmit = async () => {
+    if (!attendance || attendance.length === 0) {
+      toast.error("No attendance data to submit.");
+      return;
+    }
+    setSubmitAttendanceLoading(true);
+    try {
+      await axios.post(
+        "https://dce-attendance.onrender.com/api/dashboard/attendance/update",
+        attendance
+      );
+      toast.success("Attendance updated successfully!");
+    } catch (err) {
+      console.error("Error updating attendance:", err);
+      toast.error("Error updating attendance.");
+    } finally {
+      setSubmitAttendanceLoading(false);
+    }
   };
 
-  const handleRemoveSubject = (subject, semester, branch) => {
+  const handleRemoveSubject = async (
+    subjectToRemove,
+    semesterToRemove,
+    branchToRemove
+  ) => {
     if (
       !window.confirm(
-        `Are you sure you want to remove ${subject} (${semester} - ${branch})?`
+        `Are you sure you want to remove ${subjectToRemove} (${semesterToRemove} - ${branchToRemove})?`
       )
     ) {
       return;
     }
 
-    // Convert semester to ordinal string if necessary
-    const ordinalSemester = getOrdinalSuffix(semester);
+    const ordinalSemester = getOrdinalSuffix(semesterToRemove);
 
     const payload = {
       teacher_id: user.id,
-      subject,
-      semester: ordinalSemester, // Use "1st", "2nd", etc.
-      branch,
+      subject: subjectToRemove,
+      semester: ordinalSemester,
+      branch: branchToRemove,
     };
 
-    axios
-      .delete("https://dce-attendance.onrender.com/api/dashboard/remove-subject", {
-        data: payload,
-      })
-      .then(() => {
-        alert("Subject removed successfully!");
-        window.location.reload();
-        fetchUserSubjects(); // Refresh subject list
-      })
-      .catch((err) => {
-        console.error(
-          "Error removing subject:",
-          err.response?.data || err.message
-        );
-        alert(
-          "Error: " + (err.response?.data?.error || "Something went wrong")
-        );
-      });
+    setRemoveSubjectLoading(subjectToRemove);
+
+    try {
+      await axios.delete(
+        "https://dce-attendance.onrender.com/api/dashboard/remove-subject",
+        {
+          data: payload,
+        }
+      );
+      toast.success("Subject removed successfully!");
+      fetchUserSubjects();
+      if (selectedSubjectForAttendance === subjectToRemove) {
+        setStudents();
+        setAttendance();
+        setSelectedSubjectForAttendance(null);
+      }
+    } catch (err) {
+      console.error(
+        "Error removing subject:",
+        err.response?.data || err.message
+      );
+      toast.error(
+        "Error: " + (err.response?.data?.error || "Something went wrong")
+      );
+    } finally {
+      setRemoveSubjectLoading(null);
+    }
   };
 
   return (
     <div
       className={`min-h-screen flex flex-col items-center justify-start ${
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      } transition duration-300 p-4`}
+      } transition duration-300 pt-24 p-4`}
     >
       <div
-        className={`w-full max-w-6xl p-8 rounded-xl shadow-2xl border ${
+        className={`w-full max-w-6xl p-6 md:p-8 rounded-xl shadow-2xl border ${
           darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         } transition duration-300`}
       >
-        <h2 className="text-3xl font-bold mb-8">Welcome, {user?.name}</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">
+          Welcome, {user?.name}
+        </h2>
 
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-6 md:mb-8">
           <select
             value={semester}
             onChange={(e) => setSemester(e.target.value)}
-            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+            className={`w-full md:w-1/4 px-3 py-2 rounded-lg border focus:outline-none ${
               darkMode
                 ? "bg-gray-700 text-white border-gray-600"
                 : "bg-white text-gray-900 border-gray-300"
@@ -314,7 +360,7 @@ const Dashboard = () => {
           <select
             value={branch}
             onChange={(e) => setBranch(e.target.value)}
-            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+            className={`w-full md:w-1/4 px-3 py-2 rounded-lg border focus:outline-none ${
               darkMode
                 ? "bg-gray-700 text-white border-gray-600"
                 : "bg-white text-gray-900 border-gray-300"
@@ -332,7 +378,7 @@ const Dashboard = () => {
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
+            className={`w-full md:w-1/4 px-3 py-2 rounded-lg border focus:outline-none ${
               darkMode
                 ? "bg-gray-700 text-white border-gray-600"
                 : "bg-white text-gray-900 border-gray-300"
@@ -349,27 +395,35 @@ const Dashboard = () => {
 
           <button
             onClick={handleAddSubject}
-            disabled={!semester || !branch || !subject || loading}
+            disabled={!semester || !branch || !subject || addSubjectLoading}
             className={`w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
               semester && branch && subject
                 ? darkMode
-                  ? "bg-green-600 hover:bg-green-700 text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
+                  ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                  : "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
                 : "bg-gray-400 cursor-not-allowed text-gray-700"
             }`}
           >
-            {loading ? "Adding..." : "Add Subject"}
+            {addSubjectLoading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+            ) : (
+              "Add Subject"
+            )}
           </button>
         </div>
 
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold mb-4">Your Subjects</h3>
-          {userSubjects.length > 0 ? (
+        <div className="mb-6 md:mb-8">
+          <h3 className="text-xl md:text-2xl font-bold mb-4">Your Subjects</h3>
+          {fetchSubjectsLoading ? (
+            <div className="flex justify-center">
+              <Loader size="h-8 w-8" color="text-blue-500" />
+            </div>
+          ) : userSubjects && userSubjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {userSubjects.map((sub, index) => (
                 <div
                   key={index}
-                  className={`p-4 rounded-lg w-full flex justify-between items-center transition duration-300 ${
+                  className={`p-3 md:p-4 rounded-lg w-full flex justify-between items-center transition duration-300 ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-white"
                       : "bg-gray-100 hover:bg-gray-200 text-gray-900"
@@ -379,23 +433,32 @@ const Dashboard = () => {
                     onClick={() =>
                       fetchStudents(sub.subject, sub.semester, sub.branch)
                     }
-                    className="text-left flex-grow"
+                    className="text-left flex-grow cursor-pointer"
+                    disabled={fetchStudentsLoading}
                   >
-                    <p className="font-medium">
+                    <p className="font-medium text-sm md:text-base">
                       {sub.subject} ({sub.semester} Semester - {sub.branch})
+                      {fetchStudentsLoading && (
+                        <span className="ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></span>
+                      )}
                     </p>
                   </button>
                   <button
                     onClick={() =>
                       handleRemoveSubject(sub.subject, sub.semester, sub.branch)
                     }
-                    className={`ml-4 p-1 rounded-full transition duration-300 ${
+                    className={`ml-2 md:ml-4 p-1 rounded-full transition duration-300 focus:outline-none cursor-pointer ${
                       darkMode
                         ? "text-red-400 hover:bg-red-500 hover:text-white"
                         : "text-red-500 hover:bg-red-500 hover:text-white"
                     }`}
+                    disabled={removeSubjectLoading === sub.subject}
                   >
-                    ✖
+                    {removeSubjectLoading === sub.subject ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                    ) : (
+                      <TrashIcon className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               ))}
@@ -405,84 +468,112 @@ const Dashboard = () => {
           )}
         </div>
 
-        {students.length > 0 && (
-          <div className="mt-6 w-full">
-            <h3 className="text-2xl font-bold mb-4">
-              {attendance[0]?.subject}
+        {students && students.length > 0 && (
+          <div className="mt-4 md:mt-6 w-full">
+            <h3 className="text-xl md:text-2xl font-bold mb-4">
+              {selectedSubjectForAttendance}
             </h3>
-            <table
-              className={`border-collapse w-full ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <thead>
-                <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
-                  <th className="border px-4 py-2">Reg ID</th>
-                  <th className="border px-4 py-2">Name</th>
-                  <th className="border px-4 py-2">Total Classes</th>
-                  <th className="border px-4 py-2">Attended Classes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendance.map((entry, index) => (
-                  <tr
-                    key={entry.student_id}
-                    className={darkMode ? "bg-gray-800" : "bg-white"}
-                  >
-                    <td className="border px-4 py-2">
-                      {students[index]?.registration_no}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {students[index]?.name}
-                    </td>
-                    <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        value={entry.total_classes}
-                        onChange={(e) =>
-                          handleTotalClassesChange(e.target.value)
-                        }
-                        className={`w-full text-center ${
-                          darkMode
-                            ? "bg-gray-700 text-white border-gray-600"
-                            : "bg-white text-gray-900 border-gray-300"
-                        }`}
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        value={entry.attended_classes}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "attended_classes",
-                            e.target.value
-                          )
-                        }
-                        className={`w-full text-center ${
-                          darkMode
-                            ? "bg-gray-700 text-white border-gray-600"
-                            : "bg-white text-gray-900 border-gray-300"
-                        }`}
-                      />
-                    </td>
+
+            <div className="mb-4">
+              <label
+                htmlFor="total-classes"
+                className="block font-semibold mb-1"
+              >
+                Total Classes for this Session
+              </label>
+              <input
+                type="number"
+                id="total-classes"
+                className={`w-full px-3 py-2 rounded-lg border focus:outline-none ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-gray-900 border-gray-300"
+                }`}
+                placeholder="Enter total classes"
+                onChange={(e) => handleTotalClassesChange(e.target.value)}
+              />
+            </div>
+
+            <div className="overflow-x-auto">
+              <table
+                className={`border-collapse w-full ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                <thead>
+                  <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
+                    <th className="border px-2 py-2 md:px-4 md:py-2 text-left">
+                      Reg ID
+                    </th>
+                    <th className="border px-2 py-2 md:px-4 md:py-2 text-left">
+                      Name
+                    </th>
+                    <th className="border px-2 py-2 md:px-4 md:py-2 text-left">
+                      Attended Classes
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {students.map((student, index) => (
+                    <tr
+                      key={student.id}
+                      className={darkMode ? "bg-gray-800" : "bg-white"}
+                    >
+                      <td className="border px-2 py-2 md:px-4 md:py-2">
+                        {student.registration_no}
+                      </td>
+                      <td className="border px-2 py-2 md:px-4 md:py-2">
+                        {student.name}
+                      </td>
+                      <td className="border px-2 py-2 md:px-4 md:py-2">
+                        <input
+                          type="number"
+                          value={attendance[index]?.attended_classes || 0}
+                          onChange={(e) =>
+                            handleInputChange(
+                              index,
+                              "attended_classes",
+                              e.target.value
+                            )
+                          }
+                          className={`w-full text-center px-1 py-0.5 rounded border focus:outline-none ${
+                            darkMode
+                              ? "bg-gray-700 text-white border-gray-600"
+                              : "bg-white text-gray-900 border-gray-300"
+                          }`}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button
               onClick={handleSubmit}
-              className={`mt-4 px-4 py-2 rounded ${
+              className={`mt-4 px-4 py-2  cursor-pointer ${
                 darkMode
                   ? "bg-blue-600 hover:bg-blue-700 text-white"
                   : "bg-blue-500 hover:bg-blue-600 text-white"
               }`}
+              disabled={submitAttendanceLoading || attendance.length === 0}
             >
-              Submit Attendance
+              {submitAttendanceLoading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+              ) : (
+                "Submit Attendance"
+              )}
             </button>
           </div>
         )}
+
+        {students &&
+          students.length === 0 &&
+          userSubjects.length > 0 &&
+          !fetchStudentsLoading && (
+            <p className="mt-6 text-gray-600 dark:text-gray-400">
+              Click on a subject to view and manage attendance.
+            </p>
+          )}
       </div>
     </div>
   );

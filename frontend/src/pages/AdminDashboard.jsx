@@ -8,13 +8,18 @@ import toast from "react-hot-toast";
 import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
 import { FiLogOut } from "react-icons/fi"; // Import logout icon
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import eye icons
-import Loader from "../components/Loader"; // Import the Loader component
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
-  const [isLoading, setIsLoading] = useState(false); // State to manage loading
+  const [isLoading, setIsLoading] = useState(false); // State to manage overall loading (can be removed or used for very broad loading)
+  const [isFetchingTeachers, setIsFetchingTeachers] = useState(false); // Loading state for fetching teachers
+  const [isAddingTeacher, setIsAddingTeacher] = useState(false); // Loading state for adding teacher
+  const [deletingTeacherId, setDeletingTeacherId] = useState(null); // Employee ID of teacher being deleted
+  const [isRegisteringStudent, setIsRegisteringStudent] = useState(false); // Loading state for registering student
+  const [isPromotingStudents, setIsPromotingStudents] = useState(false); // Loading state for promoting students
+  const [isUpdatingSemester, setIsUpdatingSemester] = useState(false); // Loading state for updating student semester
 
   // For Teachers
   const [teacherData, setTeacherData] = useState({
@@ -36,7 +41,7 @@ const AdminDashboard = () => {
 
   // Fetch teachers list
   const fetchTeachers = async () => {
-    setIsLoading(true);
+    setIsFetchingTeachers(true);
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.get(
@@ -60,7 +65,7 @@ const AdminDashboard = () => {
       setTeacherList(); // Clear teacher list on error
       toast.error("Failed to fetch teachers.");
     } finally {
-      setIsLoading(false);
+      setIsFetchingTeachers(false);
     }
   };
 
@@ -81,7 +86,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsAddingTeacher(true);
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.post(
@@ -108,7 +113,7 @@ const AdminDashboard = () => {
           (err.response?.data?.error || "Something went wrong")
       );
     } finally {
-      setIsLoading(false);
+      setIsAddingTeacher(false);
     }
   };
 
@@ -122,7 +127,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setIsLoading(true);
+    setDeletingTeacherId(employeeId);
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.delete(
@@ -142,7 +147,7 @@ const AdminDashboard = () => {
       );
       console.log(err || "Something went wrong");
     } finally {
-      setIsLoading(false);
+      setDeletingTeacherId(null);
     }
   };
 
@@ -203,7 +208,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsRegisteringStudent(true);
     try {
       const res = await axios.post(
         "https://dce-attendance.onrender.com/api/admin/register-student",
@@ -219,7 +224,7 @@ const AdminDashboard = () => {
         "Error: " + (err.response?.data?.error || "Something went wrong")
       );
     } finally {
-      setIsLoading(false);
+      setIsRegisteringStudent(false);
     }
   };
 
@@ -236,7 +241,7 @@ const AdminDashboard = () => {
 
     if (!confirmPromotion) return;
 
-    setIsLoading(true);
+    setIsPromotingStudents(true);
     try {
       const res = await axios.put(
         "https://dce-attendance.onrender.com/api/admin/promote-semester",
@@ -252,7 +257,7 @@ const AdminDashboard = () => {
         "Error: " + (err.response?.data?.error || "Something went wrong")
       );
     } finally {
-      setIsLoading(false);
+      setIsPromotingStudents(false);
     }
   };
 
@@ -263,7 +268,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsUpdatingSemester(true);
     try {
       const res = await axios.put(
         "https://dce-attendance.onrender.com/api/admin/update-student-semester",
@@ -279,7 +284,7 @@ const AdminDashboard = () => {
         "Error: " + (err.response?.data?.error || "Something went wrong")
       );
     } finally {
-      setIsLoading(false);
+      setIsUpdatingSemester(false);
     }
   };
 
@@ -367,310 +372,338 @@ const AdminDashboard = () => {
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
-      {isLoading ? (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <Loader size="h-16 w-16" color="text-blue-500" />
+      <div className="max-w-5xl mx-auto">
+        {/* Logout Button at the Top */}
+        <div className="flex justify-end mb-8">
+          <button
+            onClick={() => {
+              localStorage.removeItem("adminToken");
+              navigate("/");
+            }}
+            className={`${logoutButtonClass} px-4 py-2 sm:px-5 sm:py-2`}
+          >
+            <FiLogOut className="mr-2 h-5 w-5" /> Logout
+          </button>
         </div>
-      ) : (
-        <div className="max-w-5xl mx-auto">
-          {/* Logout Button at the Top */}
-          <div className="flex justify-end mb-8">
-            <button
-              onClick={() => {
-                localStorage.removeItem("adminToken");
-                navigate("/");
-              }}
-              className={`${logoutButtonClass} px-4 py-2 sm:px-5 sm:py-2`}
+
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8">
+          Admin Dashboard
+        </h2>
+
+        {/* Student Management Section */}
+        <div className="mb-10 p-4 sm:p-6 rounded-lg shadow-xl">
+          <h3 className="text-xl sm:text-2xl font-semibold mb-5 text-blue-500">
+            Student Management
+          </h3>
+
+          {/* Register Student Section */}
+          <div className="mb-6">
+            <div
+              className={`${collapsibleTitleClass} cursor-pointer`}
+              onClick={() => setIsRegisterOpen(!isRegisterOpen)}
             >
-              <FiLogOut className="mr-2 h-5 w-5" /> Logout
-            </button>
+              <h4 className={sectionTitleClass}>Register New Student</h4>
+              <span>{isRegisterOpen ? "▲" : "▼"}</span>
+            </div>
+            {isRegisterOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="registration_no"
+                    placeholder="Registration No"
+                    value={formData.registration_no}
+                    onChange={handleChange}
+                    className={inputClass}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={inputClass}
+                    required
+                  />
+                  <select
+                    name="branch"
+                    value={formData.branch}
+                    onChange={handleChange}
+                    className={selectClass}
+                  >
+                    <option value="">Select Branch</option>
+                    {subjectData[0].branches.map((b) => (
+                      <option key={b.branch} value={b.branch}>
+                        {b.branch}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    name="semester"
+                    value={formData.semester}
+                    onChange={handleChange}
+                    className={selectClass}
+                  >
+                    <option value="">Select Semester</option>
+                    {[
+                      "1st",
+                      "2nd",
+                      "3rd",
+                      "4th",
+                      "5th",
+                      "6th",
+                      "7th",
+                      "8th",
+                    ].map((sem) => (
+                      <option key={sem} value={sem}>
+                        {sem} Semester
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={handleRegister}
+                  className={`${primaryButtonClass} ${
+                    isRegisteringStudent ? "cursor-not-allowed" : ""
+                  }`}
+                  disabled={isRegisteringStudent}
+                >
+                  {isRegisteringStudent ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Register Student"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8">
-            Admin Dashboard
-          </h2>
-
-          {/* Student Management Section */}
-          <div className="mb-10 p-4 sm:p-6 rounded-lg shadow-xl">
-            <h3 className="text-xl sm:text-2xl font-semibold mb-5 text-blue-500">
-              Student Management
-            </h3>
-
-            {/* Register Student Section */}
-            <div className="mb-6">
-              <div
-                className={`${collapsibleTitleClass}`}
-                onClick={() => setIsRegisterOpen(!isRegisterOpen)}
-              >
-                <h4 className={sectionTitleClass}>Register New Student</h4>
-                <span>{isRegisterOpen ? "▲" : "▼"}</span>
-              </div>
-              {isRegisterOpen && (
-                <div className={collapsibleContentClass}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="text"
-                      name="registration_no"
-                      placeholder="Registration No"
-                      value={formData.registration_no}
-                      onChange={handleChange}
-                      className={inputClass}
-                      required
-                    />
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={inputClass}
-                      required
-                    />
-                    <select
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handleChange}
-                      className={selectClass}
-                    >
-                      <option value="">Select Branch</option>
-                      {subjectData[0].branches.map((b) => (
-                        <option key={b.branch} value={b.branch}>
-                          {b.branch}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      name="semester"
-                      value={formData.semester}
-                      onChange={handleChange}
-                      className={selectClass}
-                    >
-                      <option value="">Select Semester</option>
-                      {[
-                        "1st",
-                        "2nd",
-                        "3rd",
-                        "4th",
-                        "5th",
-                        "6th",
-                        "7th",
-                        "8th",
-                      ].map((sem) => (
+          {/* Promote Students Section */}
+          <div className="mb-6">
+            <div
+              className={`${collapsibleTitleClass} cursor-pointer`}
+              onClick={() => setIsPromoteOpen(!isPromoteOpen)}
+            >
+              <h4 className={sectionTitleClass}>Promote Students</h4>
+              <span>{isPromoteOpen ? "▲" : "▼"}</span>
+            </div>
+            {isPromoteOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <select
+                    value={promotionSemester}
+                    onChange={(e) => setPromotionSemester(e.target.value)}
+                    className={selectClass}
+                  >
+                    <option value="">Select Semester to Promote</option>
+                    {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
+                      (sem) => (
                         <option key={sem} value={sem}>
                           {sem} Semester
                         </option>
-                      ))}
-                    </select>
-                  </div>
+                      )
+                    )}
+                  </select>
                   <button
-                    onClick={handleRegister}
-                    className={primaryButtonClass}
+                    onClick={handlePromote}
+                    className={`${successButtonClass} ${
+                      isPromotingStudents ? "cursor-not-allowed" : ""
+                    }`}
+                    disabled={isPromotingStudents}
                   >
-                    Register Student
+                    {isPromotingStudents ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    ) : (
+                      "Promote Students"
+                    )}
                   </button>
                 </div>
-              )}
-            </div>
-
-            {/* Promote Students Section */}
-            <div className="mb-6">
-              <div
-                className={collapsibleTitleClass}
-                onClick={() => setIsPromoteOpen(!isPromoteOpen)}
-              >
-                <h4 className={sectionTitleClass}>Promote Students</h4>
-                <span>{isPromoteOpen ? "▲" : "▼"}</span>
               </div>
-              {isPromoteOpen && (
-                <div className={collapsibleContentClass}>
-                  <div className="flex flex-col md:flex-row gap-4 mb-4">
-                    <select
-                      value={promotionSemester}
-                      onChange={(e) => setPromotionSemester(e.target.value)}
-                      className={selectClass}
-                    >
-                      <option value="">Select Semester to Promote</option>
-                      {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
-                        (sem) => (
-                          <option key={sem} value={sem}>
-                            {sem} Semester
-                          </option>
-                        )
-                      )}
-                    </select>
+            )}
+          </div>
+
+          {/* Update Student Semester Section */}
+          <div>
+            <div
+              className={`${collapsibleTitleClass} cursor-pointer`}
+              onClick={() => setIsUpdateOpen(!isUpdateOpen)}
+            >
+              <h4 className={sectionTitleClass}>Update Student Semester</h4>
+              <span>{isUpdateOpen ? "▲" : "▼"}</span>
+            </div>
+            {isUpdateOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="registration_no"
+                    placeholder="Registration No"
+                    value={updateData.registration_no}
+                    onChange={(e) =>
+                      setUpdateData({
+                        ...updateData,
+                        registration_no: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+                  <select
+                    name="newSemester"
+                    value={updateData.newSemester}
+                    onChange={(e) =>
+                      setUpdateData({
+                        ...updateData,
+                        newSemester: e.target.value,
+                      })
+                    }
+                    className={selectClass}
+                  >
+                    <option value="">Select New Semester</option>
+                    {[
+                      "1st",
+                      "2nd",
+                      "3rd",
+                      "4th",
+                      "5th",
+                      "6th",
+                      "7th",
+                      "8th",
+                    ].map((sem) => (
+                      <option key={sem} value={sem}>
+                        {sem} Semester
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={handleUpdateSemester}
+                  className={`${warningButtonClass} ${
+                    isUpdatingSemester ? "cursor-not-allowed" : ""
+                  }`}
+                  disabled={isUpdatingSemester}
+                >
+                  {isUpdatingSemester ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Update Semester"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Teacher Management Section */}
+        <div className="mb-10 p-4 sm:p-6 rounded-lg shadow-xl">
+          <h3 className="text-xl sm:text-2xl font-semibold mb-5 text-indigo-500">
+            Teacher Management
+          </h3>
+
+          {/* Add Teacher Section */}
+          <div className="mb-6">
+            <div
+              className={`${collapsibleTitleClass} cursor-pointer`}
+              onClick={() => setIsAddTeacherOpen(!isAddTeacherOpen)}
+            >
+              <h4 className={sectionTitleClass}>Add New Teacher</h4>
+              <span>{isAddTeacherOpen ? "▲" : "▼"}</span>
+            </div>
+            {isAddTeacherOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="employee_id"
+                    placeholder="Employee ID"
+                    value={teacherData.employee_id}
+                    onChange={handleTeacherChange}
+                    className={inputClass}
+                  />
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={teacherData.name}
+                    onChange={handleTeacherChange}
+                    className={inputClass}
+                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="Password"
+                      value={teacherData.password}
+                      onChange={handleTeacherChange}
+                      className={inputClass}
+                    />
                     <button
-                      onClick={handlePromote}
-                      className={successButtonClass}
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
                     >
-                      Promote Students
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      placeholder="Confirm Password"
+                      value={teacherData.confirmPassword}
+                      onChange={handleTeacherChange}
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={toggleConfirmPasswordVisibility}
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Update Student Semester Section */}
-            <div>
-              <div
-                className={collapsibleTitleClass}
-                onClick={() => setIsUpdateOpen(!isUpdateOpen)}
-              >
-                <h4 className={sectionTitleClass}>Update Student Semester</h4>
-                <span>{isUpdateOpen ? "▲" : "▼"}</span>
+                <button
+                  onClick={handleAddTeacher}
+                  className={`${primaryButtonClass} ${
+                    isAddingTeacher ? "cursor-not-allowed" : ""
+                  }`}
+                  disabled={isAddingTeacher}
+                >
+                  {isAddingTeacher ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Add Teacher"
+                  )}
+                </button>
               </div>
-              {isUpdateOpen && (
-                <div className={collapsibleContentClass}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="text"
-                      name="registration_no"
-                      placeholder="Registration No"
-                      value={updateData.registration_no}
-                      onChange={(e) =>
-                        setUpdateData({
-                          ...updateData,
-                          registration_no: e.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-                    <select
-                      name="newSemester"
-                      value={updateData.newSemester}
-                      onChange={(e) =>
-                        setUpdateData({
-                          ...updateData,
-                          newSemester: e.target.value,
-                        })
-                      }
-                      className={selectClass}
-                    >
-                      <option value="">Select New Semester</option>
-                      {[
-                        "1st",
-                        "2nd",
-                        "3rd",
-                        "4th",
-                        "5th",
-                        "6th",
-                        "7th",
-                        "8th",
-                      ].map((sem) => (
-                        <option key={sem} value={sem}>
-                          {sem} Semester
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <button
-                    onClick={handleUpdateSemester}
-                    className={warningButtonClass}
-                  >
-                    Update Semester
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Teacher Management Section */}
-          <div className="mb-10 p-4 sm:p-6 rounded-lg shadow-xl">
-            <h3 className="text-xl sm:text-2xl font-semibold mb-5 text-indigo-500">
-              Teacher Management
-            </h3>
-
-            {/* Add Teacher Section */}
-            <div className="mb-6">
-              <div
-                className={collapsibleTitleClass}
-                onClick={() => setIsAddTeacherOpen(!isAddTeacherOpen)}
-              >
-                <h4 className={sectionTitleClass}>Add New Teacher</h4>
-                <span>{isAddTeacherOpen ? "▲" : "▼"}</span>
-              </div>
-              {isAddTeacherOpen && (
-                <div className={collapsibleContentClass}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="text"
-                      name="employee_id"
-                      placeholder="Employee ID"
-                      value={teacherData.employee_id}
-                      onChange={handleTeacherChange}
-                      className={inputClass}
-                    />
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Name"
-                      value={teacherData.name}
-                      onChange={handleTeacherChange}
-                      className={inputClass}
-                    />
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        placeholder="Password"
-                        value={teacherData.password}
-                        onChange={handleTeacherChange}
-                        className={inputClass}
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                      >
-                        {showPassword ? (
-                          <EyeSlashIcon className="h-5 w-5" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        placeholder="Confirm Password"
-                        value={teacherData.confirmPassword}
-                        onChange={handleTeacherChange}
-                        className={inputClass}
-                      />
-                      <button
-                        type="button"
-                        onClick={toggleConfirmPasswordVisibility}
-                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeSlashIcon className="h-5 w-5" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleAddTeacher}
-                    className={primaryButtonClass}
-                  >
-                    Add Teacher
-                  </button>
-                </div>
-              )}
+          {/* List of Teachers Section */}
+          <div>
+            <div
+              className={`${collapsibleTitleClass} cursor-pointer`}
+              onClick={() => setIsTeacherListOpen(!isTeacherListOpen)}
+            >
+              <h4 className={sectionTitleClass}>Current Teachers</h4>
+              <span>{isTeacherListOpen ? "▲" : "▼"}</span>
             </div>
-
-            {/* List of Teachers Section */}
-            <div>
-              <div
-                className={collapsibleTitleClass}
-                onClick={() => setIsTeacherListOpen(!isTeacherListOpen)}
-              >
-                <h4 className={sectionTitleClass}>Current Teachers</h4>
-                <span>{isTeacherListOpen ? "▲" : "▼"}</span>
-              </div>
-              {isTeacherListOpen && (
-                <div className={collapsibleContentClass}>
+            {isTeacherListOpen && (
+              <div className={collapsibleContentClass}>
+                {isFetchingTeachers ? (
+                  <div className="flex justify-center items-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  </div>
+                ) : (
                   <div className="overflow-x-auto">
                     <table className={tableClass}>
                       <thead className={tableHeaderClass}>
@@ -698,9 +731,20 @@ const AdminDashboard = () => {
                                       teacher.name
                                     )
                                   }
-                                  className={deleteIconClass}
+                                  className={`${deleteIconClass} ${
+                                    deletingTeacherId === teacher.employee_id
+                                      ? "cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={
+                                    deletingTeacherId === teacher.employee_id
+                                  }
                                 >
-                                  <AiOutlineDelete className="h-5 w-5 inline-block" />
+                                  {deletingTeacherId === teacher.employee_id ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500 inline-block"></div>
+                                  ) : (
+                                    <AiOutlineDelete className="h-5 w-5 inline-block" />
+                                  )}
                                 </button>
                               </td>
                             </tr>
@@ -718,12 +762,12 @@ const AdminDashboard = () => {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
