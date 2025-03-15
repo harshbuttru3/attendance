@@ -30,39 +30,29 @@ const Home = () => {
         {/* Buttons */}
         <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6">
           {user ? (
+            // If user is logged in, show Teacher's Dashboard button
             <button
               onClick={() => navigate("/dashboard")}
-              className={`px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
+              className={`cursor-pointer px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
                 darkMode
                   ? "bg-purple-600 hover:bg-purple-700 text-white"
                   : "bg-purple-600 hover:bg-purple-700 text-white"
               }`}
             >
-              Go to Dashboard
+              Go to Teacher's Dashboard
             </button>
           ) : (
-            <>
-              <button
-                onClick={() => navigate("/login")}
-                className={`px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
-                  darkMode
-                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => navigate("/admin/login")}
-                className={`px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
-                  darkMode
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"
-                }`}
-              >
-                Admin Login
-              </button>
-            </>
+            // If user is not logged in, show Login button
+            <button
+              onClick={() => navigate("/login")}
+              className={`cursor-pointer px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 focus:outline-none shadow-md ${
+                darkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              Login
+            </button>
           )}
         </div>
       </div>

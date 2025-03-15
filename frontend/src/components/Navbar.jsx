@@ -9,7 +9,6 @@ import {
   FaHome,
   FaClipboardList,
   FaSignInAlt,
-  FaUserPlus,
   FaSignOutAlt,
   FaUserCog, // Icon for Admin Dashboard
 } from "react-icons/fa";
@@ -47,14 +46,14 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             <a
               href="/dashboard"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
               <FaHome className="text-xl" />
               <span>Dashboard</span>
             </a>
             <a
               href="/attendance"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
               <FaClipboardList className="text-xl" />
               <span>All Attendance</span>
@@ -62,7 +61,7 @@ const Navbar = () => {
             {/* Admin Dashboard Link (Visible to All) */}
             <a
               href="/admin/dashboard"
-              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+              className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
             >
               <FaUserCog className="text-xl" />
               <span>Admin Dashboard</span>
@@ -75,12 +74,11 @@ const Navbar = () => {
           {/* Dark/Light Mode Toggler */}
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-full transition duration-300 focus:outline-none shadow-md 
-              ${
-                darkMode
-                  ? "bg-yellow-400 hover:bg-yellow-500"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+            className={`p-2 rounded-full transition duration-300 focus:outline-none shadow-md cursor-pointer ${
+              darkMode
+                ? "bg-yellow-400 hover:bg-yellow-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
           >
             {darkMode ? (
               <FaSun className="text-white text-xl" />
@@ -92,7 +90,7 @@ const Navbar = () => {
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={toggleMenu}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 focus:outline-none shadow-md"
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 focus:outline-none shadow-md cursor-pointer"
           >
             {isMenuOpen ? (
               <FaTimes className="text-xl" />
@@ -109,7 +107,7 @@ const Navbar = () => {
               {user ? (
                 <button
                   onClick={logout}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md"
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
                 >
                   <FaSignOutAlt className="text-xl" />
                   <span>Logout</span>
@@ -117,22 +115,21 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={() => navigate("/login")}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none shadow-md cursor-pointer"
                 >
                   <FaSignInAlt className="text-xl" />
-                  <span>Teacher Login</span>
+                  <span>Teacher's Login</span>
                 </button>
               )}
             </>
           )}
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-full transition duration-300 focus:outline-none shadow-md 
-              ${
-                darkMode
-                  ? "bg-yellow-400 hover:bg-yellow-500"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+            className={`p-2 rounded-full transition duration-300 focus:outline-none shadow-md cursor-pointer ${
+              darkMode
+                ? "bg-yellow-400 hover:bg-yellow-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
           >
             {darkMode ? (
               <FaSun className="text-white text-xl" />
@@ -153,8 +150,10 @@ const Navbar = () => {
         >
           <div
             className={`fixed top-0 right-0 h-full w-64 ${
-              darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-            } shadow-lg transform transition-all duration-500 ease-in-out ${
+              darkMode
+                ? "bg-gray-900/90 text-white"
+                : "bg-white/90 text-gray-900"
+            } shadow-lg transform transition-all duration-500 ease-in-out backdrop-blur-md ${
               isMenuOpen
                 ? "translate-x-0 opacity-100"
                 : "translate-x-full opacity-0"
@@ -169,7 +168,7 @@ const Navbar = () => {
               {/* Dashboard Link */}
               <a
                 href="/dashboard"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
                 style={{
                   animation: isMenuOpen
                     ? "fadeIn 0.5s ease-in-out 0.2s forwards"
@@ -184,7 +183,7 @@ const Navbar = () => {
               {/* All Attendance Link */}
               <a
                 href="/attendance"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
                 style={{
                   animation: isMenuOpen
                     ? "fadeIn 0.5s ease-in-out 0.3s forwards"
@@ -199,7 +198,7 @@ const Navbar = () => {
               {/* Admin Dashboard Link (Visible to All) */}
               <a
                 href="/admin/dashboard"
-                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300"
+                className="flex items-center space-x-2 text-lg font-medium hover:text-purple-600 transition duration-300 cursor-pointer"
                 style={{
                   animation: isMenuOpen
                     ? "fadeIn 0.5s ease-in-out 0.4s forwards"
@@ -229,34 +228,19 @@ const Navbar = () => {
                       <span>Logout</span>
                     </a>
                   ) : (
-                    <>
-                      <a
-                        onClick={() => navigate("/login")}
-                        className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
-                        style={{
-                          animation: isMenuOpen
-                            ? "fadeIn 0.5s ease-in-out 0.6s forwards"
-                            : "none",
-                          opacity: 0,
-                        }}
-                      >
-                        <FaSignInAlt className="text-xl" />
-                        <span>Login</span>
-                      </a>
-                      <a
-                        onClick={() => navigate("/signup")}
-                        className="flex items-center space-x-2 text-lg font-medium hover:text-green-600 transition duration-300 cursor-pointer"
-                        style={{
-                          animation: isMenuOpen
-                            ? "fadeIn 0.5s ease-in-out 0.7s forwards"
-                            : "none",
-                          opacity: 0,
-                        }}
-                      >
-                        <FaUserPlus className="text-xl" />
-                        <span>Signup</span>
-                      </a>
-                    </>
+                    <a
+                      onClick={() => navigate("/login")}
+                      className="flex items-center space-x-2 text-lg font-medium hover:text-blue-600 transition duration-300 cursor-pointer"
+                      style={{
+                        animation: isMenuOpen
+                          ? "fadeIn 0.5s ease-in-out 0.6s forwards"
+                          : "none",
+                        opacity: 0,
+                      }}
+                    >
+                      <FaSignInAlt className="text-xl" />
+                      <span>Teacher's Login</span>
+                    </a>
                   )}
                 </>
               )}

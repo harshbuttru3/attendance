@@ -5,6 +5,9 @@ import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import subjectData from "../assets/subjectData"; // Importing subject data
 import toast from "react-hot-toast";
+import { AiOutlineDelete } from "react-icons/ai"; // Import delete icon
+import { FiLogOut } from "react-icons/fi"; // Import logout icon
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import eye icons
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -27,10 +30,7 @@ const AdminDashboard = () => {
     setTeacherData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const [teacherList, setTeacherList] = useState([]); // State to store teachers list
-  const [deleteTeacherData, setDeleteTeacherData] = useState({
-    employee_id: "", // Only need employee_id for deletion
-  });
+  const [teacherList, setTeacherList] = useState(); // State to store teachers list
 
   // Fetch teachers list
   const fetchTeachers = async () => {
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
       );
     } catch (err) {
       console.log(err || "Something went wrong");
-      setTeacherList([]); // Clear teacher list on error
+      setTeacherList(); // Clear teacher list on error
     }
   };
 
@@ -100,25 +100,32 @@ const AdminDashboard = () => {
   };
 
   // Handle deleting teacher
-  const handleDeleteTeacher = async () => {
-    if (!deleteTeacherData.employee_id) {
-      alert("Please enter the Employee ID to delete a teacher.");
+  const handleDeleteTeacher = async (employeeId, teacherName) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete teacher: ${teacherName} with Employee ID: ${employeeId}?`
+    );
+
+    if (!confirmDelete) {
       return;
     }
+
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.delete(
-        `https://dce-attendance.onrender.com/api/admin/delete-teacher/${deleteTeacherData.employee_id}`,
+        `https://dce-attendance.onrender.com/api/admin/delete-teacher/${employeeId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      alert(res.data.message);
-      setDeleteTeacherData({ employee_id: "" }); // Reset deleteTeacherData
+      toast.success(res.data.message);
       fetchTeachers(); // Refresh teacher list after deleting
     } catch (err) {
+      toast.error(
+        "Error deleting teacher: " +
+          (err.response?.data?.error || "Something went wrong")
+      );
       console.log(err || "Something went wrong");
     }
   };
@@ -142,7 +149,6 @@ const AdminDashboard = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
-  const [isDeleteTeacherOpen, setIsDeleteTeacherOpen] = useState(false);
   const [isTeacherListOpen, setIsTeacherListOpen] = useState(false);
 
   // Convert semester number to ordinal (1st, 2nd, 3rd, etc.)
@@ -252,10 +258,81 @@ const AdminDashboard = () => {
     }
   };
 
+  // Function to toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Function to toggle confirm password visibility
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   // Fetch teachers list on component mount
   useEffect(() => {
     fetchTeachers();
-  }, []);
+  });
+
+  const sectionTitleClass = `text-xl font-semibold mb-3 ${
+    darkMode ? "text-gray-300" : "text-gray-700"
+  }`;
+  const collapsibleTitleClass = `flex justify-between items-center cursor-pointer mb-2 ${
+    darkMode ? "text-white" : "text-gray-900"
+  }`;
+  const collapsibleContentClass = `mt-2 p-4 rounded-md ${
+    darkMode
+      ? "bg-gray-700 border border-gray-600"
+      : "bg-gray-100 border border-gray-200"
+  }`;
+  const inputClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    darkMode
+      ? "bg-gray-800 text-white border-gray-700"
+      : "bg-white text-gray-900 border-gray-300"
+  }`;
+  const selectClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    darkMode
+      ? "bg-gray-800 text-white border-gray-700"
+      : "bg-white text-gray-900 border-gray-300"
+  }`;
+  const buttonClass = `cursor-pointer px-5 py-2 rounded-lg font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500`;
+  const primaryButtonClass = `${buttonClass} ${
+    darkMode
+      ? "bg-blue-600 hover:bg-blue-700 text-white"
+      : "bg-blue-500 hover:bg-blue-600 text-white"
+  }`;
+  const successButtonClass = `${buttonClass} ${
+    darkMode
+      ? "bg-green-600 hover:bg-green-700 text-white"
+      : "bg-green-500 hover:bg-green-600 text-white"
+  }`;
+  const warningButtonClass = `${buttonClass} ${
+    darkMode
+      ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+      : "bg-yellow-500 hover:bg-yellow-600 text-white"
+  }`;
+  const deleteButtonClass = `${buttonClass} ${
+    darkMode
+      ? "bg-red-600 hover:bg-red-700 text-white"
+      : "bg-red-500 hover:bg-red-600 text-white"
+  }`;
+  const tableClass = `w-full border-collapse rounded-lg overflow-hidden shadow-md ${
+    darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+  }`;
+  const tableHeaderClass = `bg-gray-100 font-semibold text-left ${
+    darkMode ? "bg-gray-700 text-gray-300" : "text-gray-600"
+  }`;
+  const tableRowClass = `hover:bg-gray-200 ${
+    darkMode
+      ? "hover:bg-gray-700 border-b border-gray-700"
+      : "border-b border-gray-200"
+  }`;
+  const tableCellClass = `px-4 py-3`;
+  const deleteIconClass = `cursor-pointer text-red-500 hover:text-red-700 focus:outline-none`;
+  const logoutButtonClass = `${buttonClass} ${
+    darkMode
+      ? "bg-red-700 hover:bg-red-800 text-white"
+      : "bg-red-600 hover:bg-red-700 text-white"
+  } flex items-center`;
 
   return (
     <div
@@ -263,40 +340,47 @@ const AdminDashboard = () => {
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h2>
+      <div className="max-w-5xl mx-auto">
+        {/* Logout Button at the Top */}
+        <div className="flex justify-end mb-8">
+          <button
+            onClick={() => {
+              localStorage.removeItem("adminToken");
+              navigate("/");
+            }}
+            className={logoutButtonClass}
+          >
+            <FiLogOut className="mr-2 h-5 w-5" /> Logout
+          </button>
+        </div>
+
+        <h2 className="text-4xl font-bold text-center mb-8">Admin Dashboard</h2>
 
         {/* Student Management Section */}
-        <div
-          className={`mb-8 p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
-        >
-          <h3 className="text-2xl font-bold mb-4">Student Management</h3>
+        <div className="mb-10 p-6 rounded-lg shadow-xl">
+          <h3 className="text-2xl font-semibold mb-5 text-blue-500">
+            Student Management
+          </h3>
 
           {/* Register Student Section */}
           <div className="mb-6">
             <div
-              className="flex justify-between items-center cursor-pointer"
+              className={collapsibleTitleClass}
               onClick={() => setIsRegisterOpen(!isRegisterOpen)}
             >
-              <h4 className="text-xl font-bold">Register New Student</h4>
+              <h4 className={sectionTitleClass}>Register New Student</h4>
               <span>{isRegisterOpen ? "▲" : "▼"}</span>
             </div>
             {isRegisterOpen && (
-              <div className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     name="registration_no"
                     placeholder="Registration No"
                     value={formData.registration_no}
                     onChange={handleChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={inputClass}
                     required
                   />
                   <input
@@ -305,22 +389,14 @@ const AdminDashboard = () => {
                     placeholder="Name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={inputClass}
                     required
                   />
                   <select
                     name="branch"
                     value={formData.branch}
                     onChange={handleChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={selectClass}
                   >
                     <option value="">Select Branch</option>
                     {subjectData[0].branches.map((b) => (
@@ -333,11 +409,7 @@ const AdminDashboard = () => {
                     name="semester"
                     value={formData.semester}
                     onChange={handleChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={selectClass}
                   >
                     <option value="">Select Semester</option>
                     {[
@@ -356,14 +428,7 @@ const AdminDashboard = () => {
                     ))}
                   </select>
                 </div>
-                <button
-                  onClick={handleRegister}
-                  className={`mt-4 px-4 py-2 rounded-lg ${
-                    darkMode
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } text-white w-full md:w-auto`}
-                >
+                <button onClick={handleRegister} className={primaryButtonClass}>
                   Register Student
                 </button>
               </div>
@@ -373,23 +438,19 @@ const AdminDashboard = () => {
           {/* Promote Students Section */}
           <div className="mb-6">
             <div
-              className="flex justify-between items-center cursor-pointer"
+              className={collapsibleTitleClass}
               onClick={() => setIsPromoteOpen(!isPromoteOpen)}
             >
-              <h4 className="text-xl font-bold">Promote Students</h4>
+              <h4 className={sectionTitleClass}>Promote Students</h4>
               <span>{isPromoteOpen ? "▲" : "▼"}</span>
             </div>
             {isPromoteOpen && (
-              <div className="mt-4">
-                <div className="flex flex-col md:flex-row gap-4">
+              <div className={collapsibleContentClass}>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <select
                     value={promotionSemester}
                     onChange={(e) => setPromotionSemester(e.target.value)}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={selectClass}
                   >
                     <option value="">Select Semester to Promote</option>
                     {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
@@ -402,11 +463,7 @@ const AdminDashboard = () => {
                   </select>
                   <button
                     onClick={handlePromote}
-                    className={`px-4 py-2 rounded-lg ${
-                      darkMode
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-green-500 hover:bg-green-600"
-                    } text-white`}
+                    className={successButtonClass}
                   >
                     Promote Students
                   </button>
@@ -418,15 +475,15 @@ const AdminDashboard = () => {
           {/* Update Student Semester Section */}
           <div>
             <div
-              className="flex justify-between items-center cursor-pointer"
+              className={collapsibleTitleClass}
               onClick={() => setIsUpdateOpen(!isUpdateOpen)}
             >
-              <h4 className="text-xl font-bold">Update Student Semester</h4>
+              <h4 className={sectionTitleClass}>Update Student Semester</h4>
               <span>{isUpdateOpen ? "▲" : "▼"}</span>
             </div>
             {isUpdateOpen && (
-              <div className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     name="registration_no"
@@ -438,11 +495,7 @@ const AdminDashboard = () => {
                         registration_no: e.target.value,
                       })
                     }
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={inputClass}
                   />
                   <select
                     name="newSemester"
@@ -453,11 +506,7 @@ const AdminDashboard = () => {
                         newSemester: e.target.value,
                       })
                     }
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={selectClass}
                   >
                     <option value="">Select New Semester</option>
                     {[
@@ -478,11 +527,7 @@ const AdminDashboard = () => {
                 </div>
                 <button
                   onClick={handleUpdateSemester}
-                  className={`mt-4 px-4 py-2 rounded-lg ${
-                    darkMode
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-500 hover:bg-yellow-600"
-                  } text-white w-full md:w-auto`}
+                  className={warningButtonClass}
                 >
                   Update Semester
                 </button>
@@ -492,36 +537,30 @@ const AdminDashboard = () => {
         </div>
 
         {/* Teacher Management Section */}
-        <div
-          className={`mb-8 p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
-        >
-          <h3 className="text-2xl font-bold mb-4">Teacher Management</h3>
+        <div className="mb-10 p-6 rounded-lg shadow-xl">
+          <h3 className="text-2xl font-semibold mb-5 text-indigo-500">
+            Teacher Management
+          </h3>
 
           {/* Add Teacher Section */}
           <div className="mb-6">
             <div
-              className="flex justify-between items-center cursor-pointer"
+              className={collapsibleTitleClass}
               onClick={() => setIsAddTeacherOpen(!isAddTeacherOpen)}
             >
-              <h4 className="text-xl font-bold">Add New Teacher</h4>
+              <h4 className={sectionTitleClass}>Add New Teacher</h4>
               <span>{isAddTeacherOpen ? "▲" : "▼"}</span>
             </div>
             {isAddTeacherOpen && (
-              <div className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     name="employee_id"
                     placeholder="Employee ID"
                     value={teacherData.employee_id}
                     onChange={handleTeacherChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={inputClass}
                   />
                   <input
                     type="text"
@@ -529,11 +568,7 @@ const AdminDashboard = () => {
                     placeholder="Name"
                     value={teacherData.name}
                     onChange={handleTeacherChange}
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
+                    className={inputClass}
                   />
                   <div className="relative">
                     <input
@@ -542,19 +577,18 @@ const AdminDashboard = () => {
                       placeholder="Password"
                       value={teacherData.password}
                       onChange={handleTeacherChange}
-                      className={`p-2 rounded-lg border focus:outline-none w-full ${
-                        darkMode
-                          ? "bg-gray-700 text-white border-gray-600"
-                          : "bg-white text-gray-900 border-gray-300"
-                      }`}
+                      className={inputClass}
                     />
                     <button
-                      onClick={() => setShowPassword(!showPassword)}
-                      className={`absolute right-2 top-2 ${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
                     >
-                      {showPassword ? "Hide" : "Show"}
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                   <div className="relative">
@@ -564,77 +598,26 @@ const AdminDashboard = () => {
                       placeholder="Confirm Password"
                       value={teacherData.confirmPassword}
                       onChange={handleTeacherChange}
-                      className={`p-2 rounded-lg border focus:outline-none w-full ${
-                        darkMode
-                          ? "bg-gray-700 text-white border-gray-600"
-                          : "bg-white text-gray-900 border-gray-300"
-                      }`}
+                      className={inputClass}
                     />
                     <button
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className={`absolute right-2 top-2 ${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
+                      type="button"
+                      onClick={toggleConfirmPasswordVisibility}
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
                     >
-                      {showConfirmPassword ? "Hide" : "Show"}
+                      {showConfirmPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 </div>
                 <button
                   onClick={handleAddTeacher}
-                  className={`mt-4 px-4 py-2 rounded-lg ${
-                    darkMode
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  } text-white w-full md:w-auto`}
+                  className={primaryButtonClass}
                 >
                   Add Teacher
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Delete Teacher Section */}
-          <div className="mb-6">
-            <div
-              className="flex justify-between items-center cursor-pointer"
-              onClick={() => setIsDeleteTeacherOpen(!isDeleteTeacherOpen)}
-            >
-              <h4 className="text-xl font-bold">Delete Teacher</h4>
-              <span>{isDeleteTeacherOpen ? "▲" : "▼"}</span>
-            </div>
-            {isDeleteTeacherOpen && (
-              <div className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    name="employee_id"
-                    placeholder="Employee ID"
-                    value={deleteTeacherData.employee_id}
-                    onChange={(e) =>
-                      setDeleteTeacherData({
-                        ...deleteTeacherData,
-                        employee_id: e.target.value,
-                      })
-                    }
-                    className={`p-2 rounded-lg border focus:outline-none ${
-                      darkMode
-                        ? "bg-gray-700 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-300"
-                    }`}
-                  />
-                </div>
-                <button
-                  onClick={handleDeleteTeacher}
-                  className={`mt-4 px-4 py-2 rounded-lg ${
-                    darkMode
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-red-500 hover:bg-red-600"
-                  } text-white w-full md:w-auto`}
-                >
-                  Delete Teacher
                 </button>
               </div>
             )}
@@ -643,92 +626,64 @@ const AdminDashboard = () => {
           {/* List of Teachers Section */}
           <div>
             <div
-              className="flex justify-between items-center cursor-pointer"
+              className={collapsibleTitleClass}
               onClick={() => setIsTeacherListOpen(!isTeacherListOpen)}
             >
-              <h4 className="text-xl font-bold">Current Teachers</h4>
+              <h4 className={sectionTitleClass}>Current Teachers</h4>
               <span>{isTeacherListOpen ? "▲" : "▼"}</span>
             </div>
             {isTeacherListOpen && (
-              <div className="mt-4 overflow-x-auto">
-                <table
-                  className={`w-full border-collapse rounded-lg overflow-hidden ${
-                    darkMode ? "bg-gray-700" : "bg-white"
-                  }`}
-                >
-                  <thead>
-                    <tr
-                      className={`${
-                        darkMode
-                          ? "bg-gray-800 text-white"
-                          : "bg-gray-200 text-gray-900"
-                      }`}
-                    >
-                      <th className="px-4 py-3 text-left">Name</th>
-                      <th className="px-4 py-3 text-left">Employee ID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teacherList.length > 0 ? (
-                      teacherList.map((teacher) => (
-                        <tr
-                          key={teacher.id}
-                          className={`${
-                            darkMode
-                              ? "hover:bg-gray-600 border-b border-gray-600"
-                              : "hover:bg-gray-100 border-b border-gray-200"
-                          } transition duration-200`}
-                        >
+              <div className={collapsibleContentClass}>
+                <div className="overflow-x-auto">
+                  <table className={tableClass}>
+                    <thead className={tableHeaderClass}>
+                      <tr>
+                        <th className={tableCellClass}>Name</th>
+                        <th className={tableCellClass}>Employee ID</th>
+                        <th className={`${tableCellClass} text-center`}>
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teacherList.length > 0 ? (
+                        teacherList.map((teacher) => (
+                          <tr key={teacher.id} className={tableRowClass}>
+                            <td className={tableCellClass}>{teacher.name}</td>
+                            <td className={tableCellClass}>
+                              {teacher.employee_id}
+                            </td>
+                            <td className={`${tableCellClass} text-center`}>
+                              <button
+                                onClick={() =>
+                                  handleDeleteTeacher(
+                                    teacher.employee_id,
+                                    teacher.name
+                                  )
+                                }
+                                className={deleteIconClass}
+                              >
+                                <AiOutlineDelete className="h-5 w-5 inline-block" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
                           <td
-                            className={`px-4 py-3 ${
-                              darkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            colSpan="3"
+                            className={`${tableCellClass} text-center`}
                           >
-                            {teacher.name}
-                          </td>
-                          <td
-                            className={`px-4 py-3 ${
-                              darkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {teacher.employee_id}
+                            No teachers found.
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="2"
-                          className={`px-4 py-3 text-center ${
-                            darkMode ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          No teachers found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Logout Button */}
-        <div className="flex justify-center">
-          <button
-            onClick={() => {
-              localStorage.removeItem("adminToken");
-              navigate("/");
-            }}
-            className={`px-4 py-2 rounded-lg ${
-              darkMode
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-red-500 hover:bg-red-600"
-            } text-white`}
-          >
-            Logout
-          </button>
         </div>
       </div>
     </div>

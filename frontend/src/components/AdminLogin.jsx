@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import { useContext } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import eye icons
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({ employee_id: "", password: "" });
   const navigate = useNavigate();
-
-  // const { user, login } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
   const { darkMode } = useContext(ThemeContext);
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (adminToken) {
+      navigate("/admin/dashboard");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,6 +37,10 @@ const AdminLogin = () => {
     } catch (err) {
       alert("Error: " + (err.response?.data?.error || "Something went wrong"));
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -54,8 +65,8 @@ const AdminLogin = () => {
           Admin Login
         </h2>
 
-        {/* ✅ Employee ID Field */}
         <div className="space-y-6">
+          {/* ✅ Employee ID Field */}
           <div>
             <label
               className={`block text-sm font-medium ${
@@ -88,29 +99,38 @@ const AdminLogin = () => {
             >
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className={`w-full px-4 py-2 rounded-lg border ${
-                darkMode ? "border-gray-600" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                darkMode ? "bg-gray-700 text-white" : "bg-white"
-              } transition duration-300`}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className={`w-full px-4 py-2 rounded-lg border ${
+                  darkMode ? "border-gray-600" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  darkMode ? "bg-gray-700 text-white" : "bg-white"
+                } transition duration-300`}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className={`absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-500`}
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* ✅ Login Button */}
           <button
             type="submit"
-            className={`w-full mt-6 ${
-              darkMode ? "bg-blue-600" : "bg-blue-600"
-            } text-white py-2 rounded-lg hover:${
-              darkMode ? "bg-blue-700" : "bg-blue-700"
-            } transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full mt-6 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-semibold`}
           >
             Login
           </button>
