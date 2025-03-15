@@ -22,14 +22,11 @@ const StudentAttendance = () => {
     if (sem === "6") return "6th";
     if (sem === "7") return "7th";
     if (sem === "8") return "8th";
-    return sem;      
-    ; // 4th, 5th, 6th, 7th, 8th
+    return sem; // 4th, 5th, 6th, 7th, 8th
   };
-  
 
   const fetchAttendance = () => {
     if (semester && branch) {
-
       const formattedSemester = formatSemester(semester);
 
       axios
