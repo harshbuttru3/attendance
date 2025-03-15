@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [submitAttendanceLoading, setSubmitAttendanceLoading] = useState(false);
   const [selectedSubjectForAttendance, setSelectedSubjectForAttendance] =
     useState(null);
+  const [previousTotalClasses, setPreviousTotalClasses] = useState(""); // Add this line
 
   const getOrdinalSuffix = (value) => {
     if (typeof value === "string" && /^\d+(st|nd|rd|th)$/.test(value)) {
@@ -192,6 +193,26 @@ const Dashboard = () => {
         );
         const pastAttendance = attendanceRes.data;
 
+        // Check if pastAttendance is valid
+        if (!pastAttendance || pastAttendance.length === 0) {
+          toast.error("No past attendance data found.");
+          setPreviousTotalClasses(""); // Clear previous total classes
+          setAttendance(
+            studentList.map((student) => ({
+              student_id: student.id,
+              subject: selectedSubject,
+              semester: ordinalSemester,
+              branch: selectedBranch,
+              total_classes: 0,
+              attended_classes: 0,
+            }))
+          );
+          return;
+        }
+
+        // Extract previous total classes if available
+        setPreviousTotalClasses(pastAttendance[0].total_classes); // Assuming total classes is the same for all
+
         const updatedAttendance = studentList.map((student) => {
           const existingRecord = pastAttendance.find(
             (record) => record.student_id === student.id
@@ -212,6 +233,7 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Error fetching past attendance:", err);
         toast.error("Could not fetch past attendance.");
+        setPreviousTotalClasses(""); // Clear if there's an error
         setAttendance(
           studentList.map((student) => ({
             student_id: student.id,
@@ -231,12 +253,29 @@ const Dashboard = () => {
     }
   };
 
+  useEffect(() => {
+    if (previousTotalClasses !== "") {
+      setAttendance((prevAttendance) =>
+        prevAttendance.map((entry) => ({
+          ...entry,
+          total_classes: Number(previousTotalClasses),
+        }))
+      );
+    }
+  }, [previousTotalClasses]);
+
   const handleTotalClassesChange = (value) => {
     if (!attendance) return; // Add check for undefined
+    const numericValue = value === "" ? 0 : Math.max(0, Number(value)); // Ensure it's a number
+
+    // Update previousTotalClasses
+    setPreviousTotalClasses(numericValue);
+
+    // Update attendance state
     setAttendance((prevAttendance) =>
       prevAttendance.map((entry) => ({
         ...entry,
-        total_classes: value === "" ? "" : Math.max(0, Number(value)),
+        total_classes: numericValue, // Update total_classes for all entries
       }))
     );
   };
@@ -245,7 +284,7 @@ const Dashboard = () => {
     if (!attendance) return; // Add check for undefined
     setAttendance((prevAttendance) => {
       const updatedAttendance = [...prevAttendance];
-      let numericValue = value === "" ? "" : Math.max(0, Number(value));
+      let numericValue = value === "" ? 0 : Math.max(0, Number(value)); // Ensure it's a number
       updatedAttendance[index][field] = numericValue;
       return updatedAttendance;
     });
@@ -257,11 +296,16 @@ const Dashboard = () => {
       return;
     }
     setSubmitAttendanceLoading(true);
+
+    // Debugging: Log the attendance data being sent
+    console.log("Submitting attendance data:", attendance);
+
     try {
-      await axios.post(
+      const response = await axios.post(
         "https://dce-attendance.onrender.com/api/dashboard/attendance/update",
         attendance
       );
+      console.log("Backend response:", response.data); // Debugging
       toast.success("Attendance updated successfully!");
     } catch (err) {
       console.error("Error updating attendance:", err);
@@ -270,6 +314,23 @@ const Dashboard = () => {
       setSubmitAttendanceLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!selectedSubjectForAttendance) {
+      setPreviousTotalClasses("");
+    }
+  }, [selectedSubjectForAttendance]);
+
+  useEffect(() => {
+    if (previousTotalClasses !== "") {
+      setAttendance((prevAttendance) =>
+        prevAttendance.map((entry) => ({
+          ...entry,
+          total_classes: Number(previousTotalClasses),
+        }))
+      );
+    }
+  }, [previousTotalClasses]);
 
   const handleRemoveSubject = async (
     subjectToRemove,
@@ -305,8 +366,8 @@ const Dashboard = () => {
       toast.success("Subject removed successfully!");
       fetchUserSubjects();
       if (selectedSubjectForAttendance === subjectToRemove) {
-        setStudents();
-        setAttendance();
+        setStudents([]); // Reset to empty array
+        setAttendance([]); // Reset to empty array
         setSelectedSubjectForAttendance(null);
       }
     } catch (err) {
@@ -479,10 +540,10 @@ const Dashboard = () => {
                 htmlFor="total-classes"
                 className="block font-semibold mb-1"
               >
-                Total Classes for this Session
+                Total Classes for this Subject
               </label>
               <input
-                type="number"
+                type="text" // Changed from "number" to "text"
                 id="total-classes"
                 className={`w-full px-3 py-2 rounded-lg border focus:outline-none ${
                   darkMode
@@ -490,7 +551,25 @@ const Dashboard = () => {
                     : "bg-white text-gray-900 border-gray-300"
                 }`}
                 placeholder="Enter total classes"
-                onChange={(e) => handleTotalClassesChange(e.target.value)}
+                value={previousTotalClasses} // Bind the value to previousTotalClasses
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Ensure the value is a valid number
+                  if (/^\d*$/.test(value)) {
+                    // Only allow numeric input
+                    console.log("onChange:", value); // Debugging
+                    handleTotalClassesChange(value); // Update both states
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  // Ensure the value is a valid number
+                  if (/^\d*$/.test(value)) {
+                    // Only allow numeric input
+                    console.log("onBlur:", value); // Debugging
+                    handleTotalClassesChange(value); // Update both states
+                  }
+                }}
               />
             </div>
 
@@ -527,15 +606,20 @@ const Dashboard = () => {
                       </td>
                       <td className="border px-2 py-2 md:px-4 md:py-2">
                         <input
-                          type="number"
+                          type="text" // Changed from "number" to "text"
                           value={attendance[index]?.attended_classes || 0}
-                          onChange={(e) =>
-                            handleInputChange(
-                              index,
-                              "attended_classes",
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Ensure the value is a valid number
+                            if (/^\d*$/.test(value)) {
+                              // Only allow numeric input
+                              handleInputChange(
+                                index,
+                                "attended_classes",
+                                value
+                              ); // Update attendance
+                            }
+                          }}
                           className={`w-full text-center px-1 py-0.5 rounded border focus:outline-none ${
                             darkMode
                               ? "bg-gray-700 text-white border-gray-600"
