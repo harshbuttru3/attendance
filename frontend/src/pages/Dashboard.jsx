@@ -64,7 +64,7 @@ const Dashboard = () => {
 
     axios
       .get(
-        `https://dce-attendance.onrender.com/api/dashboard/subjects/${user.id}`
+        `http://localhost:5000/api/dashboard/subjects/${user.id}`
       )
       .then((res) => {
         console.log("Fetched subjects:", res.data);
@@ -139,7 +139,7 @@ const Dashboard = () => {
 
     try {
       await axios.post(
-        "https://dce-attendance.onrender.com/api/dashboard/add-subjects",
+        "http://localhost:5000/api/dashboard/add-subjects",
         payload
       );
       fetchUserSubjects();
@@ -182,14 +182,14 @@ const Dashboard = () => {
 
     try {
       const studentsRes = await axios.get(
-        `https://dce-attendance.onrender.com/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
+        `http://localhost:5000/api/dashboard/students/${ordinalSemester}/${selectedBranch}`
       );
       const studentList = studentsRes.data;
       setStudents(studentList);
 
       try {
         const attendanceRes = await axios.get(
-          `https://dce-attendance.onrender.com/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
+          `http://localhost:5000/api/dashboard/attendance/${ordinalSemester}/${selectedBranch}/${selectedSubject}`
         );
         const pastAttendance = attendanceRes.data;
 
@@ -302,7 +302,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.post(
-        "https://dce-attendance.onrender.com/api/dashboard/attendance/update",
+        "http://localhost:5000/api/dashboard/attendance/update",
         attendance
       );
       console.log("Backend response:", response.data); // Debugging
@@ -358,7 +358,7 @@ const Dashboard = () => {
 
     try {
       await axios.delete(
-        "https://dce-attendance.onrender.com/api/dashboard/remove-subject",
+        "http://localhost:5000/api/dashboard/remove-subject",
         {
           data: payload,
         }

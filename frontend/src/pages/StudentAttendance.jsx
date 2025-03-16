@@ -36,7 +36,7 @@ const StudentAttendance = () => {
 
       axios
         .get(
-          `https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`
+          `http://localhost:5000/api/student-attendance/${formattedSemester}/${branch}`
         )
         .then((res) => {
           setIsLoading(false); // Set loading to false

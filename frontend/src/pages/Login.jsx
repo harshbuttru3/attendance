@@ -35,7 +35,7 @@ const Login = () => {
     setIsLoading(true); // Show loader on submit
     try {
       const res = await axios.post(
-        "https://dce-attendance.onrender.com/api/auth/login", // ✅ Correct Endpoint
+        "http://localhost:5000/api/auth/login", // ✅ Correct Endpoint
         formData
       );
       login(res.data.user); // ✅ Save user info in context
