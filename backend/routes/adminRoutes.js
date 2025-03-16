@@ -284,7 +284,43 @@ router.delete("/delete-student/:registration_no", verifyAdminToken, (req, res) =
     );
 });
 
+//delete student-attendance of whole class using semester while promoting
+router.delete("/delete-student-attendance/:semester", verifyAdminToken, (req, res) => {
+    const { semester } = req.params;
 
+    if (!semester) {
+        return res.status(400).json({ error: "Semester is required" });
+    }
+
+    pool.query(
+        "DELETE FROM attendance WHERE semester = ?",
+        [semester],
+        (error, result) => {
+            if (error) {
+                console.error("Error deleting student attendance:", error);
+                return res.status(500).json({ error: "Database error while deleting student attendance" });
+            }
+            res.json({ message: "Student attendance deleted successfully" });
+        }
+    );
+});
+
+ //delete-students-of-last-semester
+router.delete("/delete-students-of-last-semester", verifyAdminToken, (req, res) => {
+    const lastSemester = "8th";
+
+    pool.query(
+        "DELETE FROM students WHERE semester = ?",
+        [lastSemester],
+        (error, result) => {
+            if (error) {
+                console.error("Error deleting students:", error);
+                return res.status(500).json({ error: "Database error while deleting students" });
+            }
+            res.json({ message: "8th semester students deleted successfully" });
+        }
+    );
+});
 
 //admin login
 router.post("/auth/login", (req, res) => {

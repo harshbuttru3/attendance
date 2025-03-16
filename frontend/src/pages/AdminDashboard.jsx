@@ -34,7 +34,6 @@ const AdminDashboard = () => {
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  
 
   // ✅ Handle teacher form changes
   const handleTeacherChange = (e) => {
@@ -46,14 +45,11 @@ const AdminDashboard = () => {
   const fetchTeachers = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get(
-        "https://dce-attendance.onrender.com/api/admin/teachers",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.get("https://dce-attendance.onrender.com/api/admin/teachers", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("Fetched Teachers:", res.data);
       setTeacherList(
         res.data.map(({ id, name, employee_id }) => ({
@@ -145,7 +141,6 @@ const AdminDashboard = () => {
     fetchTeachers(); // ✅ Runs on mount and when teacherListUpdated changes
   }, [teacherListUpdated]);
 
-
   // Reset teacher's password using employee_id.
   const handleResetPassword = async () => {
     if (
@@ -157,7 +152,9 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword) {
+    if (
+      resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword
+    ) {
       toast.error("New Password and Confirm New Password do not match.");
       return;
     }
@@ -188,7 +185,6 @@ const AdminDashboard = () => {
       toast.error("Failed to reset password.");
     }
   };
-
 
   // For Students
   const [formData, setFormData] = useState({
@@ -273,7 +269,7 @@ const AdminDashboard = () => {
     }
 
     const confirmPromotion = window.confirm(
-      `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester?`
+      `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester? All attendance data for the current semester will be deleted!`
     );
 
     if (!confirmPromotion) return;
@@ -338,11 +334,54 @@ const AdminDashboard = () => {
         }
       );
       toast.success(res.data.message);
-
       // Optionally, you can trigger a re-fetch or update the student list state here
     } catch (err) {
       console.log(err || "Something went wrong");
       toast.error("Failed to delete student.");
+    }
+  };
+
+  // function to delete student's attendance data using semester while promoting
+  const deleteStudentAttendanceWhilePromoting = async (semester) => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.delete(
+        `https://dce-attendance.onrender.com/api/admin/delete-student-attendance/${semester}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(res.data.message);
+    } catch (err) {
+      console.log(err || "Something went wrong");
+      toast.error("Failed to delete student attendance.");
+    }
+  };
+
+
+  // function to delete students of last ie 8th semester
+  const deleteStudentsOfLastSemester = async () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete students of 8th semester?`
+    ); //confirmation message
+    if (!confirmDelete) return; //if user cancels the confirmation message
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.delete(
+        `https://dce-attendance.onrender.com/api/admin/delete-students-of-last-semester`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(res.data.message);
+      // Optionally, you can trigger a re-fetch or update the student list state here   
+    } catch (err) {
+      console.log(err || "Something went wrong");
+      toast.error("Failed to delete students of last semester.");
     }
   };
 
@@ -356,8 +395,6 @@ const AdminDashboard = () => {
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-
-
 
   const sectionTitleClass = `text-xl font-semibold mb-3 ${
     darkMode ? "text-gray-300" : "text-gray-700"
@@ -548,7 +585,10 @@ const AdminDashboard = () => {
                     )}
                   </select>
                   <button
-                    onClick={handlePromote}
+                    onClick={async () => {
+                      await handlePromote();
+                      await deleteStudentAttendanceWhilePromoting(promotionSemester);
+                    }}
                     className={successButtonClass}
                   >
                     Promote Students
@@ -624,38 +664,46 @@ const AdminDashboard = () => {
           {/* delete studnets based on registration number  */}
           {/* Delete Student Section */}
           <div className="mb-6">
-          <div
-            className={collapsibleTitleClass}
-            onClick={() => setIsDeleteOpen(!isDeleteOpen)}
-          >
-            <h4 className={sectionTitleClass}>Delete Student</h4>
-            <span>{isDeleteOpen ? "▲" : "▼"}</span>
-          </div>
-          {isDeleteOpen && (
-            <div className={collapsibleContentClass}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input
-              type="text"
-              name="delete_registration_no"
-              placeholder="Registration No"
-              value={formData.registration_no}
-              onChange={(e) =>
-                setFormData({ ...formData, registration_no: e.target.value })
-              }
-              className={inputClass}
-              required
-              />
-            </div>
-            <button
-              onClick={() => handleDeleteStudent(formData.registration_no)}
-              className={deleteButtonClass}
+            <div
+              className={collapsibleTitleClass}
+              onClick={() => setIsDeleteOpen(!isDeleteOpen)}
             >
-              Delete Student
-            </button>
+              <h4 className={sectionTitleClass}>Delete Student</h4>
+              <span>{isDeleteOpen ? "▲" : "▼"}</span>
             </div>
-          )}
+            {isDeleteOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="delete_registration_no"
+                    placeholder="Registration No"
+                    value={formData.registration_no}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        registration_no: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                    required
+                  />
+                </div>
+                <button
+                  onClick={() => handleDeleteStudent(formData.registration_no)}
+                  className={deleteButtonClass}
+                >
+                  Delete Student
+                </button>
+                <button
+                  onClick={deleteStudentsOfLastSemester}
+                  className={deleteButtonClass}
+                  >
+                  Delete Students of Last Semester
+                  </button>
+              </div>
+            )}
           </div>
-
         </div>
 
         {/* Teacher Management Section */}
@@ -745,94 +793,96 @@ const AdminDashboard = () => {
             )}
           </div>
 
-        {/* component for reseting password of teacher */}
-        {/* Reset Teacher Password Section */}
-        <div className="mb-6">
-          <div
-            className={collapsibleTitleClass}
-            onClick={() => setIsResetPasswordOpen(!IsResetPasswordOpen)}
-          >
-            <h4 className={sectionTitleClass}>Reset Teacher Password</h4>
-            <span>{IsResetPasswordOpen ? "▲" : "▼"}</span>
-          </div>
-          {IsResetPasswordOpen && (
-            <div className={collapsibleContentClass}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  name="reset_employee_id"
-                  placeholder="Employee ID"
-                  value={resetPasswordData.employee_id}
-                  onChange={(e) =>
-                    setResetPasswordData({
-                      ...resetPasswordData,
-                      employee_id: e.target.value,
-                    })
-                  }
-                  className={inputClass}
-                />
-                <div className="relative">
-                  <input
-                    type={showNewPassword ? "text" : "password"}
-                    name="newPassword"
-                    placeholder="New Password"
-                    value={resetPasswordData.newPassword}
-                    onChange={(e) =>
-                      setResetPasswordData({
-                        ...resetPasswordData,
-                        newPassword: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                  >
-                    {showNewPassword ? (
-                      <EyeSlashIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showConfirmNewPassword ? "text" : "password"}
-                    name="confirmNewPassword"
-                    placeholder="Confirm New Password"
-                    value={resetPasswordData.confirmNewPassword}
-                    onChange={(e) =>
-                      setResetPasswordData({
-                        ...resetPasswordData,
-                        confirmNewPassword: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                    className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                  >
-                    {showConfirmNewPassword ? (
-                      <EyeSlashIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={handleResetPassword}
-                className={primaryButtonClass}
-              >
-                Reset Password
-              </button>
+          {/* component for reseting password of teacher */}
+          {/* Reset Teacher Password Section */}
+          <div className="mb-6">
+            <div
+              className={collapsibleTitleClass}
+              onClick={() => setIsResetPasswordOpen(!IsResetPasswordOpen)}
+            >
+              <h4 className={sectionTitleClass}>Reset Teacher Password</h4>
+              <span>{IsResetPasswordOpen ? "▲" : "▼"}</span>
             </div>
-          )}
-        </div>
+            {IsResetPasswordOpen && (
+              <div className={collapsibleContentClass}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="reset_employee_id"
+                    placeholder="Employee ID"
+                    value={resetPasswordData.employee_id}
+                    onChange={(e) =>
+                      setResetPasswordData({
+                        ...resetPasswordData,
+                        employee_id: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      name="newPassword"
+                      placeholder="New Password"
+                      value={resetPasswordData.newPassword}
+                      onChange={(e) =>
+                        setResetPasswordData({
+                          ...resetPasswordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                    >
+                      {showNewPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showConfirmNewPassword ? "text" : "password"}
+                      name="confirmNewPassword"
+                      placeholder="Confirm New Password"
+                      value={resetPasswordData.confirmNewPassword}
+                      onChange={(e) =>
+                        setResetPasswordData({
+                          ...resetPasswordData,
+                          confirmNewPassword: e.target.value,
+                        })
+                      }
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmNewPassword(!showConfirmNewPassword)
+                      }
+                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                    >
+                      {showConfirmNewPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <button
+                  onClick={handleResetPassword}
+                  className={primaryButtonClass}
+                >
+                  Reset Password
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* List of Teachers Section */}
           <div>
