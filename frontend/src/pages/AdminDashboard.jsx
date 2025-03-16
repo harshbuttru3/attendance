@@ -39,6 +39,7 @@ const AdminDashboard = () => {
   const [isDeletingLastSemester, setIsDeletingLastSemester] = useState(false);
   const [isPromoting, setIsPromoting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // ✅ Handle teacher form changes
   const handleTeacherChange = (e) => {
@@ -246,6 +247,7 @@ const AdminDashboard = () => {
 
   // Handle student registration
   const handleRegister = async () => {
+    // Validation
     if (
       !formData.registration_no ||
       !formData.name ||
@@ -256,20 +258,32 @@ const AdminDashboard = () => {
       return;
     }
 
+    setIsRegistering(true); // Start loading state
+
     try {
       const res = await axios.post(
         "https://dce-attendance.onrender.com/api/admin/register-student",
         formData,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
       );
       toast.success(res.data.message);
-      setFormData({ registration_no: "", name: "", branch: "", semester: "" });
+      setFormData({
+        registration_no: "",
+        name: "",
+        branch: "",
+        semester: "",
+      }); // Clear form after successful registration
     } catch (err) {
+      console.log(err || "Something went wrong");
       toast.error(
-        "Error: " + (err.response?.data?.error || "Something went wrong")
+        "Error: " + (err.response?.data?.error || "Failed to register student.")
       );
+    } finally {
+      setIsRegistering(false); // End loading state
     }
   };
 
@@ -570,8 +584,16 @@ const AdminDashboard = () => {
                     ))}
                   </select>
                 </div>
-                <button onClick={handleRegister} className={primaryButtonClass}>
-                  Register Student
+                <button
+                  onClick={handleRegister}
+                  className={`${primaryButtonClass} flex items-center justify-center`}
+                  disabled={isRegistering} // Disable button while loading
+                >
+                  {isRegistering ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Register Student"
+                  )}
                 </button>
               </div>
             )}
