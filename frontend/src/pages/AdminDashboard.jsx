@@ -35,6 +35,11 @@ const AdminDashboard = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingLastSemester, setIsDeletingLastSemester] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+
   // ✅ Handle teacher form changes
   const handleTeacherChange = (e) => {
     const { name, value } = e.target;
@@ -45,11 +50,14 @@ const AdminDashboard = () => {
   const fetchTeachers = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get("https://dce-attendance.onrender.com/api/admin/teachers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        "https://dce-attendance.onrender.com/api/admin/teachers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log("Fetched Teachers:", res.data);
       setTeacherList(
         res.data.map(({ id, name, employee_id }) => ({
@@ -160,10 +168,12 @@ const AdminDashboard = () => {
     }
 
     const confirmReset = window.confirm(
-      `Are you sure you want to reset password for teacher with Employee ID: ${resetPasswordData.employee_id}?`
+      `Are you sure you want to reset the password for teacher with Employee ID: ${resetPasswordData.employee_id}?`
     );
 
     if (!confirmReset) return;
+
+    setIsResettingPassword(true); // Start loading state
 
     try {
       const token = localStorage.getItem("adminToken");
@@ -183,6 +193,8 @@ const AdminDashboard = () => {
     } catch (err) {
       console.log(err || "Something went wrong");
       toast.error("Failed to reset password.");
+    } finally {
+      setIsResettingPassword(false); // End loading state
     }
   };
 
@@ -264,15 +276,11 @@ const AdminDashboard = () => {
   // Handle student promotion
   const handlePromote = async () => {
     if (!promotionSemester) {
-      toast.error("Please select a semester to promote students.");
+      toast.error("Please select a semester to promote.");
       return;
     }
 
-    const confirmPromotion = window.confirm(
-      `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester? All attendance data for the current semester will be deleted!`
-    );
-
-    if (!confirmPromotion) return;
+    setIsPromoting(true); // Start loading state
 
     try {
       const res = await axios.put(
@@ -283,11 +291,13 @@ const AdminDashboard = () => {
         }
       );
       toast.success(res.data.message);
-      setPromotionSemester("");
+      setPromotionSemester(""); // Clear selection after promotion
     } catch (err) {
       toast.error(
         "Error: " + (err.response?.data?.error || "Something went wrong")
       );
+    } finally {
+      setIsPromoting(false); // End loading state
     }
   };
 
@@ -323,6 +333,8 @@ const AdminDashboard = () => {
 
     if (!confirmDelete) return;
 
+    setIsDeleting(true); // Start loading state
+
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.delete(
@@ -338,6 +350,8 @@ const AdminDashboard = () => {
     } catch (err) {
       console.log(err || "Something went wrong");
       toast.error("Failed to delete student.");
+    } finally {
+      setIsDeleting(false); // End loading state
     }
   };
 
@@ -360,13 +374,16 @@ const AdminDashboard = () => {
     }
   };
 
-
   // function to delete students of last ie 8th semester
   const deleteStudentsOfLastSemester = async () => {
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete students of 8th semester?`
-    ); //confirmation message
-    if (!confirmDelete) return; //if user cancels the confirmation message
+      "Are you sure you want to delete all students of the last semester?"
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeletingLastSemester(true); // Start loading state
+
     try {
       const token = localStorage.getItem("adminToken");
       const res = await axios.delete(
@@ -378,13 +395,13 @@ const AdminDashboard = () => {
         }
       );
       toast.success(res.data.message);
-      // Optionally, you can trigger a re-fetch or update the student list state here   
     } catch (err) {
       console.log(err || "Something went wrong");
       toast.error("Failed to delete students of last semester.");
+    } finally {
+      setIsDeletingLastSemester(false); // End loading state
     }
   };
-
 
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
@@ -465,7 +482,9 @@ const AdminDashboard = () => {
     >
       <div className="max-w-5xl mx-auto">
         {/* Logout Button at the Top */}
-        <div className="flex justify-end mb-8">
+        <div className="flex justify-end mb-8 pt-16">
+          {" "}
+          {/* Added pt-16 for padding-top */}
           <button
             onClick={() => {
               localStorage.removeItem("adminToken");
@@ -481,14 +500,18 @@ const AdminDashboard = () => {
 
         {/* Student Management Section */}
         <div className="mb-10 p-6 rounded-lg shadow-xl">
-          <h3 className="text-2xl font-semibold mb-5 text-blue-500">
+          <h3 className="text-2xl font-semibold mb-6 text-blue-500">
+            {" "}
+            {/* mb-6 for consistent spacing */}
             Student Management
           </h3>
 
           {/* Register Student Section */}
           <div className="mb-6">
+            {" "}
+            {/* mb-6 for consistent spacing */}
             <div
-              className={collapsibleTitleClass}
+              className={`${collapsibleTitleClass} mb-3`}
               onClick={() => setIsRegisterOpen(!isRegisterOpen)}
             >
               <h4 className={sectionTitleClass}>Register New Student</h4>
@@ -497,6 +520,8 @@ const AdminDashboard = () => {
             {isRegisterOpen && (
               <div className={collapsibleContentClass}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {" "}
+                  {/* gap-4 for consistent spacing */}
                   <input
                     type="text"
                     name="registration_no"
@@ -561,7 +586,7 @@ const AdminDashboard = () => {
           {/* Promote Students Section */}
           <div className="mb-6">
             <div
-              className={collapsibleTitleClass}
+              className={`${collapsibleTitleClass} mb-3`}
               onClick={() => setIsPromoteOpen(!isPromoteOpen)}
             >
               <h4 className={sectionTitleClass}>Promote Students</h4>
@@ -569,11 +594,14 @@ const AdminDashboard = () => {
             </div>
             {isPromoteOpen && (
               <div className={collapsibleContentClass}>
+                <h5 className="text-lg font-semibold mb-4">
+                  Promote Students to Next Semester
+                </h5>
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <select
                     value={promotionSemester}
                     onChange={(e) => setPromotionSemester(e.target.value)}
-                    className={selectClass}
+                    className={`${selectClass} md:w-1/3`} // Adjusted width for desktop
                   >
                     <option value="">Select Semester to Promote</option>
                     {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
@@ -586,22 +614,47 @@ const AdminDashboard = () => {
                   </select>
                   <button
                     onClick={async () => {
-                      await handlePromote();
-                      await deleteStudentAttendanceWhilePromoting(promotionSemester);
+                      if (!promotionSemester) {
+                        toast.error("Please select a semester to promote.");
+                        return;
+                      }
+                      const confirmed = window.confirm(
+                        `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester? This action cannot be undone.`
+                      );
+                      if (confirmed) {
+                        setIsPromoting(true); // Start loading state
+                        await handlePromote();
+                        await deleteStudentAttendanceWhilePromoting(
+                          promotionSemester
+                        );
+                        setIsPromoting(false); // End loading state
+                        setPromotionSemester(""); // Clear selection after promotion
+                      }
                     }}
-                    className={successButtonClass}
+                    className={`${successButtonClass} flex-1 flex items-center justify-center`} // flex-1 to take remaining width
+                    disabled={isPromoting} // Disable button while loading
                   >
-                    Promote Students
+                    {isPromoting ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    ) : (
+                      "Promote Students"
+                    )}
                   </button>
                 </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Note: Promoting students will move them to the next semester
+                  and delete their attendance records for the current semester.
+                </p>
               </div>
             )}
           </div>
 
           {/* Update Student Semester Section */}
-          <div>
+          <div className="mb-6">
+            {" "}
+            {/* mb-6 for consistent spacing */}
             <div
-              className={collapsibleTitleClass}
+              className={`${collapsibleTitleClass} mb-3`}
               onClick={() => setIsUpdateOpen(!isUpdateOpen)}
             >
               <h4 className={sectionTitleClass}>Update Student Semester</h4>
@@ -610,6 +663,8 @@ const AdminDashboard = () => {
             {isUpdateOpen && (
               <div className={collapsibleContentClass}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {" "}
+                  {/* gap-4 for consistent spacing */}
                   <input
                     type="text"
                     name="registration_no"
@@ -661,11 +716,10 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* delete studnets based on registration number  */}
           {/* Delete Student Section */}
           <div className="mb-6">
             <div
-              className={collapsibleTitleClass}
+              className={`${collapsibleTitleClass} mb-3`}
               onClick={() => setIsDeleteOpen(!isDeleteOpen)}
             >
               <h4 className={sectionTitleClass}>Delete Student</h4>
@@ -673,34 +727,80 @@ const AdminDashboard = () => {
             </div>
             {isDeleteOpen && (
               <div className={collapsibleContentClass}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <input
-                    type="text"
-                    name="delete_registration_no"
-                    placeholder="Registration No"
-                    value={formData.registration_no}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        registration_no: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                    required
-                  />
+                {/* Delete by Registration No */}
+                <div className="mb-6">
+                  <h5 className="text-lg font-semibold mb-4">
+                    Delete by Registration Number
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      name="delete_registration_no"
+                      placeholder="Enter Registration No"
+                      value={formData.registration_no}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          registration_no: e.target.value,
+                        })
+                      }
+                      className={inputClass}
+                      required
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!formData.registration_no) {
+                          toast.error("Please enter a registration number.");
+                          return;
+                        }
+                        const confirmed = window.confirm(
+                          `Are you sure you want to delete student with registration number: ${formData.registration_no}?`
+                        );
+                        if (confirmed) {
+                          await handleDeleteStudent(formData.registration_no);
+                          setFormData({ ...formData, registration_no: "" }); // Clear input after deletion
+                        }
+                      }}
+                      className={`${deleteButtonClass} flex items-center justify-center`}
+                      disabled={isDeleting} // Disable button while loading
+                    >
+                      {isDeleting ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      ) : (
+                        "Delete"
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleDeleteStudent(formData.registration_no)}
-                  className={deleteButtonClass}
-                >
-                  Delete Student
-                </button>
-                <button
-                  onClick={deleteStudentsOfLastSemester}
-                  className={deleteButtonClass}
+
+                {/* Divider with "OR" */}
+                <div className="flex items-center my-6">
+                  <hr className="flex-grow border-gray-400" />
+                  <span className="mx-4 text-gray-500">OR</span>
+                  <hr className="flex-grow border-gray-400" />
+                </div>
+
+                {/* Delete Students of Last Semester */}
+                <div>
+                  <button
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to delete all students of the last semester?"
+                      );
+                      if (confirmed) {
+                        await deleteStudentsOfLastSemester();
+                      }
+                    }}
+                    className={`${deleteButtonClass} w-full flex items-center justify-center`}
+                    disabled={isDeletingLastSemester} // Disable button while loading
                   >
-                  Delete Students of Last Semester
+                    {isDeletingLastSemester ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    ) : (
+                      "Delete Students of Last Semester"
+                    )}
                   </button>
+                </div>
               </div>
             )}
           </div>
@@ -806,6 +906,7 @@ const AdminDashboard = () => {
             {IsResetPasswordOpen && (
               <div className={collapsibleContentClass}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Employee ID Field */}
                   <input
                     type="text"
                     name="reset_employee_id"
@@ -819,66 +920,74 @@ const AdminDashboard = () => {
                     }
                     className={inputClass}
                   />
-                  <div className="relative">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      name="newPassword"
-                      placeholder="New Password"
-                      value={resetPasswordData.newPassword}
-                      onChange={(e) =>
-                        setResetPasswordData({
-                          ...resetPasswordData,
-                          newPassword: e.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                    >
-                      {showNewPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showConfirmNewPassword ? "text" : "password"}
-                      name="confirmNewPassword"
-                      placeholder="Confirm New Password"
-                      value={resetPasswordData.confirmNewPassword}
-                      onChange={(e) =>
-                        setResetPasswordData({
-                          ...resetPasswordData,
-                          confirmNewPassword: e.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmNewPassword(!showConfirmNewPassword)
-                      }
-                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                    >
-                      {showConfirmNewPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
-                    </button>
+                  {/* New Password and Confirm New Password Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        name="newPassword"
+                        placeholder="New Password"
+                        value={resetPasswordData.newPassword}
+                        onChange={(e) =>
+                          setResetPasswordData({
+                            ...resetPasswordData,
+                            newPassword: e.target.value,
+                          })
+                        }
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                      >
+                        {showNewPassword ? (
+                          <EyeSlashIcon className="h-5 w-5" />
+                        ) : (
+                          <EyeIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showConfirmNewPassword ? "text" : "password"}
+                        name="confirmNewPassword"
+                        placeholder="Confirm New Password"
+                        value={resetPasswordData.confirmNewPassword}
+                        onChange={(e) =>
+                          setResetPasswordData({
+                            ...resetPasswordData,
+                            confirmNewPassword: e.target.value,
+                          })
+                        }
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmNewPassword(!showConfirmNewPassword)
+                        }
+                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                      >
+                        {showConfirmNewPassword ? (
+                          <EyeSlashIcon className="h-5 w-5" />
+                        ) : (
+                          <EyeIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button
                   onClick={handleResetPassword}
-                  className={primaryButtonClass}
+                  className={`${primaryButtonClass} flex items-center justify-center`}
+                  disabled={isResettingPassword} // Disable button while loading
                 >
-                  Reset Password
+                  {isResettingPassword ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Reset Password"
+                  )}
                 </button>
               </div>
             )}
@@ -896,11 +1005,15 @@ const AdminDashboard = () => {
             {isTeacherListOpen && (
               <div className={collapsibleContentClass}>
                 <div className="overflow-x-auto">
+                  {" "}
+                  {/* Ensure tables are scrollable on mobile */}
                   <table className={tableClass}>
                     <thead className={tableHeaderClass}>
                       <tr>
-                        <th className={tableCellClass}>Name</th>
-                        <th className={tableCellClass}>Employee ID</th>
+                        <th className={`${tableCellClass} text-left`}>Name</th>
+                        <th className={`${tableCellClass} text-left`}>
+                          Employee ID
+                        </th>
                         <th className={`${tableCellClass} text-center`}>
                           Actions
                         </th>
