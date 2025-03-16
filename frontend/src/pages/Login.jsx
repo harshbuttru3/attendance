@@ -20,7 +20,6 @@ const Login = () => {
   useEffect(() => {
     if (user) {
       navigate("/dashboard"); // Changed to /dashboard to match the comment
-      toast.success("Already Logged In!");
     }
   }, [user, navigate]);
 
