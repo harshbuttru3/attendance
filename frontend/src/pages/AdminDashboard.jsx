@@ -327,12 +327,6 @@ const AdminDashboard = () => {
 
   //function to delete student using registration number in the URL
   const handleDeleteStudent = async (registrationNo) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete student with Registration No: ${registrationNo}?`
-    );
-
-    if (!confirmDelete) return;
-
     setIsDeleting(true); // Start loading state
 
     try {
