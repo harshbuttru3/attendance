@@ -306,21 +306,70 @@ router.delete("/delete-student-attendance/:semester", verifyAdminToken, (req, re
 });
 
  //delete-students-of-last-semester
-router.delete("/delete-students-of-last-semester", verifyAdminToken, (req, res) => {
+ router.delete("/delete-students-of-last-semester", verifyAdminToken, (req, res) => {
     const lastSemester = "8th";
 
-    pool.query(
-        "DELETE FROM students WHERE semester = ?",
-        [lastSemester],
-        (error, result) => {
-            if (error) {
-                console.error("Error deleting students:", error);
-                return res.status(500).json({ error: "Database error while deleting students" });
-            }
-            res.json({ message: "8th semester students deleted successfully" });
+    // ✅ Start a transaction to ensure both deletions are consistent
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error("Error getting database connection:", err);
+            return res.status(500).json({ error: "Database connection error" });
         }
-    );
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                connection.release();
+                console.error("Error starting transaction:", err);
+                return res.status(500).json({ error: "Error starting transaction" });
+            }
+
+            // ✅ Step 1: Delete attendance records of 8th semester students
+            connection.query(
+                "DELETE FROM attendance WHERE student_id IN (SELECT registration_no FROM students WHERE semester = ?)",
+                [lastSemester],
+                (error, result) => {
+                    if (error) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            console.error("Error deleting attendance:", error);
+                            return res.status(500).json({ error: "Database error while deleting attendance" });
+                        });
+                    }
+
+                    // ✅ Step 2: Delete 8th semester students after attendance is deleted
+                    connection.query(
+                        "DELETE FROM students WHERE semester = ?",
+                        [lastSemester],
+                        (error, result) => {
+                            if (error) {
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    console.error("Error deleting students:", error);
+                                    return res.status(500).json({ error: "Database error while deleting students" });
+                                });
+                            }
+
+                            // ✅ Commit transaction after both deletions are successful
+                            connection.commit((err) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        console.error("Error committing transaction:", err);
+                                        return res.status(500).json({ error: "Error committing transaction" });
+                                    });
+                                }
+
+                                connection.release();
+                                res.json({ message: "8th semester students and their attendance deleted successfully" });
+                            });
+                        }
+                    );
+                }
+            );
+        });
+    });
 });
+
 
 //admin login
 router.post("/auth/login", (req, res) => {
