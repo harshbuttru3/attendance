@@ -32,16 +32,16 @@ const pool = mysql.createPool({
   database: process.env.MYSQL_ADDON_DB, // Clever Cloud DB Name
   port: process.env.MYSQL_ADDON_PORT, // Clever Cloud DB Port
   waitForConnections: true,
-  connectionLimit: 5, // Match Clever Cloud limit
+  connectionLimit: 5,
   queueLimit: 0,
 });
 
-// ✅ Log when the connection pool is successfully created
-pool.query("SELECT 1", (err) => {
+pool.getConnection((err, connection) => {
   if (err) {
-    console.error("❌ MySQL Connection Error:", err);
+    console.error("Database connection failed:", err);
   } else {
     console.log("✅ Connected to MySQL on Clever Cloud");
+    connection.release();
   }
 });
 
