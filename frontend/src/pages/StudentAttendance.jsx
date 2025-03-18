@@ -324,46 +324,50 @@ const StudentAttendance = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {attendanceData[subject].map((student, idx) => {
-                            const attendancePercentage =
-                              student.total_classes > 0
-                                ? (student.attended_classes /
-                                    student.total_classes) *
-                                  100
-                                : 0;
-                            return (
-                              <tr
-                                key={idx}
-                                className={
-                                  darkMode ? "bg-gray-800" : "bg-white"
-                                }
-                                style={{
-                                  backgroundColor:
-                                    attendancePercentage < 75
-                                      ? darkMode
-                                        ? "rgba(239, 68, 68, 0.2)" // Dark mode red
-                                        : "rgba(239, 68, 68, 0.1)" // Light mode red
-                                      : "transparent",
-                                }}
-                              >
-                                <td className="border px-4 py-2">
-                                  {student.registration_no}
-                                </td>
-                                <td className="border px-4 py-2">
-                                  {student.name}
-                                </td>
-                                <td className="border px-4 py-2">
-                                  {student.total_classes}
-                                </td>
-                                <td className="border px-4 py-2">
-                                  {student.attended_classes}
-                                </td>
-                                <td className="border px-4 py-2">
-                                  {attendancePercentage.toFixed(2)}%
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {attendanceData[subject]
+                            .sort((a, b) =>
+                              a.registration_no.localeCompare(b.registration_no)
+                            )
+                            .map((student, idx) => {
+                              const attendancePercentage =
+                                student.total_classes > 0
+                                  ? (student.attended_classes /
+                                      student.total_classes) *
+                                    100
+                                  : 0;
+                              return (
+                                <tr
+                                  key={idx}
+                                  className={
+                                    darkMode ? "bg-gray-800" : "bg-white"
+                                  }
+                                  style={{
+                                    backgroundColor:
+                                      attendancePercentage < 75
+                                        ? darkMode
+                                          ? "rgba(239, 68, 68, 0.2)" // Dark mode red
+                                          : "rgba(239, 68, 68, 0.1)" // Light mode red
+                                        : "transparent",
+                                  }}
+                                >
+                                  <td className="border px-4 py-2">
+                                    {student.registration_no}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {student.name}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {student.total_classes}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {student.attended_classes}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {attendancePercentage.toFixed(2)}%
+                                  </td>
+                                </tr>
+                              );
+                            })}
                         </tbody>
                       </table>
 
@@ -431,57 +435,63 @@ const StudentAttendance = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.keys(summaryData).map((regId) => {
-                        const student = summaryData[regId];
-                        const attendancePercentage =
-                          student.total_classes > 0
-                            ? (student.attended_classes /
-                                student.total_classes) *
-                              100
-                            : 0;
-                        return (
-                          <tr
-                            key={regId}
-                            className={darkMode ? "bg-gray-800" : "bg-white"}
-                            style={{
-                              backgroundColor:
-                                attendancePercentage < 75
-                                  ? darkMode
-                                    ? "rgba(239, 68, 68, 0.2)" // Dark mode red
-                                    : "rgba(239, 68, 68, 0.1)" // Light mode red
-                                  : "transparent",
-                            }}
-                          >
-                            <td className="border px-4 py-2">{regId}</td>
-                            <td className="border px-4 py-2">{student.name}</td>
-                            {Object.keys(attendanceData).map((subject) => {
-                              const subjectData = student.subjects[subject] || {
-                                total_classes: 0,
-                                attended_classes: 0,
-                              };
-                              return (
-                                <React.Fragment key={subject}>
-                                  <td className="border px-4 py-2">
-                                    {subjectData.total_classes}
-                                  </td>
-                                  <td className="border px-4 py-2">
-                                    {subjectData.attended_classes}
-                                  </td>
-                                </React.Fragment>
-                              );
-                            })}
-                            <td className="border px-4 py-2">
-                              {student.total_classes}
-                            </td>
-                            <td className="border px-4 py-2">
-                              {student.attended_classes}
-                            </td>
-                            <td className="border px-4 py-2">
-                              {attendancePercentage.toFixed(2)}%
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {Object.keys(summaryData)
+                        .sort((a, b) => a.localeCompare(b))
+                        .map((regId) => {
+                          const student = summaryData[regId];
+                          const attendancePercentage =
+                            student.total_classes > 0
+                              ? (student.attended_classes /
+                                  student.total_classes) *
+                                100
+                              : 0;
+                          return (
+                            <tr
+                              key={regId}
+                              className={darkMode ? "bg-gray-800" : "bg-white"}
+                              style={{
+                                backgroundColor:
+                                  attendancePercentage < 75
+                                    ? darkMode
+                                      ? "rgba(239, 68, 68, 0.2)" // Dark mode red
+                                      : "rgba(239, 68, 68, 0.1)" // Light mode red
+                                    : "transparent",
+                              }}
+                            >
+                              <td className="border px-4 py-2">{regId}</td>
+                              <td className="border px-4 py-2">
+                                {student.name}
+                              </td>
+                              {Object.keys(attendanceData).map((subject) => {
+                                const subjectData = student.subjects[
+                                  subject
+                                ] || {
+                                  total_classes: 0,
+                                  attended_classes: 0,
+                                };
+                                return (
+                                  <React.Fragment key={subject}>
+                                    <td className="border px-4 py-2">
+                                      {subjectData.total_classes}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {subjectData.attended_classes}
+                                    </td>
+                                  </React.Fragment>
+                                );
+                              })}
+                              <td className="border px-4 py-2">
+                                {student.total_classes}
+                              </td>
+                              <td className="border px-4 py-2">
+                                {student.attended_classes}
+                              </td>
+                              <td className="border px-4 py-2">
+                                {attendancePercentage.toFixed(2)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
 

@@ -4,7 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import subjectsData from "../assets/subjectData";
 import toast from "react-hot-toast";
-import { FiArrowLeft, FiPlus, FiTrash2 } from "react-icons/fi";
+import {
+  ArrowLeftIcon,
+  PlusCircleIcon,
+  TrashIcon,
+  UserCircleIcon,
+  IdentificationIcon,
+} from "@heroicons/react/24/outline";
+import { PlusCircleIcon as PlusCircleSolid } from "@heroicons/react/24/solid";
 
 const RegisterMultiple = () => {
   const navigate = useNavigate();
@@ -28,34 +35,34 @@ const RegisterMultiple = () => {
     : [];
 
   // Styling classes
-  const inputClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+  const inputClass = `w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
     darkMode
-      ? "bg-gray-800 text-white border-gray-700"
-      : "bg-white text-gray-900 border-gray-300"
+      ? "bg-gray-800 text-white border-gray-600 focus:border-blue-500"
+      : "bg-white text-gray-900 border-gray-200 focus:border-blue-500"
   }`;
 
-  const selectClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+  const selectClass = `w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
     darkMode
-      ? "bg-gray-800 text-white border-gray-700"
-      : "bg-white text-gray-900 border-gray-300"
+      ? "bg-gray-800 text-white border-gray-600 focus:border-blue-500"
+      : "bg-white text-gray-900 border-gray-200 focus:border-blue-500"
   }`;
 
-  const buttonClass = `cursor-pointer px-5 py-2 rounded-lg font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+  const buttonClass = `cursor-pointer px-6 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 flex items-center gap-2 ${
     darkMode
-      ? "bg-blue-600 hover:bg-blue-700 text-white"
-      : "bg-blue-500 hover:bg-blue-600 text-white"
+      ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-300"
+      : "bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-200"
   }`;
 
-  const addButtonClass = `cursor-pointer px-4 py-2 rounded-lg font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+  const addButtonClass = `cursor-pointer px-6 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 flex items-center gap-2 ${
     darkMode
-      ? "bg-green-600 hover:bg-green-700 text-white"
-      : "bg-green-500 hover:bg-green-600 text-white"
+      ? "bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-300"
+      : "bg-emerald-500 hover:bg-emerald-600 text-white focus:ring-emerald-200"
   }`;
 
-  const deleteButtonClass = `cursor-pointer px-3 py-1 rounded-md font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 ${
+  const deleteButtonClass = `cursor-pointer px-4 py-2 rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 flex items-center gap-1 ${
     darkMode
-      ? "bg-red-600 hover:bg-red-700 text-white"
-      : "bg-red-500 hover:bg-red-600 text-white"
+      ? "bg-red-600 hover:bg-red-700 text-white focus:ring-red-300"
+      : "bg-red-500 hover:bg-red-600 text-white focus:ring-red-200"
   }`;
 
   // Validate input fields
@@ -82,6 +89,18 @@ const RegisterMultiple = () => {
     return error;
   };
 
+  // Load initial state from localStorage
+  useEffect(() => {
+    const savedStudents = localStorage.getItem("pendingStudents");
+    if (savedStudents) {
+      const parsedStudents = JSON.parse(savedStudents);
+      if (parsedStudents.length > 0) {
+        setSemester(parsedStudents[0].semester);
+        setBranch(parsedStudents[0].branch);
+      }
+    }
+  }, []);
+
   // Save students to localStorage
   useEffect(() => {
     localStorage.setItem("pendingStudents", JSON.stringify(students));
@@ -103,6 +122,8 @@ const RegisterMultiple = () => {
       {
         registration_no: currentRegistrationId.trim(),
         name: currentStudentName.trim(),
+        semester,
+        branch,
       },
     ]);
     setCurrentRegistrationId("");
@@ -136,10 +157,6 @@ const RegisterMultiple = () => {
 
   // Submit all students
   const handleRegisterAll = async () => {
-    if (!semester || !branch) {
-      toast.error("Please select both semester and branch.");
-      return;
-    }
     if (students.length === 0) {
       toast.error("Please add at least one student to the list.");
       return;
@@ -150,8 +167,8 @@ const RegisterMultiple = () => {
       const payload = students.map((student) => ({
         registration_no: student.registration_no,
         name: student.name,
-        branch,
-        semester,
+        branch: student.branch,
+        semester: student.semester,
       }));
 
       await axios.post(
@@ -183,75 +200,92 @@ const RegisterMultiple = () => {
   return (
     <div
       className={`min-h-screen flex flex-col items-center justify-start ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
       } pt-24 p-4`}
     >
       <div
-        className={`w-full max-w-6xl p-6 md:p-8 rounded-xl shadow-2xl border ${
-          darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        className={`w-full max-w-6xl p-6 md:p-8 rounded-2xl shadow-xl ${
+          darkMode
+            ? "bg-gray-800 border border-gray-700"
+            : "bg-white border border-gray-200"
         }`}
       >
-        <button
-          onClick={() => navigate(-1)}
-          className={`${buttonClass} flex items-center mb-6`}
-        >
-          <FiArrowLeft className="mr-2" /> Back
+        {/* Back Button */}
+        <button onClick={() => navigate(-1)} className={`${buttonClass} mb-8`}>
+          <ArrowLeftIcon className="w-5 h-5" />
+          Back
         </button>
 
-        <h2 className="text-3xl font-bold mb-8">Register Multiple Students</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2">
+          <UserCircleIcon className="w-8 h-8" />
+          Register Multiple Students
+        </h2>
 
         {/* Semester and Branch Selectors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
           <div>
-            <label className="block text-sm font-medium mb-1">Semester</label>
-            <select
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-              className={selectClass}
-            >
-              <option value="">Select Semester</option>
-              {subjectsData.map((sem) => (
-                <option key={sem.semester} value={sem.semester}>
-                  {sem.semester} Semester
-                </option>
-              ))}
-            </select>
-            {validationErrors.semesterError && (
-              <p className="text-red-500 text-sm mt-1">
-                {validationErrors.semesterError}
-              </p>
-            )}
+            <label className="block text-sm font-medium mb-2 ml-1">
+              Semester
+            </label>
+            <div className="relative">
+              <select
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                className={selectClass}
+                disabled={students.length > 0}
+              >
+                <option value="">Select Semester</option>
+                {subjectsData.map((sem) => (
+                  <option key={sem.semester} value={sem.semester}>
+                    {sem.semester} Semester
+                  </option>
+                ))}
+              </select>
+              {validationErrors.semesterError && (
+                <p className="text-red-500 text-sm mt-1">
+                  {validationErrors.semesterError}
+                </p>
+              )}
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Branch</label>
-            <select
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              className={selectClass}
-              disabled={!semester}
-            >
-              <option value="">Select Branch</option>
-              {branches.map((br) => (
-                <option key={br} value={br}>
-                  {br}
-                </option>
-              ))}
-            </select>
-            {validationErrors.branchError && (
-              <p className="text-red-500 text-sm mt-1">
-                {validationErrors.branchError}
-              </p>
-            )}
+            <label className="block text-sm font-medium mb-2 ml-1">
+              Branch
+            </label>
+            <div className="relative">
+              <select
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                className={selectClass}
+                disabled={!semester || students.length > 0}
+              >
+                <option value="">Select Branch</option>
+                {branches.map((br) => (
+                  <option key={br} value={br}>
+                    {br}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.branchError && (
+                <p className="text-red-500 text-sm mt-1">
+                  {validationErrors.branchError}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Add Student Form */}
-        <div className="mb-8 border-t pt-6">
-          <h3 className="text-xl font-semibold mb-4">Add New Student</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="mb-8 border-t pt-8">
+          <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <PlusCircleSolid className="w-6 h-6 text-emerald-500" />
+            Add New Student
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-2 ml-1 flex items-center gap-1">
+                <IdentificationIcon className="w-4 h-4" />
                 Registration ID
               </label>
               <input
@@ -271,7 +305,8 @@ const RegisterMultiple = () => {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-2 ml-1 flex items-center gap-1">
+                <UserCircleIcon className="w-4 h-4" />
                 Student Name
               </label>
               <input
@@ -293,46 +328,55 @@ const RegisterMultiple = () => {
           </div>
           <div className="flex justify-end">
             <button onClick={handleAddStudent} className={addButtonClass}>
-              <FiPlus className="mr-2" /> Add Student
+              <PlusCircleIcon className="w-5 h-5" />
+              Add Student
             </button>
           </div>
         </div>
 
         {/* Students List */}
         {students.length > 0 && (
-          <div className="mb-8 border-t pt-6">
-            <h3 className="text-xl font-semibold mb-4">Pending Students</h3>
-            <div className="overflow-x-auto">
+          <div className="mb-8 border-t pt-8">
+            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <IdentificationIcon className="w-6 h-6 text-blue-500" />
+              Pending Registrations
+            </h3>
+            <div className="overflow-x-auto rounded-xl shadow-sm">
               <table
-                className={`w-full ${
-                  darkMode ? "text-white" : "text-gray-900"
+                className={`w-full border-collapse ${
+                  darkMode ? "text-gray-200" : "text-gray-800"
                 }`}
               >
-                <thead className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
+                <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
                   <tr>
-                    <th className="border px-4 py-2 text-left">
+                    <th className="p-4 text-left font-semibold">
                       Registration ID
                     </th>
-                    <th className="border px-4 py-2 text-left">Name</th>
-                    <th className="border px-4 py-2 text-center">Actions</th>
+                    <th className="p-4 text-left font-semibold">
+                      Student Name
+                    </th>
+                    <th className="p-4 text-center font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map((student, index) => (
                     <tr
                       key={index}
-                      className={darkMode ? "bg-gray-800" : "bg-white"}
+                      className={`${
+                        darkMode
+                          ? "hover:bg-gray-700/50 border-b border-gray-700"
+                          : "hover:bg-gray-50 border-b border-gray-200"
+                      } transition-colors`}
                     >
-                      <td className="border px-4 py-2">
-                        {student.registration_no}
-                      </td>
-                      <td className="border px-4 py-2">{student.name}</td>
-                      <td className="border px-4 py-2 text-center">
+                      <td className="p-4">{student.registration_no}</td>
+                      <td className="p-4">{student.name}</td>
+                      <td className="p-4 text-center flex justify-center items-center">
                         <button
                           onClick={() => handleDeleteStudent(index)}
                           className={deleteButtonClass}
                         >
-                          <FiTrash2 />
+                          <TrashIcon className="w-4 h-4" />
+                          <span className="sr-only">Delete</span>
                         </button>
                       </td>
                     </tr>
@@ -345,20 +389,30 @@ const RegisterMultiple = () => {
 
         {/* Action Buttons */}
         {students.length > 0 && (
-          <div className="flex justify-end space-x-4">
-            <button onClick={handleClearAll} className={deleteButtonClass}>
-              <FiTrash2 className="mr-2" /> Clear All
-            </button>
+          <div className="flex flex-col md:flex-row justify-end gap-4 mt-8">
             <button
               onClick={handleRegisterAll}
-              className={buttonClass}
+              className={`${buttonClass} justify-center`}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  Registering...
+                </>
               ) : (
-                "Register All Students"
+                <>
+                  <PlusCircleIcon className="w-5 h-5" />
+                  Register All Students
+                </>
               )}
+            </button>
+            <button
+              onClick={handleClearAll}
+              className={`${deleteButtonClass} justify-center`}
+            >
+              <TrashIcon className="w-5 h-5" />
+              Clear All
             </button>
           </div>
         )}

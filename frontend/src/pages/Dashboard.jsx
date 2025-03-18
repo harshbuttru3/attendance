@@ -593,42 +593,44 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student, index) => (
-                    <tr
-                      key={student.id}
-                      className={darkMode ? "bg-gray-800" : "bg-white"}
-                    >
-                      <td className="border px-2 py-2 md:px-4 md:py-2">
-                        {student.registration_no}
-                      </td>
-                      <td className="border px-2 py-2 md:px-4 md:py-2">
-                        {student.name}
-                      </td>
-                      <td className="border px-2 py-2 md:px-4 md:py-2">
-                        <input
-                          type="text" // Changed from "number" to "text"
-                          value={attendance[index]?.attended_classes || 0}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            // Ensure the value is a valid number
-                            if (/^\d*$/.test(value)) {
-                              // Only allow numeric input
-                              handleInputChange(
-                                index,
-                                "attended_classes",
-                                value
-                              ); // Update attendance
-                            }
-                          }}
-                          className={`w-full text-center px-1 py-0.5 rounded border focus:outline-none ${
-                            darkMode
-                              ? "bg-gray-700 text-white border-gray-600"
-                              : "bg-white text-gray-900 border-gray-300"
-                          }`}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {students
+                    .sort((a, b) =>
+                      a.registration_no.localeCompare(b.registration_no)
+                    )
+                    .map((student, index) => (
+                      <tr
+                        key={student.id}
+                        className={darkMode ? "bg-gray-800" : "bg-white"}
+                      >
+                        <td className="border px-2 py-2 md:px-4 md:py-2">
+                          {student.registration_no}
+                        </td>
+                        <td className="border px-2 py-2 md:px-4 md:py-2">
+                          {student.name}
+                        </td>
+                        <td className="border px-2 py-2 md:px-4 md:py-2">
+                          <input
+                            type="text"
+                            value={attendance[index]?.attended_classes || 0}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d*$/.test(value)) {
+                                handleInputChange(
+                                  index,
+                                  "attended_classes",
+                                  value
+                                );
+                              }
+                            }}
+                            className={`w-full text-center px-1 py-0.5 rounded border focus:outline-none ${
+                              darkMode
+                                ? "bg-gray-700 text-white border-gray-600"
+                                : "bg-white text-gray-900 border-gray-300"
+                            }`}
+                          />
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
