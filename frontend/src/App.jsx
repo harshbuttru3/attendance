@@ -17,6 +17,7 @@ import Navbar from "./components/Navbar";
 import { ThemeProvider } from "./context/ThemeContext";
 import Footer from "./components/Footer";
 import AdminLogin from "./pages/AdminLogin";
+import RegisterMultiple from "./pages/RegisterMultiple";
 
 // ✅ Protect Dashboard Route (For Students/Teachers)
 const PrivateRoute = ({ element }) => {
@@ -50,6 +51,10 @@ function App() {
                 <Route
                   path="/admin/dashboard"
                   element={<AdminRoute element={<AdminDashboard />} />}
+                />
+                <Route
+                  path="/admin/dashboard/multi-register"
+                  element={<AdminRoute element={<RegisterMultiple />} />}
                 />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="*" element={<NotFound />} />

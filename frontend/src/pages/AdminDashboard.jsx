@@ -516,8 +516,6 @@ const AdminDashboard = () => {
 
           {/* Register Student Section */}
           <div className="mb-6">
-            {" "}
-            {/* mb-6 for consistent spacing */}
             <div
               className={`${collapsibleTitleClass} mb-3`}
               onClick={() => setIsRegisterOpen(!isRegisterOpen)}
@@ -528,8 +526,6 @@ const AdminDashboard = () => {
             {isRegisterOpen && (
               <div className={collapsibleContentClass}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {" "}
-                  {/* gap-4 for consistent spacing */}
                   <input
                     type="text"
                     name="registration_no"
@@ -594,6 +590,21 @@ const AdminDashboard = () => {
                   ) : (
                     "Register Student"
                   )}
+                </button>
+
+                {/* Divider with "OR" */}
+                <div className="flex items-center my-6">
+                  <hr className="flex-grow border-gray-400" />
+                  <span className="mx-4 text-gray-500">OR</span>
+                  <hr className="flex-grow border-gray-400" />
+                </div>
+
+                {/* Register Multiple Button */}
+                <button
+                  onClick={() => navigate("/admin/dashboard/multi-register")}
+                  className={`${primaryButtonClass} w-full flex items-center justify-center`}
+                >
+                  Register Multiple Students
                 </button>
               </div>
             )}
