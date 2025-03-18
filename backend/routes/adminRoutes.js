@@ -205,6 +205,82 @@ router.post("/register-student", (req, res) => {
     );
 });
 
+
+//mass register students
+router.post("/register-multiple-students", verifyAdminToken, (req, res) => {
+    const students = req.body;
+
+    if (!students || !Array.isArray(students) || students.length === 0) {
+        return res.status(400).json({ error: "Invalid data format or empty list." });
+    }
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error("Error getting database connection:", err);
+            return res.status(500).json({ error: "Database connection error" });
+        }
+
+        // ✅ Start a transaction
+        connection.beginTransaction((err) => {
+            if (err) {
+                connection.release();
+                console.error("Error starting transaction:", err);
+                return res.status(500).json({ error: "Error starting transaction" });
+            }
+
+            const insertPromises = students.map((student) => {
+                return new Promise((resolve, reject) => {
+                    connection.query(
+                        "INSERT INTO students (registration_no, name, branch, semester) VALUES (?, ?, ?, ?)",
+                        [
+                            student.registration_no,
+                            student.name,
+                            student.branch,
+                            student.semester,
+                        ],
+                        (error, result) => {
+                            if (error) {
+                                if (error.code === "ER_DUP_ENTRY") {
+                                    reject(`Student with Registration No ${student.registration_no} already exists.`);
+                                } else {
+                                    reject(`Error inserting student with Registration No ${student.registration_no}: ${error.message}`);
+                                }
+                            } else {
+                                resolve(result);
+                            }
+                        }
+                    );
+                });
+            });
+
+            // ✅ Execute all insert queries
+            Promise.all(insertPromises)
+                .then(() => {
+                    connection.commit((err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                console.error("Error committing transaction:", err);
+                                return res.status(500).json({ error: "Error committing transaction" });
+                            });
+                        }
+
+                        connection.release();
+                        res.status(201).json({ message: `${students.length} students registered successfully.` });
+                    });
+                })
+                .catch((error) => {
+                    connection.rollback(() => {
+                        connection.release();
+                        console.error("Transaction failed:", error);
+                        res.status(500).json({ error });
+                    });
+                });
+        });
+    });
+});
+
+
 /**
  * ✅ Promote all students to the next semester
  */
