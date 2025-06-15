@@ -41,7 +41,7 @@ const Navbar = () => {
             onClick={() => navigate("/")} // Navigate to home route
             className="text-xl md:text-2xl font-bold cursor-pointer hover:text-purple-600 transition duration-300"
           >
-            DCE Attendance
+            Attendance System
           </h1>
           <div className="hidden md:flex items-center space-x-4">
             <a
