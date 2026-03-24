@@ -420,675 +420,547 @@ const AdminDashboard = () => {
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-
-  const sectionTitleClass = `text-xl font-semibold mb-3 ${
-    darkMode ? "text-gray-300" : "text-gray-700"
-  }`;
-  const collapsibleTitleClass = `flex justify-between items-center cursor-pointer mb-2 ${
-    darkMode ? "text-white" : "text-gray-900"
-  }`;
-  const collapsibleContentClass = `mt-2 p-4 rounded-md ${
-    darkMode
-      ? "bg-gray-700 border border-gray-600"
-      : "bg-gray-100 border border-gray-200"
-  }`;
-  const inputClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-    darkMode
-      ? "bg-gray-800 text-white border-gray-700"
-      : "bg-white text-gray-900 border-gray-300"
-  }`;
-  const selectClass = `w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-    darkMode
-      ? "bg-gray-800 text-white border-gray-700"
-      : "bg-white text-gray-900 border-gray-300"
-  }`;
-  const buttonClass = `cursor-pointer px-5 py-2 rounded-lg font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500`;
-  const primaryButtonClass = `${buttonClass} ${
-    darkMode
-      ? "bg-blue-600 hover:bg-blue-700 text-white"
-      : "bg-blue-500 hover:bg-blue-600 text-white"
-  }`;
-  const successButtonClass = `${buttonClass} ${
-    darkMode
-      ? "bg-green-600 hover:bg-green-700 text-white"
-      : "bg-green-500 hover:bg-green-600 text-white"
-  }`;
-  const warningButtonClass = `${buttonClass} ${
-    darkMode
-      ? "bg-yellow-600 hover:bg-yellow-700 text-white"
-      : "bg-yellow-500 hover:bg-yellow-600 text-white"
-  }`;
-  const deleteButtonClass = `${buttonClass} ${
-    darkMode
-      ? "bg-red-600 hover:bg-red-700 text-white"
-      : "bg-red-500 hover:bg-red-600 text-white"
-  }`;
-  const tableClass = `w-full border-collapse rounded-lg overflow-hidden shadow-md ${
-    darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-  }`;
-  const tableHeaderClass = `bg-gray-100 font-semibold text-left ${
-    darkMode ? "bg-gray-700 text-gray-300" : "text-gray-600"
-  }`;
-  const tableRowClass = `hover:bg-gray-200 ${
-    darkMode
-      ? "hover:bg-gray-700 border-b border-gray-700"
-      : "border-b border-gray-200"
-  }`;
-  const tableCellClass = `px-4 py-3`;
-  const deleteIconClass = `cursor-pointer text-red-500 hover:text-red-700 focus:outline-none`;
-  const logoutButtonClass = `${buttonClass} ${
-    darkMode
-      ? "bg-red-700 hover:bg-red-800 text-white"
-      : "bg-red-600 hover:bg-red-700 text-white"
-  } flex items-center`;
+  const sectionTitleClass = `text-xl font-bold mb-4 font-serif text-white tracking-tight`;
+  const collapsibleTitleClass = `flex justify-between items-center cursor-pointer mb-2 transition-all duration-300`;
+  const collapsibleContentClass = `mt-4 p-8 rounded-[1.5rem] border border-white/5 bg-[#133b5c]/20 backdrop-blur-md shadow-inner`;
+  const inputClass = `input-institutional h-12 text-sm`;
+  const selectClass = `input-institutional h-12 text-sm cursor-pointer`;
+  const buttonClass = `btn-institutional h-12 text-xs shadow-lg active:scale-95`;
+  const primaryButtonClass = `${buttonClass}`;
+  const successButtonClass = `${buttonClass} bg-green-600/20 text-green-400 border-green-500/30 hover:bg-green-600 hover:text-white`;
+  const warningButtonClass = `${buttonClass} bg-[#c6b677]/20 text-[#c6b677] border-[#c6b677]/30 hover:bg-[#c6b677] hover:text-[#133b5c]`;
+  const deleteButtonClass = `${buttonClass} bg-red-600/20 text-red-400 border-red-500/30 hover:bg-red-600 hover:text-white`;
+  const tableClass = `w-full border-collapse font-mono text-xs rounded-2xl overflow-hidden shadow-2xl`;
+  const tableHeaderClass = `bg-[#133b5c]/80 text-[#c6b677] border-b border-white/10 text-left`;
+  const tableRowClass = `border-b border-white/5 hover:bg-white/5 transition-colors`;
+  const tableCellClass = `px-6 py-4`;
+  const deleteIconClass = `cursor-pointer text-red-400 hover:text-red-600 transition-colors focus:outline-none`;
+  const logoutButtonClass = `btn-institutional h-10 px-6 bg-red-600/20 text-red-400 border-red-500/30 hover:bg-red-600 hover:text-white text-[10px]`;
 
   return (
-    <div
-      className={`min-h-screen p-8 ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      }`}
-    >
-      <div className="max-w-5xl mx-auto">
-        {/* Logout Button at the Top */}
-        <div className="flex justify-end mb-8 pt-16">
-          {" "}
-          {/* Added pt-16 for padding-top */}
-          <button
-            onClick={() => {
-              localStorage.removeItem("adminToken");
-              navigate("/");
-            }}
-            className={logoutButtonClass}
-          >
-            <FiLogOut className="mr-2 h-5 w-5" /> Logout
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#0b2438] pt-28 px-6 pb-20 overflow-hidden relative">
+      {/* Institutional Background Elements */}
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#133b5c]/30 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#c6b677]/5 blur-[130px] rounded-full pointer-events-none" />
 
-        <h2 className="text-4xl font-bold text-center mb-8">Admin Dashboard</h2>
+      <div className="max-w-6xl mx-auto z-10 relative animate-fade-in">
+        {/* Header Section */}
+        <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-8 border-b border-white/5 pb-12">
+          <div className="text-left">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 font-serif">
+              Admin <span className="text-[#c6b677]">Command</span>
+            </h1>
+            <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.5em] flex items-center gap-3">
+              <span className="w-8 h-px bg-[#c6b677]/30" /> System Control Interface
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex flex-col items-end">
+              <span className="text-[10px] font-bold text-[#c6b677] uppercase tracking-widest mb-1">Session Identity</span>
+              <span className="text-white/40 font-mono text-xs">ROOT_ADMIN_SECURE_01</span>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem("adminToken");
+                navigate("/");
+              }}
+              className={logoutButtonClass}
+            >
+              <FiLogOut className="mr-3" /> Terminate Session
+            </button>
+          </div>
+        </header>
 
+        <div className="grid grid-cols-1 gap-12">
         {/* Student Management Section */}
-        <div className="mb-10 p-6 rounded-lg shadow-xl">
-          <h3 className="text-2xl font-semibold mb-6 text-blue-500">
-            {" "}
-            {/* mb-6 for consistent spacing */}
-            Student Management
-          </h3>
-
-          {/* Register Student Section */}
-          <div className="mb-6">
-            <div
-              className={`${collapsibleTitleClass} mb-3`}
-              onClick={() => setIsRegisterOpen(!isRegisterOpen)}
-            >
-              <h4 className={sectionTitleClass}>Register New Student</h4>
-              <span>{isRegisterOpen ? "▲" : "▼"}</span>
-            </div>
-            {isRegisterOpen && (
-              <div className={collapsibleContentClass}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <input
-                    type="text"
-                    name="registration_no"
-                    placeholder="Registration No"
-                    value={formData.registration_no}
-                    onChange={handleChange}
-                    className={inputClass}
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={inputClass}
-                    required
-                  />
-                  <select
-                    name="branch"
-                    value={formData.branch}
-                    onChange={handleChange}
-                    className={selectClass}
-                  >
-                    <option value="">Select Branch</option>
-                    {subjectData[0].branches.map((b) => (
-                      <option key={b.branch} value={b.branch}>
-                        {b.branch}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    name="semester"
-                    value={formData.semester}
-                    onChange={handleChange}
-                    className={selectClass}
-                  >
-                    <option value="">Select Semester</option>
-                    {[
-                      "1st",
-                      "2nd",
-                      "3rd",
-                      "4th",
-                      "5th",
-                      "6th",
-                      "7th",
-                      "8th",
-                    ].map((sem) => (
-                      <option key={sem} value={sem}>
-                        {sem} Semester
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  onClick={handleRegister}
-                  className={`${primaryButtonClass} flex items-center justify-center`}
-                  disabled={isRegistering} // Disable button while loading
-                >
-                  {isRegistering ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  ) : (
-                    "Register Student"
-                  )}
-                </button>
-
-                {/* Divider with "OR" */}
-                <div className="flex items-center my-6">
-                  <hr className="flex-grow border-gray-400" />
-                  <span className="mx-4 text-gray-500">OR</span>
-                  <hr className="flex-grow border-gray-400" />
-                </div>
-
-                {/* Register Multiple Button */}
-                <button
-                  onClick={() => navigate("/admin/dashboard/multi-register")}
-                  className={`${primaryButtonClass} w-full flex items-center justify-center`}
-                >
-                  Register Multiple Students
-                </button>
-              </div>
-            )}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 px-4">
+            <div className="w-12 h-px bg-[#c6b677]/20" />
+            <h2 className="text-xl font-bold text-white uppercase tracking-[0.3em] font-serif">Student Registry</h2>
+            <div className="flex-grow h-px bg-[#c6b677]/20" />
           </div>
 
-          {/* Promote Students Section */}
-          <div className="mb-6">
-            <div
-              className={`${collapsibleTitleClass} mb-3`}
-              onClick={() => setIsPromoteOpen(!isPromoteOpen)}
-            >
-              <h4 className={sectionTitleClass}>Promote Students</h4>
-              <span>{isPromoteOpen ? "▲" : "▼"}</span>
-            </div>
-            {isPromoteOpen && (
-              <div className={collapsibleContentClass}>
-                <h5 className="text-lg font-semibold mb-4">
-                  Promote Students to Next Semester
-                </h5>
-                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                  <select
-                    value={promotionSemester}
-                    onChange={(e) => setPromotionSemester(e.target.value)}
-                    className={`${selectClass} md:w-1/3`} // Adjusted width for desktop
-                  >
-                    <option value="">Select Semester to Promote</option>
-                    {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map(
-                      (sem) => (
-                        <option key={sem} value={sem}>
-                          {sem} Semester
-                        </option>
-                      )
-                    )}
-                  </select>
-                  <button
-                    onClick={async () => {
-                      if (!promotionSemester) {
-                        toast.error("Please select a semester to promote.");
-                        return;
-                      }
-                      const confirmed = window.confirm(
-                        `Are you sure you want to promote all students from ${promotionSemester} semester to the next semester? This action cannot be undone.`
-                      );
-                      if (confirmed) {
-                        setIsPromoting(true); // Start loading state
-                        await handlePromote();
-                        await deleteStudentAttendanceWhilePromoting(
-                          promotionSemester
-                        );
-                        setIsPromoting(false); // End loading state
-                        setPromotionSemester(""); // Clear selection after promotion
-                      }
-                    }}
-                    className={`${successButtonClass} flex-1 flex items-center justify-center`} // flex-1 to take remaining width
-                    disabled={isPromoting} // Disable button while loading
-                  >
-                    {isPromoting ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    ) : (
-                      "Promote Students"
-                    )}
-                  </button>
+          <div className="grid grid-cols-1 gap-8">
+            {/* Register Student Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isRegisterOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsRegisterOpen(!isRegisterOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isRegisterOpen ? "bg-[#c6b677] text-[#133b5c]" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUniversity size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Enrollment Protocol</h4>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Note: Promoting students will move them to the next semester
-                  and delete their attendance records for the current semester.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Update Student Semester Section */}
-          <div className="mb-6">
-            {" "}
-            {/* mb-6 for consistent spacing */}
-            <div
-              className={`${collapsibleTitleClass} mb-3`}
-              onClick={() => setIsUpdateOpen(!isUpdateOpen)}
-            >
-              <h4 className={sectionTitleClass}>Update Student Semester</h4>
-              <span>{isUpdateOpen ? "▲" : "▼"}</span>
-            </div>
-            {isUpdateOpen && (
-              <div className={collapsibleContentClass}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {" "}
-                  {/* gap-4 for consistent spacing */}
-                  <input
-                    type="text"
-                    name="registration_no"
-                    placeholder="Registration No"
-                    value={updateData.registration_no}
-                    onChange={(e) =>
-                      setUpdateData({
-                        ...updateData,
-                        registration_no: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  />
-                  <select
-                    name="newSemester"
-                    value={updateData.newSemester}
-                    onChange={(e) =>
-                      setUpdateData({
-                        ...updateData,
-                        newSemester: e.target.value,
-                      })
-                    }
-                    className={selectClass}
-                  >
-                    <option value="">Select New Semester</option>
-                    {[
-                      "1st",
-                      "2nd",
-                      "3rd",
-                      "4th",
-                      "5th",
-                      "6th",
-                      "7th",
-                      "8th",
-                    ].map((sem) => (
-                      <option key={sem} value={sem}>
-                        {sem} Semester
-                      </option>
-                    ))}
-                  </select>
+                <div className={`transition-transform duration-500 ${isRegisterOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
                 </div>
-                <button
-                  onClick={handleUpdateSemester}
-                  className={warningButtonClass}
-                >
-                  Update Semester
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Delete Student Section */}
-          <div className="mb-6">
-            <div
-              className={`${collapsibleTitleClass} mb-3`}
-              onClick={() => setIsDeleteOpen(!isDeleteOpen)}
-            >
-              <h4 className={sectionTitleClass}>Delete Student</h4>
-              <span>{isDeleteOpen ? "▲" : "▼"}</span>
-            </div>
-            {isDeleteOpen && (
-              <div className={collapsibleContentClass}>
-                {/* Delete by Registration No */}
-                <div className="mb-6">
-                  <h5 className="text-lg font-semibold mb-4">
-                    Delete by Registration Number
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              </button>
+              
+              {isRegisterOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <input
                       type="text"
-                      name="delete_registration_no"
-                      placeholder="Enter Registration No"
+                      name="registration_no"
+                      placeholder="Institutional ID (Registration)"
                       value={formData.registration_no}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          registration_no: e.target.value,
-                        })
-                      }
+                      onChange={handleChange}
                       className={inputClass}
                       required
                     />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Legal Full Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={inputClass}
+                      required
+                    />
+                    <select
+                      name="branch"
+                      value={formData.branch}
+                      onChange={handleChange}
+                      className={selectClass}
+                    >
+                      <option value="">Select Academic Branch</option>
+                      {subjectData[0].branches.map((b) => (
+                        <option key={b.branch} value={b.branch}>{b.branch}</option>
+                      ))}
+                    </select>
+                    <select
+                      name="semester"
+                      value={formData.semester}
+                      onChange={handleChange}
+                      className={selectClass}
+                    >
+                      <option value="">Select Enrollment Stage</option>
+                      {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+                        <option key={sem} value={sem}>{sem} Semester</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <button
+                      onClick={handleRegister}
+                      className="btn-institutional flex-1 h-14"
+                      disabled={isRegistering}
+                    >
+                      {isRegistering ? <Loader size="h-5 w-5" /> : "Authorize Individual Registration"}
+                    </button>
+                    
+                    <div className="flex items-center">
+                      <div className="h-px w-8 bg-white/10" />
+                      <span className="px-4 text-[10px] font-bold text-white/20 uppercase tracking-widest">or</span>
+                      <div className="h-px w-8 bg-white/10" />
+                    </div>
+
+                    <button
+                      onClick={() => navigate("/admin/dashboard/multi-register")}
+                      className="btn-institutional bg-white text-[#133b5c] flex-1 h-14"
+                    >
+                      Batch Registration Interface
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Promote Students Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isPromoteOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsPromoteOpen(!isPromoteOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isPromoteOpen ? "bg-green-500/20 text-green-400" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUniversity size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Academic Promotion Cycle</h4>
+                </div>
+                <div className={`transition-transform duration-500 ${isPromoteOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {isPromoteOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="flex flex-col md:flex-row gap-6 items-end">
+                    <div className="flex-1 space-y-2">
+                      <label className="text-[10px] font-bold text-[#c6b677] uppercase tracking-widest ml-1">Universal Promotion Stage</label>
+                      <select
+                        value={promotionSemester}
+                        onChange={(e) => setPromotionSemester(e.target.value)}
+                        className={selectClass}
+                      >
+                        <option value="">Select Origin Semester</option>
+                        {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"].map((sem) => (
+                          <option key={sem} value={sem}>{sem} Semester</option>
+                        ))}
+                      </select>
+                    </div>
                     <button
                       onClick={async () => {
-                        if (!formData.registration_no) {
-                          toast.error("Please enter a registration number.");
+                        if (!promotionSemester) {
+                          toast.error("Please select a semester to promote.");
                           return;
                         }
-                        const confirmed = window.confirm(
-                          `Are you sure you want to delete student with registration number: ${formData.registration_no}?`
-                        );
+                        const confirmed = window.confirm(`Initiate universal promotion cycle from ${promotionSemester}? This operation is permanent.`);
                         if (confirmed) {
-                          await handleDeleteStudent(formData.registration_no);
-                          setFormData({ ...formData, registration_no: "" }); // Clear input after deletion
+                          setIsPromoting(true);
+                          await handlePromote();
+                          await deleteStudentAttendanceWhilePromoting(promotionSemester);
+                          setIsPromoting(false);
+                          setPromotionSemester("");
                         }
                       }}
-                      className={`${deleteButtonClass} flex items-center justify-center`}
-                      disabled={isDeleting} // Disable button while loading
+                      className="btn-institutional bg-green-600/20 text-green-400 border-green-500/30 hover:bg-green-600 hover:text-white h-12 px-10"
+                      disabled={isPromoting}
                     >
-                      {isDeleting ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      ) : (
-                        "Delete"
-                      )}
+                      {isPromoting ? <Loader /> : "Authorize Global Promotion"}
                     </button>
                   </div>
+                  <p className="mt-6 text-[10px] text-white/30 font-mono tracking-tighter bg-black/20 p-4 rounded-xl border border-white/5">
+                    <span className="text-[#c6b677] font-bold uppercase">Note:</span> Executing promotion shifts all student indices to subsequent stages and clears legacy attendance logs for the origin semester.
+                  </p>
                 </div>
+              )}
+            </div>
 
-                {/* Divider with "OR" */}
-                <div className="flex items-center my-6">
-                  <hr className="flex-grow border-gray-400" />
-                  <span className="mx-4 text-gray-500">OR</span>
-                  <hr className="flex-grow border-gray-400" />
+            {/* Update Student Semester Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isUpdateOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsUpdateOpen(!isUpdateOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isUpdateOpen ? "bg-[#c6b677]/20 text-[#c6b677]" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUniversity size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Registry Correction (Individual)</h4>
                 </div>
+                <div className={`transition-transform duration-500 ${isUpdateOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {isUpdateOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <input
+                      type="text"
+                      placeholder="Target Student ID"
+                      value={updateData.registration_no}
+                      onChange={(e) => setUpdateData({ ...updateData, registration_no: e.target.value })}
+                      className={inputClass}
+                    />
+                    <select
+                      value={updateData.newSemester}
+                      onChange={(e) => setUpdateData({ ...updateData, newSemester: e.target.value })}
+                      className={selectClass}
+                    >
+                      <option value="">Select Adjusted Stage</option>
+                      {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+                        <option key={sem} value={sem}>{sem} Semester</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button onClick={handleUpdateSemester} className="btn-institutional h-12 px-10">Authorize Registry Correction</button>
+                </div>
+              )}
+            </div>
 
-                {/* Delete Students of Last Semester */}
-                <div>
-                  <button
-                    onClick={async () => {
-                      const confirmed = window.confirm(
-                        "Are you sure you want to delete all students of the last semester?"
-                      );
-                      if (confirmed) {
-                        await deleteStudentsOfLastSemester();
-                      }
-                    }}
-                    className={`${deleteButtonClass} w-full flex items-center justify-center`}
-                    disabled={isDeletingLastSemester} // Disable button while loading
-                  >
-                    {isDeletingLastSemester ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    ) : (
-                      "Delete Students of Last Semester"
-                    )}
-                  </button>
+            {/* Delete Student Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isDeleteOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsDeleteOpen(!isDeleteOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isDeleteOpen ? "bg-red-600/20 text-red-400" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUniversity size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>De-enrollment & Archive Disposal</h4>
                 </div>
-              </div>
-            )}
+                <div className={`transition-transform duration-500 ${isDeleteOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {isDeleteOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="space-y-10">
+                    <div>
+                      <h5 className="text-[10px] font-bold text-[#c6b677] uppercase tracking-widest mb-4 ml-1">Individual De-enrollment</h5>
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <input
+                          type="text"
+                          placeholder="Target Institutional ID"
+                          value={formData.registration_no}
+                          onChange={(e) => setFormData({ ...formData, registration_no: e.target.value })}
+                          className="input-institutional flex-1 h-12"
+                        />
+                        <button
+                          onClick={async () => {
+                            if (!formData.registration_no) {
+                              toast.error("Please enter a registration number.");
+                              return;
+                            }
+                            const confirmed = window.confirm(`Expunge student ${formData.registration_no} from institutional records?`);
+                            if (confirmed) {
+                              await handleDeleteStudent(formData.registration_no);
+                              setFormData({ ...formData, registration_no: "" });
+                            }
+                          }}
+                          className="btn-institutional bg-red-600/20 text-red-400 border-red-500/30 hover:bg-red-600 hover:text-white h-12 px-10"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? <Loader /> : "Authorize Expulsion"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-white/5">
+                      <h5 className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-4 ml-1">Final Cycle Disposal (8th Semester)</h5>
+                      <button
+                        onClick={deleteStudentsOfLastSemester}
+                        className="btn-institutional w-full h-14 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white border-red-500/20"
+                        disabled={isDeletingLastSemester}
+                      >
+                        {isDeletingLastSemester ? <Loader /> : "Expunge All Graduating Cohort Records (8th Semester)"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Teacher Management Section */}
-        <div className="mb-10 p-6 rounded-lg shadow-xl">
-          <h3 className="text-2xl font-semibold mb-5 text-indigo-500">
-            Teacher Management
-          </h3>
-
-          {/* Add Teacher Section */}
-          <div className="mb-6">
-            <div
-              className={collapsibleTitleClass}
-              onClick={() => setIsAddTeacherOpen(!isAddTeacherOpen)}
-            >
-              <h4 className={sectionTitleClass}>Add New Teacher</h4>
-              <span>{isAddTeacherOpen ? "▲" : "▼"}</span>
-            </div>
-            {isAddTeacherOpen && (
-              <div className={collapsibleContentClass}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <input
-                    type="text"
-                    name="employee_id"
-                    placeholder="Employee ID"
-                    value={teacherData.employee_id}
-                    onChange={handleTeacherChange}
-                    className={inputClass}
-                  />
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={teacherData.name}
-                    onChange={handleTeacherChange}
-                    className={inputClass}
-                  />
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Password"
-                      value={teacherData.password}
-                      onChange={handleTeacherChange}
-                      className={inputClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                    >
-                      {showPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      placeholder="Confirm Password"
-                      value={teacherData.confirmPassword}
-                      onChange={handleTeacherChange}
-                      className={inputClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleConfirmPasswordVisibility}
-                      className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={handleAddTeacher}
-                  className={primaryButtonClass}
-                >
-                  Add Teacher
-                </button>
-              </div>
-            )}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 px-4">
+            <div className="w-12 h-px bg-[#c6b677]/20" />
+            <h2 className="text-xl font-bold text-white uppercase tracking-[0.3em] font-serif">Faculty Governance</h2>
+            <div className="flex-grow h-px bg-[#c6b677]/20" />
           </div>
 
-          {/* component for reseting password of teacher */}
-          {/* Reset Teacher Password Section */}
-          <div className="mb-6">
-            <div
-              className={collapsibleTitleClass}
-              onClick={() => setIsResetPasswordOpen(!IsResetPasswordOpen)}
-            >
-              <h4 className={sectionTitleClass}>Reset Teacher Password</h4>
-              <span>{IsResetPasswordOpen ? "▲" : "▼"}</span>
+          <div className="grid grid-cols-1 gap-8">
+            {/* Add Teacher Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isAddTeacherOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsAddTeacherOpen(!isAddTeacherOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isAddTeacherOpen ? "bg-[#c6b677] text-[#133b5c]" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUserShield size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Faculty Induction</h4>
+                </div>
+                <div className={`transition-transform duration-500 ${isAddTeacherOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {isAddTeacherOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <input
+                      type="text"
+                      name="employee_id"
+                      placeholder="Employee Reference ID"
+                      value={teacherData.employee_id}
+                      onChange={handleTeacherChange}
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Full Legal Name"
+                      value={teacherData.name}
+                      onChange={handleTeacherChange}
+                      className={inputClass}
+                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Security Password"
+                        value={teacherData.password}
+                        onChange={handleTeacherChange}
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#c6b677] transition-colors cursor-pointer"
+                      >
+                        {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        placeholder="Verify Password"
+                        value={teacherData.confirmPassword}
+                        onChange={handleTeacherChange}
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={toggleConfirmPasswordVisibility}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#c6b677] transition-colors cursor-pointer"
+                      >
+                        {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  <button onClick={handleAddTeacher} className="btn-institutional h-12 px-10">Authorize Faculty Induction</button>
+                </div>
+              )}
             </div>
-            {IsResetPasswordOpen && (
-              <div className={collapsibleContentClass}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {/* Employee ID Field */}
-                  <input
-                    type="text"
-                    name="reset_employee_id"
-                    placeholder="Employee ID"
-                    value={resetPasswordData.employee_id}
-                    onChange={(e) =>
-                      setResetPasswordData({
-                        ...resetPasswordData,
-                        employee_id: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  />
-                  {/* New Password and Confirm New Password Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Reset Teacher Password Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${IsResetPasswordOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsResetPasswordOpen(!IsResetPasswordOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${IsResetPasswordOpen ? "bg-[#c6b677]/20 text-[#c6b677]" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUserShield size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Credential Restoration</h4>
+                </div>
+                <div className={`transition-transform duration-500 ${IsResetPasswordOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {IsResetPasswordOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <input
+                      type="text"
+                      placeholder="Faculty ID"
+                      value={resetPasswordData.employee_id}
+                      onChange={(e) => setResetPasswordData({ ...resetPasswordData, employee_id: e.target.value })}
+                      className={inputClass}
+                    />
                     <div className="relative">
                       <input
                         type={showNewPassword ? "text" : "password"}
-                        name="newPassword"
                         placeholder="New Password"
                         value={resetPasswordData.newPassword}
-                        onChange={(e) =>
-                          setResetPasswordData({
-                            ...resetPasswordData,
-                            newPassword: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setResetPasswordData({ ...resetPasswordData, newPassword: e.target.value })}
                         className={inputClass}
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#c6b677] transition-colors cursor-pointer"
                       >
-                        {showNewPassword ? (
-                          <EyeSlashIcon className="h-5 w-5" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5" />
-                        )}
+                        {showNewPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                       </button>
                     </div>
                     <div className="relative">
                       <input
                         type={showConfirmNewPassword ? "text" : "password"}
-                        name="confirmNewPassword"
-                        placeholder="Confirm New Password"
+                        placeholder="Confirm New"
                         value={resetPasswordData.confirmNewPassword}
-                        onChange={(e) =>
-                          setResetPasswordData({
-                            ...resetPasswordData,
-                            confirmNewPassword: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setResetPasswordData({ ...resetPasswordData, confirmNewPassword: e.target.value })}
                         className={inputClass}
                       />
                       <button
                         type="button"
-                        onClick={() =>
-                          setShowConfirmNewPassword(!showConfirmNewPassword)
-                        }
-                        className={`absolute right-3 top-2 flex items-center text-gray-500 cursor-pointer`}
+                        onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#c6b677] transition-colors cursor-pointer"
                       >
-                        {showConfirmNewPassword ? (
-                          <EyeSlashIcon className="h-5 w-5" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5" />
-                        )}
+                        {showConfirmNewPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                       </button>
                     </div>
                   </div>
+                  <button
+                    onClick={handleResetPassword}
+                    className="btn-institutional h-12 px-10"
+                    disabled={isResettingPassword}
+                  >
+                    {isResettingPassword ? <Loader /> : "Restore Credentials"}
+                  </button>
                 </div>
-                <button
-                  onClick={handleResetPassword}
-                  className={`${primaryButtonClass} flex items-center justify-center`}
-                  disabled={isResettingPassword} // Disable button while loading
-                >
-                  {isResettingPassword ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  ) : (
-                    "Reset Password"
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* List of Teachers Section */}
-          <div>
-            <div
-              className={collapsibleTitleClass}
-              onClick={() => setIsTeacherListOpen(!isTeacherListOpen)}
-            >
-              <h4 className={sectionTitleClass}>Current Teachers</h4>
-              <span>{isTeacherListOpen ? "▲" : "▼"}</span>
+              )}
             </div>
-            {isTeacherListOpen && (
-              <div className={collapsibleContentClass}>
-                <div className="overflow-x-auto">
-                  {" "}
-                  {/* Ensure tables are scrollable on mobile */}
-                  <table className={tableClass}>
-                    <thead className={tableHeaderClass}>
-                      <tr>
-                        <th className={`${tableCellClass} text-left`}>Name</th>
-                        <th className={`${tableCellClass} text-left`}>
-                          Employee ID
-                        </th>
-                        <th className={`${tableCellClass} text-center`}>
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {teacherList.length > 0 ? (
-                        teacherList.map((teacher) => (
-                          <tr key={teacher.id} className={tableRowClass}>
-                            <td className={tableCellClass}>{teacher.name}</td>
-                            <td className={tableCellClass}>
-                              {teacher.employee_id}
-                            </td>
-                            <td className={`${tableCellClass} text-center`}>
-                              <button
-                                onClick={() =>
-                                  handleDeleteTeacher(
-                                    teacher.employee_id,
-                                    teacher.name
-                                  )
-                                }
-                                className={deleteIconClass}
-                              >
-                                <AiOutlineDelete className="h-5 w-5 inline-block" />
-                              </button>
+
+            {/* List of Teachers Section */}
+            <div className="card-institutional border-white/5 overflow-hidden group">
+              <button
+                className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${isTeacherListOpen ? "bg-[#133b5c]/50" : "hover:bg-white/5"}`}
+                onClick={() => setIsTeacherListOpen(!isTeacherListOpen)}
+              >
+                <div className="flex items-center gap-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isTeacherListOpen ? "bg-[#133b5c] text-white/50" : "bg-[#133b5c] text-white/50"}`}>
+                    <FaUserShield size={20} />
+                  </div>
+                  <h4 className={sectionTitleClass}>Institutional Faculty Directory</h4>
+                </div>
+                <div className={`transition-transform duration-500 ${isTeacherListOpen ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                  <FaChevronDown size={20} />
+                </div>
+              </button>
+              
+              {isTeacherListOpen && (
+                <div className={collapsibleContentClass}>
+                  <div className="overflow-x-auto rounded-[1.5rem] border border-white/5 shadow-2xl">
+                    <table className={tableClass}>
+                      <thead>
+                        <tr className={tableHeaderClass}>
+                          <th className={tableCellClass}>Full Name</th>
+                          <th className={tableCellClass}>Institutional ID</th>
+                          <th className={`${tableCellClass} text-center`}>Administrative Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {teacherList.length > 0 ? (
+                          teacherList.map((teacher) => (
+                            <tr key={teacher.id} className={tableRowClass}>
+                              <td className={`${tableCellClass} text-white font-bold`}>{teacher.name}</td>
+                              <td className={`${tableCellClass} text-white/50 font-mono`}>{teacher.employee_id}</td>
+                              <td className={`${tableCellClass} text-center`}>
+                                <button
+                                  onClick={() => handleDeleteTeacher(teacher.employee_id, teacher.name)}
+                                  className={deleteIconClass}
+                                  title="Revoke Access"
+                                >
+                                  <AiOutlineDelete size={22} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="3" className={`${tableCellClass} text-center text-white/30 italic py-10`}>
+                              No faculty records identified in the secure database.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan="3"
-                            className={`${tableCellClass} text-center`}
-                          >
-                            No teachers found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default AdminDashboard;

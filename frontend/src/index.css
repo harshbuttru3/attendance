@@ -1,1 +1,91 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  --primary-navy: #133b5c;
+  --accent-gold: #c6b677;
+  --text-white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  @apply bg-[#0b2438] text-white overflow-x: hidden;
+  font-family: 'Source Code Pro', monospace;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-mono {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.font-sans {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-[#0b2438];
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-[#c6b677]/30 rounded-full hover:bg-[#c6b677]/50 transition-colors;
+}
+
+/* Utilities */
+.grad-navy {
+  background: linear-gradient(135deg, #133b5c 0%, #0b2438 100%);
+}
+
+.gold-text {
+  color: #c6b677;
+}
+
+.navy-bg {
+  background-color: #133b5c;
+}
+
+.gold-bg {
+  background-color: #c6b677;
+}
+
+.btn-institutional {
+  @apply px-8 py-3 rounded-full font-bold transition-all duration-300 shadow-md flex items-center justify-center gap-2;
+  @apply bg-white text-[#133b5c] hover:bg-[#c6b677] hover:text-white active:scale-95 uppercase tracking-widest text-xs;
+}
+
+.card-institutional {
+  @apply rounded-2xl border border-white/10 bg-[#133b5c]/40 backdrop-blur-md shadow-xl transition-all duration-300 hover:border-[#c6b677]/50;
+}
+
+.input-institutional {
+  @apply w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#c6b677]/50;
+  @apply bg-[#133b5c]/50 border-white/10 text-white placeholder-white/30;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Custom classes for the new theme */
+.nav-link {
+  @apply uppercase tracking-widest text-xs font-bold transition-all duration-300 hover:text-[#c6b677];
+}

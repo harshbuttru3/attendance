@@ -1,79 +1,56 @@
-import React, { useState, useContext } from "react"; // Import React
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { ThemeContext } from "../context/ThemeContext";
 import toast from "react-hot-toast";
+import { FaClipboardList, FaDownload, FaChevronDown, FaChevronUp, FaUniversity, FaFilter } from "react-icons/fa";
+import Loader from "../components/Loader";
 
 const StudentAttendance = () => {
-  const { darkMode } = useContext(ThemeContext); // Access dark mode state
+  const { darkMode } = useContext(ThemeContext);
   const [semester, setSemester] = useState("");
   const [branch, setBranch] = useState("");
   const [attendanceData, setAttendanceData] = useState({});
   const [summaryData, setSummaryData] = useState({});
-  const [expandedSubject, setExpandedSubject] = useState(null); // Track expanded subject
-  const [showSummary, setShowSummary] = useState(false); // Track summary dropdown state
-  const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const [expandedSubject, setExpandedSubject] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  //format semester
   const formatSemester = (sem) => {
-    if (sem === "1") return "1st";
-    if (sem === "2") return "2nd";
-    if (sem === "3") return "3rd";
-    if (sem === "4") return "4th";
-    if (sem === "5") return "5th";
-    if (sem === "6") return "6th";
-    if (sem === "7") return "7th";
-    if (sem === "8") return "8th";
-    return sem; // 4th, 5th, 6th, 7th, 8th
+    const suffixes = { "1": "1st", "2": "2nd", "3": "3rd", "4": "4th", "5": "5th", "6": "6th", "7": "7th", "8": "8th" };
+    return suffixes[sem] || sem;
   };
 
   const fetchAttendance = () => {
     if (semester && branch) {
-      setIsLoading(true); // Set loading to true
-      // Clear previous data before fetching
+      setIsLoading(true);
       setAttendanceData({});
       setSummaryData({});
       const formattedSemester = formatSemester(semester);
 
       axios
-        .get(
-          `https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`
-        )
+        .get(`https://dce-attendance.onrender.com/api/student-attendance/${formattedSemester}/${branch}`)
         .then((res) => {
-          setIsLoading(false); // Set loading to false
-          console.log("Raw API Response:", res.data); // Debugging Step
-
-          // Filter out null, undefined, or invalid subjects
-          const filteredData = Object.keys(res.data || {}).reduce(
-            (acc, subject) => {
-              if (
-                subject &&
-                subject !== "null" &&
-                res.data[subject] &&
-                Array.isArray(res.data[subject])
-              ) {
-                acc[subject] = res.data[subject];
-              }
-              return acc;
-            },
-            {}
-          );
+          setIsLoading(false);
+          const filteredData = Object.keys(res.data || {}).reduce((acc, subject) => {
+            if (subject && subject !== "null" && Array.isArray(res.data[subject])) {
+              acc[subject] = res.data[subject];
+            }
+            return acc;
+          }, {});
 
           if (Object.keys(filteredData).length > 0) {
             setAttendanceData(filteredData);
             setSummaryData(calculateSummary(filteredData));
           } else {
-            toast.error(
-              "No valid attendance records found for the selected semester and branch."
-            );
+            toast.error("No valid records found.");
           }
         })
         .catch((err) => {
-          setIsLoading(false); // Set loading to false
-          console.error("Error fetching attendance:", err);
-          toast.error("No attendance records found.");
+          setIsLoading(false);
+          toast.error("Attendance records not found.");
         });
     } else {
-      toast.error("Please select both semester and branch.");
+      toast.error("Select both semester and branch.");
     }
   };
 
@@ -86,12 +63,11 @@ const StudentAttendance = () => {
             name: student.name,
             total_classes: 0,
             attended_classes: 0,
-            subjects: {}, // Store subject-wise data
+            subjects: {},
           };
         }
         summary[student.registration_no].total_classes += student.total_classes;
-        summary[student.registration_no].attended_classes +=
-          student.attended_classes;
+        summary[student.registration_no].attended_classes += student.attended_classes;
         summary[student.registration_no].subjects[subject] = {
           total_classes: student.total_classes,
           attended_classes: student.attended_classes,
@@ -101,427 +77,260 @@ const StudentAttendance = () => {
     return summary;
   };
 
-  const toggleSubject = (subject) => {
-    setExpandedSubject(expandedSubject === subject ? null : subject);
-  };
-
-  const toggleSummary = () => {
-    setShowSummary(!showSummary);
-  };
-
-  // CSV download button for specific subject or summary
   const exportToCSV = (dataType, subject = null) => {
     let csvContent = "data:text/csv;charset=utf-8,";
-
     if (dataType === "subject" && subject) {
-      // Export specific subject data
       const subjectData = attendanceData[subject];
-      if (!subjectData || subjectData.length === 0) {
-        toast.error("No attendance data to export for this subject.");
-        return;
-      }
-
-      // Headers
-      csvContent +=
-        "Subject,Registration No,Name,Total Classes,Attended Classes,Attendance %,Low Attendance\n";
-
-      // Data rows
-      subjectData.forEach((student) => {
-        const attendancePercentage =
-          student.total_classes > 0
-            ? (student.attended_classes / student.total_classes) * 100
-            : 0;
-        const isLowAttendance = attendancePercentage < 75 ? "Yes" : "No";
-
-        csvContent += `${subject},${student.registration_no},${student.name},${
-          student.total_classes
-        },${student.attended_classes},${attendancePercentage.toFixed(
-          2
-        )}%,${isLowAttendance}\n`;
+      csvContent += "Subject,Reg No,Name,Total,Attended,%,Low Attendance\n";
+      subjectData.forEach((s) => {
+        const pct = s.total_classes > 0 ? (s.attended_classes / s.total_classes) * 100 : 0;
+        csvContent += `${subject},${s.registration_no},${s.name},${s.total_classes},${s.attended_classes},${pct.toFixed(2)}%,${pct < 75 ? "Yes" : "No"}\n`;
       });
     } else if (dataType === "summary") {
-      // Export summary data
-      if (Object.keys(summaryData).length === 0) {
-        toast.error("No summary data to export.");
-        return;
-      }
-
-      // Headers
-      csvContent += "Registration No,Name,";
-      Object.keys(attendanceData).forEach((subject) => {
-        csvContent += `${subject} Total Classes,${subject} Attended Classes,`;
-      });
-      csvContent +=
-        "Total Classes,Attended Classes,Attendance %,Low Attendance\n";
-
-      // Data rows
+      csvContent += "Reg No,Name,";
+      Object.keys(attendanceData).forEach(sub => csvContent += `${sub} Total,${sub} Attended,`);
+      csvContent += "Total,Attended,%,Low Attendance\n";
       Object.keys(summaryData).forEach((regId) => {
-        const student = summaryData[regId];
-        csvContent += `${regId},${student.name},`;
-        Object.keys(attendanceData).forEach((subject) => {
-          const subjectData = student.subjects[subject] || {
-            total_classes: 0,
-            attended_classes: 0,
-          };
-          csvContent += `${subjectData.total_classes},${subjectData.attended_classes},`;
+        const s = summaryData[regId];
+        csvContent += `${regId},${s.name},`;
+        Object.keys(attendanceData).forEach((sub) => {
+          const sd = s.subjects[sub] || { total_classes: 0, attended_classes: 0 };
+          csvContent += `${sd.total_classes},${sd.attended_classes},`;
         });
-        const attendancePercentage =
-          student.total_classes > 0
-            ? (student.attended_classes / student.total_classes) * 100
-            : 0;
-        const isLowAttendance = attendancePercentage < 75 ? "Yes" : "No";
-        csvContent += `${student.total_classes},${
-          student.attended_classes
-        },${attendancePercentage.toFixed(2)}%,${isLowAttendance}\n`;
+        const pct = s.total_classes > 0 ? (s.attended_classes / s.total_classes) * 100 : 0;
+        csvContent += `${s.total_classes},${s.attended_classes},${pct.toFixed(2)}%,${pct < 75 ? "Yes" : "No"}\n`;
       });
-    } else {
-      toast.error("Invalid export request.");
-      return;
     }
-
-    // Create a link and trigger download
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      dataType === "subject"
-        ? `Attendance_${subject}.csv`
-        : `Attendance_Summary.csv`
-    );
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Attendance_${dataType === "subject" ? subject : "Summary"}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div
-      className={`min-h-screen p-4 md:p-6 lg:p-8 ${
-        // Increased padding for larger screens
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      }`}
-    >
-      <h1 className="text-3xl font-bold mb-4 md:mb-6 lg:mb-8">
-        DCE Attendance System
-      </h1>
-      <h2 className="text-2xl font-bold mb-4 md:mb-6 lg:mb-8">
-        Check Attendance
-      </h2>
+    <div className="min-h-screen bg-[#0b2438] pt-28 px-6 pb-20 overflow-hidden relative">
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#133b5c]/30 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#c6b677]/5 blur-[130px] rounded-full pointer-events-none" />
 
-      {/* Dropdowns for Semester and Branch */}
-      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-6 md:mb-8 lg:mb-10">
-        <select
-          onChange={(e) => setSemester(e.target.value)}
-          className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
-            darkMode
-              ? "bg-gray-700 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-        >
-          <option value="">-- Select Semester --</option>
-          {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(
-            (sem) => (
-              <option key={sem} value={sem}>
-                {sem} Semester
-              </option>
-            )
-          )}
-        </select>
-
-        <select
-          onChange={(e) => setBranch(e.target.value)}
-          className={`w-full md:w-1/4 px-4 py-2 rounded-lg border focus:outline-none ${
-            darkMode
-              ? "bg-gray-700 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-        >
-          <option value="">-- Select Branch --</option>
-          {["CSE", "FTS", "EEE", "Cybersecurity", "Civil", "Mechanical"].map(
-            (br) => (
-              <option key={br} value={br}>
-                {br}
-              </option>
-            )
-          )}
-        </select>
-
-        <button
-          onClick={fetchAttendance}
-          disabled={!semester || !branch || isLoading}
-          className={`cursor-pointer w-full md:w-auto px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md flex items-center justify-center ${
-            semester && branch && !isLoading
-              ? darkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-              : "bg-gray-400 cursor-not-allowed text-gray-700"
-          }`}
-        >
-          {isLoading ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-          ) : (
-            "View Attendance"
-          )}
-        </button>
-      </div>
-
-      {/* Attendance Data */}
-      <div>
-        {isLoading ? (
-          <div
-            className={`p-6 rounded-lg text-center ${
-              darkMode ? "bg-gray-700" : "bg-gray-100"
-            }`}
-          >
-            <p className="text-lg">Loading attendance data...</p>
-          </div>
-        ) : Object.keys(attendanceData).length > 0 ? (
-          <>
-            {Object.keys(attendanceData)
-              .filter((subject) => subject && subject !== "null") // Remove null values
-              .map((subject, index) => (
-                <div key={index} className="mb-6 md:mb-8">
-                  {/* Subject Title with Toggle Button */}
-                  <div
-                    className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
-                      darkMode
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-gray-200 hover:bg-gray-300"
-                    }`}
-                    onClick={() => toggleSubject(subject)}
-                  >
-                    <h3 className="text-xl font-bold">Subject: {subject}</h3>
-                    <span className="text-lg">
-                      {expandedSubject === subject ? "▲" : "▼"}
-                    </span>
-                  </div>
-
-                  {/* Expanded Table */}
-                  {expandedSubject === subject && (
-                    <div className="overflow-x-auto mt-2">
-                      <table
-                        className={`w-full border-collapse rounded-lg overflow-hidden ${
-                          darkMode ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        <thead>
-                          <tr
-                            className={darkMode ? "bg-gray-700" : "bg-gray-200"}
-                          >
-                            <th className="border px-4 py-2 text-left">
-                              Reg ID
-                            </th>
-                            <th className="border px-4 py-2 text-left">Name</th>
-                            <th className="border px-4 py-2 text-left">
-                              Total Classes
-                            </th>
-                            <th className="border px-4 py-2 text-left">
-                              Attended Classes
-                            </th>
-                            <th className="border px-4 py-2 text-left">
-                              Attendance %
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {attendanceData[subject]
-                            .sort((a, b) =>
-                              a.registration_no.localeCompare(b.registration_no)
-                            )
-                            .map((student, idx) => {
-                              const attendancePercentage =
-                                student.total_classes > 0
-                                  ? (student.attended_classes /
-                                      student.total_classes) *
-                                    100
-                                  : 0;
-                              return (
-                                <tr
-                                  key={idx}
-                                  className={
-                                    darkMode ? "bg-gray-800" : "bg-white"
-                                  }
-                                  style={{
-                                    backgroundColor:
-                                      attendancePercentage < 75
-                                        ? darkMode
-                                          ? "rgba(239, 68, 68, 0.2)" // Dark mode red
-                                          : "rgba(239, 68, 68, 0.1)" // Light mode red
-                                        : "transparent",
-                                  }}
-                                >
-                                  <td className="border px-4 py-2">
-                                    {student.registration_no}
-                                  </td>
-                                  <td className="border px-4 py-2">
-                                    {student.name}
-                                  </td>
-                                  <td className="border px-4 py-2">
-                                    {student.total_classes}
-                                  </td>
-                                  <td className="border px-4 py-2">
-                                    {student.attended_classes}
-                                  </td>
-                                  <td className="border px-4 py-2">
-                                    {attendancePercentage.toFixed(2)}%
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                        </tbody>
-                      </table>
-
-                      {/* Export Button for Subject */}
-                      <button
-                        onClick={() => exportToCSV("subject", subject)}
-                        className={`cursor-pointer mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
-                          darkMode
-                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                      >
-                        Export {subject} to CSV
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-            {/* Summary Dropdown */}
-            <div className="mb-6 md:mb-8">
-              <div
-                className={`cursor-pointer p-4 rounded-lg flex justify-between items-center transition duration-300 ${
-                  darkMode
-                    ? "bg-gray-700 hover:bg-gray-600"
-                    : "bg-gray-200 hover:bg-gray-300"
-                }`}
-                onClick={toggleSummary}
-              >
-                <h3 className="text-xl font-bold">Summary</h3>
-                <span className="text-lg">{showSummary ? "▲" : "▼"}</span>
-              </div>
-
-              {/* Expanded Summary Table */}
-              {showSummary && (
-                <div className="overflow-x-auto mt-2">
-                  <table
-                    className={`w-full border-collapse rounded-lg overflow-hidden ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    <thead>
-                      <tr className={darkMode ? "bg-gray-700" : "bg-gray-200"}>
-                        <th className="border px-4 py-2 text-left">Reg ID</th>
-                        <th className="border px-4 py-2 text-left">Name</th>
-                        {Object.keys(attendanceData).map((subject) => (
-                          <React.Fragment key={subject}>
-                            <th className="border px-4 py-2 text-left">
-                              {subject} Total Classes
-                            </th>
-                            <th className="border px-4 py-2 text-left">
-                              {subject} Attended Classes
-                            </th>
-                          </React.Fragment>
-                        ))}
-                        <th className="border px-4 py-2 text-left">
-                          Total Classes
-                        </th>
-                        <th className="border px-4 py-2 text-left">
-                          Attended Classes
-                        </th>
-                        <th className="border px-4 py-2 text-left">
-                          Attendance %
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.keys(summaryData)
-                        .sort((a, b) => a.localeCompare(b))
-                        .map((regId) => {
-                          const student = summaryData[regId];
-                          const attendancePercentage =
-                            student.total_classes > 0
-                              ? (student.attended_classes /
-                                  student.total_classes) *
-                                100
-                              : 0;
-                          return (
-                            <tr
-                              key={regId}
-                              className={darkMode ? "bg-gray-800" : "bg-white"}
-                              style={{
-                                backgroundColor:
-                                  attendancePercentage < 75
-                                    ? darkMode
-                                      ? "rgba(239, 68, 68, 0.2)" // Dark mode red
-                                      : "rgba(239, 68, 68, 0.1)" // Light mode red
-                                    : "transparent",
-                              }}
-                            >
-                              <td className="border px-4 py-2">{regId}</td>
-                              <td className="border px-4 py-2">
-                                {student.name}
-                              </td>
-                              {Object.keys(attendanceData).map((subject) => {
-                                const subjectData = student.subjects[
-                                  subject
-                                ] || {
-                                  total_classes: 0,
-                                  attended_classes: 0,
-                                };
-                                return (
-                                  <React.Fragment key={subject}>
-                                    <td className="border px-4 py-2">
-                                      {subjectData.total_classes}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                      {subjectData.attended_classes}
-                                    </td>
-                                  </React.Fragment>
-                                );
-                              })}
-                              <td className="border px-4 py-2">
-                                {student.total_classes}
-                              </td>
-                              <td className="border px-4 py-2">
-                                {student.attended_classes}
-                              </td>
-                              <td className="border px-4 py-2">
-                                {attendancePercentage.toFixed(2)}%
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-
-                  {/* Export Button for Summary */}
-                  <button
-                    onClick={() => exportToCSV("summary")}
-                    className={`cursor-pointer mt-4 px-4 py-2 rounded-lg transition duration-300 focus:outline-none shadow-md ${
-                      darkMode
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}
-                  >
-                    Export Summary to CSV
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div
-            className={`p-6 rounded-lg text-center ${
-              darkMode ? "bg-gray-700" : "bg-gray-100"
-            }`}
-          >
-            <p className="text-lg">
-              No attendance records found. Select a semester and branch to view
-              attendance.
+      <div className="max-w-7xl mx-auto z-10 relative animate-fade-in">
+        {/* Header Section */}
+        <header className="mb-16 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-8">
+          <div>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 font-serif">
+              Attendance <span className="text-[#c6b677]">Archives</span>
+            </h1>
+            <p className="text-white/50 font-mono text-sm uppercase tracking-widest flex items-center gap-3">
+              <FaUniversity className="text-[#c6b677]" /> Institutional Reporting Portal
             </p>
           </div>
-        )}
+          <div className="flex items-center gap-4 bg-[#133b5c]/40 border border-[#c6b677]/20 px-8 py-4 rounded-full shadow-2xl backdrop-blur-md">
+            <FaFilter className="text-[#c6b677] animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#c6b677]">Public Records Access</span>
+          </div>
+        </header>
+
+        {/* Filter Selection */}
+        <div className="card-institutional p-10 mb-16 border-white/5 shadow-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-[#c6b677] ml-2">Academic Semester</label>
+              <select
+                onChange={(e) => setSemester(e.target.value)}
+                className="input-institutional cursor-pointer font-bold text-sm h-14"
+              >
+                <option value="">Select Semester</option>
+                {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map(sem => (
+                  <option key={sem} value={sem}>{sem} Semester</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-[#c6b677] ml-2">Departmental Branch</label>
+              <select
+                onChange={(e) => setBranch(e.target.value)}
+                className="input-institutional cursor-pointer font-bold text-sm h-14"
+              >
+                <option value="">Select Department</option>
+                {["CSE", "FTS", "EEE", "Cybersecurity", "Civil", "Mechanical"].map(br => (
+                  <option key={br} value={br}>{br}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={fetchAttendance}
+                disabled={!semester || !branch || isLoading}
+                className="btn-institutional w-full h-14 shadow-xl hover:shadow-[#c6b677]/20"
+              >
+                {isLoading ? <Loader /> : "Initialize Query"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Attendance Content */}
+        <div className="space-y-8">
+          {Object.keys(attendanceData).length > 0 && (
+            <div className="animate-fade-in-up">
+              <div className="flex items-center gap-4 mb-10 px-4">
+                <div className="w-12 h-px bg-white/10" />
+                <h2 className="text-xl font-bold text-white uppercase tracking-[0.3em] font-serif">Academic Subject Records</h2>
+                <div className="flex-grow h-px bg-white/10" />
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {Object.keys(attendanceData).map((subject, index) => (
+                  <div key={index} className="card-institutional border-white/5 overflow-hidden group">
+                    <button
+                      className={`w-full p-8 flex justify-between items-center cursor-pointer transition-all duration-300 ${
+                        expandedSubject === subject ? "bg-[#133b5c]/50" : "hover:bg-white/5"
+                      }`}
+                      onClick={() => setExpandedSubject(expandedSubject === subject ? null : subject)}
+                    >
+                      <div className="flex items-center gap-8">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+                          expandedSubject === subject ? "bg-[#c6b677] text-[#133b5c] rotate-12" : "bg-[#133b5c] text-white/50"
+                        }`}>
+                          <FaClipboardList size={24} />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-xl font-bold text-white font-serif mb-1 group-hover:text-[#c6b677] transition-colors">{subject}</h3>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Detailed Participation Log</p>
+                        </div>
+                      </div>
+                      <div className={`transition-transform duration-500 ${expandedSubject === subject ? "rotate-180 text-[#c6b677]" : "text-white/20"}`}>
+                        <FaChevronDown size={20} />
+                      </div>
+                    </button>
+
+                    {expandedSubject === subject && (
+                      <div className="p-8 border-t border-white/5 bg-[#0b2438]/50 animate-fade-in">
+                        <div className="mb-10 flex justify-end">
+                          <button
+                            onClick={() => exportToCSV("subject", subject)}
+                            className="flex items-center gap-3 px-6 py-2.5 rounded-full border border-[#c6b677]/20 text-[#c6b677] text-[10px] font-bold uppercase tracking-widest hover:bg-[#c6b677] hover:text-white transition-all duration-500"
+                          >
+                            <FaDownload size={12} /> Archival Export (.CSV)
+                          </button>
+                        </div>
+
+                        <div className="overflow-x-auto rounded-[1.5rem] border border-white/5 shadow-2xl">
+                          <table className="w-full text-left border-collapse font-mono text-sm">
+                            <thead>
+                              <tr className="bg-[#133b5c]/80 text-[#c6b677] border-b border-white/10">
+                                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest">Student Index</th>
+                                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest">Full Name</th>
+                                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-center">Total Sessions</th>
+                                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-center">Attended</th>
+                                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-center">Calculated %</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                              {attendanceData[subject].map((s, idx) => {
+                                const pct = s.total_classes > 0 ? (s.attended_classes / s.total_classes) * 100 : 0;
+                                return (
+                                  <tr key={idx} className={`${pct < 75 ? "bg-red-500/5" : ""} hover:bg-white/5 transition-colors`}>
+                                    <td className="px-8 py-5 text-white/50">{s.registration_no}</td>
+                                    <td className="px-8 py-5 text-white font-bold">{s.name}</td>
+                                    <td className="px-8 py-5 text-center text-white/50">{s.total_classes}</td>
+                                    <td className="px-8 py-5 text-center text-[#c6b677] font-bold">{s.attended_classes}</td>
+                                    <td className={`px-8 py-5 text-center font-bold font-mono text-base ${pct < 75 ? "text-red-400" : "text-green-400"}`}>
+                                      {pct.toFixed(1)}%
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Consolidated Section */}
+              <div className="mt-20 card-institutional border-[#c6b677]/20 bg-[#c6b677]/5 overflow-hidden shadow-3xl">
+                <button
+                  className="w-full p-10 flex justify-between items-center cursor-pointer group"
+                  onClick={() => setShowSummary(!showSummary)}
+                >
+                  <div className="flex items-center gap-8">
+                    <div className="w-16 h-16 rounded-full bg-[#c6b677] text-[#133b5c] flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform duration-500">
+                      <FaClipboardList size={28} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-2xl font-extrabold text-[#c6b677] font-serif uppercase tracking-widest">Consolidated Performance Analytics</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30">Across All Enrolled Modules</p>
+                    </div>
+                  </div>
+                  <div className={`transition-transform duration-700 ${showSummary ? "rotate-180" : ""} text-[#c6b677]`}>
+                    <FaChevronDown size={28} />
+                  </div>
+                </button>
+
+                {showSummary && (
+                  <div className="p-10 border-t border-[#c6b677]/20 animate-fade-in-up">
+                    <div className="flex justify-between items-center mb-10">
+                      <div className="bg-[#c6b677]/10 px-6 py-2 rounded-full border border-[#c6b677]/20">
+                        <span className="text-[10px] font-bold text-[#c6b677] uppercase tracking-widest">Aggregated Records</span>
+                      </div>
+                      <button
+                        onClick={() => exportToCSV("summary")}
+                        className="btn-institutional h-12 bg-white text-[#133b5c] px-8 text-[10px]"
+                      >
+                        <FaDownload size={14} /> Full Institutional Report (.CSV)
+                      </button>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-[2rem] border border-white/5 bg-[#0b2438]/40 shadow-inner">
+                      <table className="w-full text-left border-collapse font-mono">
+                        <thead>
+                          <tr className="bg-[#133b5c]/90 text-[#c6b677]">
+                            <th className="px-8 py-6 text-[11px] font-bold uppercase tracking-[0.2em]">Institutional ID</th>
+                            <th className="px-8 py-6 text-[11px] font-bold uppercase tracking-[0.2em]">Full Legal Name</th>
+                            <th className="px-8 py-6 text-[11px] font-bold uppercase tracking-[0.2em] text-center">Aggregate Result</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {Object.keys(summaryData).sort().map(regId => {
+                            const s = summaryData[regId];
+                            const pct = s.total_classes > 0 ? (s.attended_classes / s.total_classes) * 100 : 0;
+                            return (
+                              <tr key={regId} className={`hover:bg-white/5 transition-all duration-300 ${pct < 75 ? "bg-red-500/5" : ""}`}>
+                                <td className="px-8 py-6 text-white/50">{regId}</td>
+                                <td className="px-8 py-6 text-white font-bold text-lg">{s.name}</td>
+                                <td className={`px-8 py-6 text-center`}>
+                                  <div className={`inline-block px-8 py-2 rounded-full font-extrabold text-xl shadow-lg ${
+                                    pct < 75 ? "bg-red-500/10 text-red-400 shadow-red-500/10" : "bg-green-500/10 text-green-400 shadow-green-500/10"
+                                  }`}>
+                                    {pct.toFixed(2)}%
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!isLoading && Object.keys(attendanceData).length === 0 && (
+            <div className="text-center py-32 rounded-[3.5rem] border-2 border-dashed border-white/10 bg-white/5 group animate-pulse">
+              <FaClipboardList className="mx-auto text-white/10 mb-8 transition-transform group-hover:scale-125 duration-700" size={80} />
+              <h3 className="text-2xl font-serif text-white/30 italic mb-2">No Records Queried</h3>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/10">Please define academic criteria to proceed with retrieval</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

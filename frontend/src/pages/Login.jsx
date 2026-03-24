@@ -1,160 +1,119 @@
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { ThemeContext } from "../context/ThemeContext";
 import toast from "react-hot-toast";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import eye icons
-import Loader from "../components/Loader"; // Import the Loader component
+import { ThemeContext } from "../context/ThemeContext";
+import { AuthContext } from "../context/AuthContext"; // Added AuthContext import
+import { FaUser, FaLock, FaArrowRight, FaSchool } from "react-icons/fa";
 
 const Login = () => {
-  const { user, login } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { darkMode } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext); // Get user from AuthContext
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({ employee_id: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
-  const [isLoading, setIsLoading] = useState(false); // State for loader
-
-  // ✅ Redirect to dashboard if user is already logged in
   useEffect(() => {
     if (user) {
-      navigate("/dashboard"); // Changed to /dashboard to match the comment
+      // If user is already logged in, redirect to dashboard
+      navigate("/dashboard");
     }
   }, [user, navigate]);
 
-  // ✅ Handle Input Change
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // ✅ Handle Form Submit
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Show loader on submit
+    setLoading(true);
     try {
-      const res = await axios.post(
-        "https://dce-attendance.onrender.com/api/auth/login", // ✅ Correct Endpoint
-        formData
-      );
-      login(res.data.user); // ✅ Save user info in context
-      console.log("User after login:", res.data.user);
+      const res = await axios.post("https://dce-attendance.onrender.com/api/login", {
+        email,
+        password,
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       toast.success("Login Successful!");
-      setTimeout(() => navigate("/dashboard"), 100); // Adjusted timeout to match AdminLogin
+      // Assuming login function from AuthContext is not needed here as we are setting localStorage directly
+      // If AuthContext's login function also updates state, it should be called here.
+      // For now, relying on the useEffect to redirect if user state updates.
+      if (res.data.user.role === "admin") navigate("/admin-dashboard");
+      else navigate("/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.error || "Something went wrong");
+      toast.error(err.response?.data?.message || "Login failed");
     } finally {
-      setIsLoading(false); // Hide loader after submission (success or error)
+      setLoading(false);
     }
   };
 
-  // Function to toggle password visibility
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center ${
-        darkMode ? "bg-gray-900" : "bg-gray-100"
-      } transition duration-300 p-4`}
-    >
-      {isLoading ? (
-        <Loader size="h-12 w-12" color="text-blue-500" />
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className={`bg-white ${
-            darkMode ? "dark:bg-gray-800" : ""
-          } p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-md border ${
-            darkMode ? "border-gray-700" : "border-gray-200"
-          } transition duration-300`}
-        >
-          <h2
-            className={`text-3xl font-bold mb-6 sm:mb-8 ${
-              darkMode ? "text-white" : "text-gray-900"
-            } text-center transition duration-300`}
-          >
-            Login
-          </h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#0b2438] px-6 relative overflow-hidden">
+      {/* Decorative Blobs */}
+      <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#133b5c]/30 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#c6b677]/5 blur-[120px] rounded-full pointer-events-none" />
 
-          {/* ✅ Employee ID Field */}
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2 transition duration-300`}
-              >
-                Employee ID
-              </label>
-              <input
-                type="text"
-                name="employee_id"
-                placeholder="Enter your Employee ID"
-                value={formData.employee_id}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-2 rounded-lg border ${
-                  darkMode ? "border-gray-600" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  darkMode ? "bg-gray-700 text-white" : "bg-white"
-                } transition duration-300`}
-              />
+      <div className="w-full max-w-md z-10 animate-fade-in">
+        <div className="card-institutional p-10 border-white/10">
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-[#133b5c] mb-6 shadow-xl">
+              <FaSchool size={32} />
             </div>
+            <h2 className="text-3xl font-extrabold text-white font-serif mb-2">Portal Access</h2>
+            <p className="text-white/50 text-sm font-mono tracking-tighter uppercase">Authorized Personnel Only</p>
+          </div>
 
-            {/* ✅ Password Field */}
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                } mb-2 transition duration-300`}
-              >
-                Password
-              </label>
-              <div className="relative">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-[#c6b677] ml-1">Email Identifier</label>
+              <div className="relative group">
+                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 transition-colors group-focus-within:text-[#c6b677]" />
                 <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
+                  type="email"
+                  placeholder="name@institution.edu"
+                  className="input-institutional pl-12"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  className={`w-full px-4 py-2 rounded-lg border ${
-                    darkMode ? "border-gray-600" : "border-gray-300"
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    darkMode ? "bg-gray-700 text-white" : "bg-white"
-                  } transition duration-300`}
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className={`absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-500`}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5" />
-                  )}
-                </button>
               </div>
             </div>
 
-            {/* ✅ Login Button */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-[#c6b677] ml-1">Secure Password</label>
+              <div className="relative group">
+                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 transition-colors group-focus-within:text-[#c6b677]" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="input-institutional pl-12"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
-              className={`w-full mt-4 sm:mt-6 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-semibold`}
-              disabled={isLoading}
+              disabled={loading}
+              className="btn-institutional w-full mt-8 h-12 shadow-lg hover:shadow-[#c6b677]/20"
             >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+              {loading ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                "Login"
+                <>Sign In Securely <FaArrowRight /></>
               )}
             </button>
+          </form>
+
+          <div className="mt-10 pt-8 border-t border-white/10 text-center">
+            <p className="text-white/40 text-xs font-medium mb-4 uppercase tracking-widest">
+              Administrative Issue?
+            </p>
+            <Link to="/" className="text-[#c6b677] hover:text-white transition-colors text-xs font-bold uppercase tracking-widest" onClick={() => navigate("/")}>
+              Return to Gateway
+            </Link>
           </div>
-        </form>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
